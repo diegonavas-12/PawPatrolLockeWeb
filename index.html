@@ -48,6 +48,7 @@
             transition: all 0.1s;
         }
         .cartoon-btn-sm:active:not(:disabled) { box-shadow: 0px 0px 0px rgba(0,0,0,0.7); transform: translate(3px, 3px); }
+        .teambuilder-action-btn { box-sizing: border-box; width: 100%; min-width: 0; max-width: 100%; padding: 8px 6px; white-space: normal; overflow-wrap: anywhere; text-align: center; line-height: 1.15; }
 
         .cartoon-input {
             border: 4px solid #1e293b;
@@ -764,7 +765,7 @@
                 heading.innerText = 'PASO 1 · Elige a un rival';
                 const rivals = PLAYERS.filter(name => name !== player);
                 container.innerHTML = rivals.map(rival => {
-                    const count = globalData.filter(data => data.jugador === rival && ['Vivo', 'Muerto'].includes(data.estado)).length;
+                    const count = globalData.filter(data => data.jugador === rival && data.estado === 'Vivo').length;
                     return `<button onclick="window.selectBanPlayer('${rival}')" ${count === 0 ? 'disabled' : ''} class="cartoon-panel p-5 text-center bg-white border-red-300 hover:border-red-600 disabled:opacity-50 disabled:cursor-not-allowed">
                         <span class="text-4xl block mb-2">🎯</span><span class="title-font text-2xl text-gray-800 block">${rival}</span>
                         <span class="text-sm font-bold text-gray-500">${count} Pokémon disponibles</span>
@@ -774,7 +775,7 @@
             }
 
             heading.innerHTML = `<button onclick="window.backToBanPlayers()" class="cartoon-btn-sm mb-3">⬅ CAMBIAR JUGADOR</button><p>PASO 2 · Elige qué Pokémon de ${selectedBanPlayer} quedará baneado</p>`;
-            const targetPokemon = globalData.filter(data => data.jugador === selectedBanPlayer && ['Vivo', 'Muerto'].includes(data.estado));
+            const targetPokemon = globalData.filter(data => data.jugador === selectedBanPlayer && data.estado === 'Vivo');
             if(targetPokemon.length === 0) {
                 container.innerHTML = '<div class="col-span-full text-center font-bold text-gray-500 p-8">Este jugador no tiene Pokémon disponibles para banear.</div>';
                 return;
@@ -784,7 +785,7 @@
                     <h3 class="font-bold text-lg uppercase truncate w-full mb-1">"${data.mote}"</h3>
                     <p class="text-sm font-bold text-gray-500 mb-2">${data.especie}</p>
                     <img src="https://play.pokemonshowdown.com/sprites/${data.shiny ? 'gen5-shiny' : 'gen5'}/${data.especie.toLowerCase().replace(/[^a-z0-9]/g, '')}.png" class="pixel-art h-16 mb-3" onerror="this.src='https://play.pokemonshowdown.com/sprites/itemicons/pokeball.png';">
-                    <span class="text-xs font-black text-red-700 mb-3">${data.estado === 'Muerto' ? 'CEMENTERIO' : 'EQUIPO / MOCHILA'}</span>
+                    <span class="text-xs font-black text-red-700 mb-3">EQUIPO / MOCHILA</span>
                     <button onclick="window.banPokemon('${selectedBanPlayer}', '${data.id}')" class="cartoon-btn-sm bg-red-200 border-red-700 text-red-900 w-full">🚫 BANEAR</button>
                 </div>`).join('');
         }
@@ -803,7 +804,7 @@
         window.banPokemon = async function(targetPlayer, id) {
             const player = getMyPlayer();
             if(!player || !db || targetPlayer === player || !PLAYERS.includes(targetPlayer)) return;
-            const selected = globalData.find(data => data.id === id && data.jugador === targetPlayer && ['Vivo', 'Muerto'].includes(data.estado));
+            const selected = globalData.find(data => data.id === id && data.jugador === targetPlayer && data.estado === 'Vivo');
             if(!selected || !confirm(`¿Banear a "${selected.mote}" (${selected.especie}) de ${targetPlayer}?`)) return;
 
             try {
@@ -814,16 +815,15 @@
                     const pokemon = target && target.pokemon;
                     if(!pokemon || !consumables || (consumables.ban || 0) < 1) return;
 
-                    const source = pokemon.vivos && pokemon.vivos[id] ? 'vivos' : (pokemon.muertos && pokemon.muertos[id] ? 'muertos' : '');
-                    if(!source) return;
+                    if(!pokemon.vivos || !pokemon.vivos[id]) return;
                     pokemon.baneados = pokemon.baneados || {};
                     pokemon.baneados[id] = {
-                        ...pokemon[source][id],
-                        estadoOriginal: source === 'vivos' ? 'Vivo' : 'Muerto',
+                        ...pokemon.vivos[id],
+                        estadoOriginal: 'Vivo',
                         baneadoPor: player,
                         baneadoEn: Date.now()
                     };
-                    delete pokemon[source][id];
+                    delete pokemon.vivos[id];
                     consumables.ban -= 1;
                     return users;
                 }, { applyLocally: false });
@@ -902,8 +902,8 @@
                     <h3 class="font-bold text-xl uppercase truncate w-full mb-1">"${data.mote}"</h3><p class="text-sm font-bold text-gray-500 mb-2">${data.especie}</p>
                     <img src="https://play.pokemonshowdown.com/sprites/${data.shiny ? 'gen5-shiny' : 'gen5'}/${data.especie.toLowerCase().replace(/[^a-z0-9]/g, '')}.png" class="pixel-art scale-[1.5] h-16 mb-4" onerror="this.src='https://play.pokemonshowdown.com/sprites/itemicons/pokeball.png';">
                     <div class="flex flex-col gap-2 w-full mt-auto">
-                        ${data.inTeam ? `<button onclick="window.openEditModal('${data.id}')" class="cartoon-btn-sm bg-indigo-100 border-indigo-600 text-indigo-700 mb-2">⚙️ Personalizar</button>` : ''}
-                        <button onclick="window.toggleTeam('${data.id}', ${!data.inTeam})" class="cartoon-btn-sm ${data.inTeam ? 'bg-red-100 border-red-600 text-red-600' : 'bg-green-100 border-green-600 text-green-700'}">${data.inTeam ? '❌ Quitar' : '➕ Añadir'}</button>
+                        ${data.inTeam ? `<button onclick="window.openEditModal('${data.id}')" class="cartoon-btn-sm teambuilder-action-btn bg-indigo-100 border-indigo-600 text-indigo-700 mb-2">⚙️ Personalizar</button>` : ''}
+                        <button onclick="window.toggleTeam('${data.id}', ${!data.inTeam})" class="cartoon-btn-sm teambuilder-action-btn ${data.inTeam ? 'bg-red-100 border-red-600 text-red-600' : 'bg-green-100 border-green-600 text-green-700'}">${data.inTeam ? '❌ Quitar' : '➕ Añadir'}</button>
                     </div></div>`).join('');
         };
 
