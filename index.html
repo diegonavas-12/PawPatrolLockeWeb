@@ -48,8 +48,6 @@
             transition: all 0.1s;
         }
         .cartoon-btn-sm:active:not(:disabled) { box-shadow: 0px 0px 0px rgba(0,0,0,0.7); transform: translate(3px, 3px); }
-        .teambuilder-action-btn { box-sizing: border-box; width: 100%; min-width: 0; max-width: 100%; padding: 8px 6px; white-space: normal; overflow-wrap: anywhere; text-align: center; line-height: 1.15; }
-        .profile-edit-btn { width: 100%; min-width: 0; white-space: normal; overflow-wrap: anywhere; }
 
         .cartoon-input {
             border: 4px solid #1e293b;
@@ -251,96 +249,37 @@
         </div>
     </div>
 
-    <div id="screen-repel" class="w-full max-w-3xl hidden flex-col mt-4">
-        <div class="flex justify-between items-center mb-4 gap-2">
-            <button onclick="nav('collectibles')" class="cartoon-btn-sm">⬅ INVENTARIO</button>
-            <h2 class="title-font text-3xl md:text-4xl text-white text-shadow-hard uppercase">🌀 REPELENTE MÁXIMO</h2>
-        </div>
-        <div class="cartoon-panel p-6 bg-cyan-50 border-cyan-700">
-            <p class="text-center text-cyan-900 font-bold text-lg mb-5">Registra públicamente el encuentro que saltaste y el Pokémon que capturaste después.</p>
-            <form id="repelForm" class="space-y-4">
-                <div><label for="repel-route" class="block font-bold ml-2 mb-1 text-gray-700">RUTA/ZONA</label><input id="repel-route" type="text" required maxlength="80" placeholder="Ej.: Ruta 3" class="cartoon-input w-full p-3 text-lg"></div>
-                <div><label for="repel-skipped" class="block font-bold ml-2 mb-1 text-gray-700">PRIMER POKÉMON (IGNORADO)</label><input id="repel-skipped" type="text" required maxlength="40" placeholder="Pokémon que apareció primero" class="cartoon-input w-full p-3 text-lg"></div>
-                <div><label for="repel-captured" class="block font-bold ml-2 mb-1 text-gray-700">SEGUNDO POKÉMON (CAPTURADO)</label><input id="repel-captured" type="text" required maxlength="40" placeholder="Pokémon capturado" class="cartoon-input w-full p-3 text-lg"></div>
-                <button type="submit" class="cartoon-btn w-full bg-cyan-500 hover:bg-cyan-400 text-white text-xl py-3">📣 REGISTRAR USO</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- PANTALLA NORMAS (CON GACHA INCLUIDO) -->
+    <!-- PANTALLA NORMAS -->
     <div id="screen-rules" class="w-full max-w-4xl hidden flex-col mt-4 mx-auto">
         <div class="flex justify-between items-center mb-4">
             <button onclick="nav('menu')" class="cartoon-btn-sm">⬅ VOLVER</button>
             <h2 class="title-font text-4xl text-white text-shadow-hard uppercase">📜 NORMAS</h2>
         </div>
         <div class="cartoon-panel p-6 text-lg bg-yellow-50">
-            <section>
-                <h3 class="font-bold text-2xl mb-4 border-b-4 border-gray-800 pb-2 text-red-600">1. Reglas Generales del Locke</h3>
-                <ul class="list-disc pl-6 space-y-3 font-bold text-gray-700">
-                    <li><strong>Capturas limitadas:</strong> Una captura por ruta o zona. En la primera ciudad se permite, además del inicial, una captura adicional.</li>
-                    <li><strong>Línea evolutiva repetida:</strong> Si el primer Pokémon que aparece en una ruta pertenece a una línea evolutiva que ya capturaste, no cuenta como captura de esa ruta.</li>
-                    <li><strong>Motes obligatorios:</strong> Todos los Pokémon capturados deben llevar mote.</li>
-                    <li><strong>Legendarios y singulares:</strong> Está prohibido capturarlos o usarlos, salvo que sean Shiny (Variocolor).</li>
-                    <li><strong>Límite de nivel:</strong> El equipo no puede superar el nivel del Pokémon más fuerte del siguiente Líder. Si alguien lo supera por error, no podrá usarlo hasta derrotar a ese Líder.</li>
-                    <li><strong>Combinaciones prohibidas:</strong> No se permite Indefenso/No Guard junto a movimientos de KO inmediato (Fisura, Frío Polar, Guillotina o Perforador). Superguarda/Wonder Guard también está prohibida.</li>
-                </ul>
-            </section>
+            <h3 class="font-bold text-2xl mb-4 border-b-4 border-gray-800 pb-2 text-red-600">Reglas del PawPatrolLocke</h3>
+            <ul class="list-disc pl-6 space-y-3 font-bold text-gray-700">
+                <li>Solo se puede capturar el <strong>primer Pokémon</strong> que aparezca en cada ruta o zona. (Si se debilita o huye, te quedas sin captura).</li>
+                <li><strong>Shiny Clause:</strong> Si te sale un Pokémon Variocolor (Shiny), puedes capturarlo y usarlo aunque ya tengas una captura en esa ruta.</li>
+                <li>Si un Pokémon se debilita (PS a 0), se considera <strong>MUERTO</strong>. Deberás meterlo al cementerio y no podrás usarlo más.</li>
+                <li>Todos los Pokémon deben llevar un mote obligatoriamente.</li>
+                <li>Prohibido el uso de objetos curativos dentro de los combates. (Las bayas equipadas sí están permitidas).</li>
+                <li>Combates en modo "Fijar" (Set), no puedes cambiar de Pokémon al derrotar a uno del rival antes de que saque el siguiente.</li>
+            </ul>
 
-            <section class="mt-8">
-                <h3 class="font-bold text-2xl mb-4 border-b-4 border-gray-800 pb-2 text-rose-700">2. Reglas de Objetos y Muerte</h3>
-                <ul class="list-disc pl-6 space-y-3 font-bold text-gray-700">
-                    <li><strong>Muerte permanente:</strong> Si un Pokémon llega a 0 PS, pasa al Cementerio y no se puede volver a usar. La única excepción es Revivir Máximo obtenido en el Gacha.</li>
-                    <li><strong>Tarjeta Roja:</strong> El Pokémon elegido queda bloqueado solo durante el combate PvP entre quien la envía y su rival. Puede usarse con normalidad en la aventura y contra otros jugadores.</li>
-                    <li><strong>Repelente Máximo:</strong> Para validar el encuentro saltado, registra y haz públicos la ruta, el primer Pokémon ignorado y el segundo Pokémon capturado.</li>
-                </ul>
-            </section>
-
-            <section class="mt-8">
-                <h3 class="font-bold text-2xl mb-4 border-b-4 border-gray-800 pb-2 text-amber-700">3. Economía y Gacha 🎰</h3>
-                <ul class="list-disc pl-6 space-y-2 font-bold text-gray-700">
-                    <li><strong>Tirada:</strong> 50 🪙 PawCoins.</li>
-                    <li><strong>Recompensas:</strong> captura nueva (+10 🪙), medalla (+50 🪙), victoria añadida al Ranking (+100 🪙).</li>
-                    <li><strong>Penalizaciones:</strong> Pokémon al Cementerio (-20 🪙), quitar una victoria añadida por error (-100 🪙).</li>
-                    <li><strong>Drop rates:</strong> 3% Objetos Míticos de un uso (Revivir Máximo 1%, Tarjeta Roja 1%, Repelente Máximo 1%); 27% Skins; 30% Banners; 40% Pepita (+25 🪙).</li>
-                    <li>Si sale una Skin o un Banner repetido, se reciben +10 🪙 de compensación.</li>
-                </ul>
-            </section>
-
-            <section class="mt-8">
-                <h3 class="font-bold text-2xl mb-4 border-b-4 border-gray-800 pb-2 text-blue-700">4. Reglas de Torneo y Ranking (PvP)</h3>
-                <ul class="list-disc pl-6 space-y-3 font-bold text-gray-700">
-                    <li>Los combates para el Ranking se juegan exportando el equipo actual al formato de Pokémon Showdown.</li>
-                    <li>Una derrota de un Pokémon en un combate PvP de Showdown no cuenta como muerte en la partida de Nintendo/emulador.</li>
-                    <li>Quien quede último al finalizar la jornada puede bloquear un Pokémon a elección del vencedor de esa jornada.</li>
-                    <li>No se permite coaching de ningun tipo durante los combates.</li>
-                </ul>
-            </section>
-
-            <section class="mt-8">
-                <h3 class="font-bold text-2xl mb-4 border-b-4 border-gray-800 pb-2 text-emerald-700">🏟️ Gimnasios y límites de nivel</h3>
-                <div class="overflow-x-auto rounded-xl border-4 border-emerald-800 bg-white">
-                    <table class="w-full min-w-[820px] text-left text-sm font-bold text-gray-800">
-                        <thead class="bg-emerald-100 text-emerald-950">
-                            <tr><th class="p-3">🏅 Gimnasio</th><th class="p-3">👤 Líder (Ciudad)</th><th class="p-3">🌀 Tipo</th><th class="p-3">🐾 Pokémon principal</th><th class="p-3">🛑 Nivel límite</th></tr>
-                        </thead>
-                        <tbody class="divide-y-2 divide-emerald-100">
-                            <tr><td class="p-3">1.º Gimnasio</td><td class="p-3">Cheren (Ciudad Engobe)</td><td class="p-3">Normal</td><td class="p-3">Lillipup</td><td class="p-3">Nivel 13</td></tr>
-                            <tr><td class="p-3">2.º Gimnasio</td><td class="p-3">Hiedra (Ciudad Hormigón)</td><td class="p-3">Veneno</td><td class="p-3">Whirlipede</td><td class="p-3">Nivel 18</td></tr>
-                            <tr><td class="p-3">3.º Gimnasio</td><td class="p-3">Camus (Ciudad Porcelana)</td><td class="p-3">Bicho</td><td class="p-3">Leavanny</td><td class="p-3">Nivel 24</td></tr>
-                            <tr><td class="p-3">4.º Gimnasio</td><td class="p-3">Camila (Ciudad Mayólica)</td><td class="p-3">Eléctrico</td><td class="p-3">Zebstrika</td><td class="p-3">Nivel 30</td></tr>
-                            <tr><td class="p-3">5.º Gimnasio</td><td class="p-3">Yakón (Ciudad Fayenza)</td><td class="p-3">Tierra</td><td class="p-3">Excadrill</td><td class="p-3">Nivel 33</td></tr>
-                            <tr><td class="p-3">6.º Gimnasio</td><td class="p-3">Gerania (Ciudad Loza)</td><td class="p-3">Volador</td><td class="p-3">Swanna</td><td class="p-3">Nivel 39</td></tr>
-                            <tr><td class="p-3">7.º Gimnasio</td><td class="p-3">Lirio (Ciudad Caolín)</td><td class="p-3">Dragón</td><td class="p-3">Haxorus</td><td class="p-3">Nivel 43</td></tr>
-                            <tr><td class="p-3">8.º Gimnasio</td><td class="p-3">Ciprián (Ciudad Marga)</td><td class="p-3">Agua</td><td class="p-3">Jellicent</td><td class="p-3">Nivel 51</td></tr>
-                            <tr class="bg-amber-50"><td class="p-3">Liga Pokémon</td><td class="p-3">Iris (Campeona)</td><td class="p-3">Dragón</td><td class="p-3">Haxorus</td><td class="p-3">Nivel 59</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-            <section class="mt-8 rounded-xl border-4 border-red-800 bg-red-100 p-5 text-center">
-                <h3 class="title-font text-3xl text-red-900 mb-2">⚠️ Importante</h3>
-                <p class="font-black text-xl text-red-800">NO SE TOCA EL RNG, MARTIN, QUEDAS AVISADO</p>
-            </section>
+            <h3 class="font-bold text-2xl mb-4 border-b-4 border-gray-800 pb-2 text-pink-600 mt-8">Economía y Gacha 🎰</h3>
+            <ul class="list-disc pl-6 space-y-2 font-bold text-gray-700 text-base">
+                <li><strong>Coste de Tirada:</strong> 50 🪙 PawCoins.</li>
+                <li><strong>¿Cómo ganar monedas?</strong> Capturas (+10 🪙), Medallas (+50 🪙), Victorias Torneo (+100 🪙).</li>
+                <li><strong>Penalizaciones:</strong> Pokémon al cementerio (-20 🪙), Restar victoria por error (-100 🪙).</li>
+                <li><strong>Premios del Gacha:</strong>
+                    <ul class="list-circle pl-6 mt-2 font-normal text-sm space-y-1">
+                        <li><span class="font-bold text-yellow-600">3% Consumibles Míticos:</span> Revivir Máximo (1%), Tarjeta Roja (1%), Repelente Máximo (1%).</li>
+                        <li><span class="font-bold text-blue-600">27% Skins:</span> Avatares para tu perfil. (Repetidos dan +10 🪙 compensación).</li>
+                        <li><span class="font-bold text-green-600">30% Banners:</span> Fondos de nombre. (Repetidos dan +10 🪙 compensación).</li>
+                        <li><span class="font-bold text-gray-600">40% Pepita:</span> Premio de consolación. Devuelve +25 🪙.</li>
+                    </ul>
+                </li>
+            </ul>
         </div>
     </div>
     
@@ -395,13 +334,16 @@
                 <div><label class="block font-bold ml-2 mb-1 text-gray-700">JUGADOR:</label><input type="text" id="playerInput" disabled class="cartoon-input w-full p-3 text-lg"></div>
                 <div><label class="block font-bold ml-2 mb-1 text-gray-700">RUTA/ZONA:</label><input type="text" id="routeInput" required placeholder="Ej: Ruta 19..." class="cartoon-input w-full p-3 text-lg"></div>
                 <div><label class="block font-bold ml-2 mb-1 text-gray-700">POKÉMON:</label><input type="text" id="speciesInput" required placeholder="Ej: Pikachu" class="cartoon-input w-full p-3 text-lg"></div>
-                <div><label class="block font-bold ml-2 mb-1 text-gray-700">MOTE:</label><input type="text" id="nicknameInput" required placeholder="Apodo" class="cartoon-input w-full p-3 text-lg"></div>
+                <div><label class="block font-bold ml-2 mb-1 text-gray-700">MOTE (Opcional si huye):</label><input type="text" id="nicknameInput" placeholder="Apodo" class="cartoon-input w-full p-3 text-lg"></div>
                 <div class="flex items-center space-x-3 p-4 bg-yellow-100 border-4 border-yellow-400 rounded-[20px]">
                     <input type="checkbox" id="shinyInput" class="w-7 h-7">
                     <label for="shinyInput" class="font-bold cursor-pointer text-xl text-yellow-700">✨ ¡ES SHINY!</label>
                 </div>
-                <p class="text-xs text-center text-gray-500 font-bold">Recompensa: +10 🪙 PawCoins</p>
-                <button type="submit" id="btn-submit-capture" class="cartoon-btn w-full bg-green-500 hover:bg-green-400 text-white text-2xl py-4 mt-2">¡CAPTURADO!</button>
+                <p class="text-xs text-center text-gray-500 font-bold mt-2">Recompensa: +10 🪙 PawCoins (Solo si se captura)</p>
+                <div class="flex gap-2 mt-2">
+                    <button type="button" onclick="window.registerFail()" class="cartoon-btn flex-1 bg-red-500 hover:bg-red-400 text-white text-lg py-4 leading-tight">❌ HUYÓ / MURIÓ</button>
+                    <button type="submit" id="btn-submit-capture" class="cartoon-btn flex-[2] bg-green-500 hover:bg-green-400 text-white text-2xl py-4">¡CAPTURADO!</button>
+                </div>
             </form>
         </div>
     </div>
@@ -411,7 +353,6 @@
         <div class="flex justify-between items-center mb-4"><button onclick="nav('menu')" class="cartoon-btn-sm">⬅ VOLVER</button><h2 class="title-font text-4xl text-white text-shadow-hard uppercase">🎒 MOCHILA</h2></div>
         <input type="text" oninput="window.filterCards(this.value, 'grid-view')" placeholder="🔍 Buscar..." class="cartoon-input w-full p-4 text-xl shadow-lg mb-6"><div id="grid-view" class="w-full"></div>
         <div class="w-full mb-4"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase">⛔ Baneados</h3><div id="grid-view-banned" class="w-full mt-3"></div></div>
-        <div class="w-full mb-4"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase">🌀 Usos de Repelente Máximo</h3><div id="grid-view-repelentes" class="w-full mt-3 space-y-3"></div></div>
     </div>
     <div id="screen-cemetery" class="w-full max-w-5xl hidden flex-col mt-4">
         <div class="flex justify-between items-center mb-4"><button onclick="nav('menu')" class="cartoon-btn-sm">⬅ VOLVER</button><h2 class="title-font text-4xl text-white text-shadow-hard uppercase">🪦 CEMENTERIO</h2></div>
@@ -440,19 +381,6 @@
     <div id="modal-edit-pokemon" class="modal-overlay"><div class="cartoon-panel modal-content bg-white relative"><button onclick="document.getElementById('modal-edit-pokemon').style.display='none'" class="absolute top-4 right-4 text-2xl font-black text-gray-500">X</button><h2 class="title-font text-3xl text-center text-blue-600 mb-2">⚙️ PERSONALIZAR</h2><p id="modal-pokemon-name" class="text-center font-bold text-gray-500 mb-4 uppercase"></p><form id="editPokeForm" class="space-y-3"><input type="hidden" id="edit-poke-id"><div class="grid grid-cols-1 md:grid-cols-2 gap-3"><div><label class="block font-bold text-sm">Nivel:</label><input type="number" id="edit-level" class="cartoon-input w-full p-2"></div><div><label class="block font-bold text-sm">Objeto (@):</label><input type="text" id="edit-item" list="valid-items-list" autocomplete="off" class="cartoon-input w-full p-2"></div><div><label class="block font-bold text-sm">Habilidad:</label><input type="text" id="edit-ability" list="valid-abilities-list" autocomplete="off" class="cartoon-input w-full p-2"></div><div><label class="block font-bold text-sm">Naturaleza:</label><input type="text" id="edit-nature" list="valid-natures-list" autocomplete="off" class="cartoon-input w-full p-2"></div><div class="md:col-span-2"><label class="block font-bold text-sm">Género:</label><select id="edit-gender" class="cartoon-input w-full p-2"><option value="">Sin Género</option><option value="(M)">Macho (M)</option><option value="(F)">Hembra (F)</option></select></div></div><div class="pt-2 border-t-2 border-gray-200 mt-2"><label class="block font-bold text-sm text-center mb-1 text-red-600">Ataques Randomlocke</label><div class="grid grid-cols-1 md:grid-cols-2 gap-2"><input type="text" id="edit-m1" list="all-moves-list" autocomplete="off" class="cartoon-input w-full p-2"><input type="text" id="edit-m2" list="all-moves-list" autocomplete="off" class="cartoon-input w-full p-2"><input type="text" id="edit-m3" list="all-moves-list" autocomplete="off" class="cartoon-input w-full p-2"><input type="text" id="edit-m4" list="all-moves-list" autocomplete="off" class="cartoon-input w-full p-2"></div></div><button type="submit" id="btn-save-edit" class="cartoon-btn w-full bg-blue-500 text-white text-xl py-3 mt-4">💾 GUARDAR</button></form></div></div>
     <div id="modal-view-pokemon" class="modal-overlay"><div class="cartoon-panel modal-content bg-white relative text-center"><button onclick="document.getElementById('modal-view-pokemon').style.display='none'" class="absolute top-4 right-4 text-2xl font-black text-gray-500">X</button><h2 class="title-font text-3xl text-blue-600 mb-1" id="view-mote"></h2><p class="font-bold text-gray-500 mb-4" id="view-especie-ruta"></p><div class="flex justify-center mb-4"><img id="view-sprite" src="" class="pixel-art scale-[2] h-24"></div><div class="grid grid-cols-2 gap-2 text-left bg-gray-100 p-4 rounded-xl border-4 border-gray-200 font-bold text-sm"><p>Nivel: <span id="view-level" class="text-blue-600"></span></p><p>Género: <span id="view-gender" class="text-blue-600"></span></p><p>Objeto: <span id="view-item" class="text-blue-600"></span></p><p>Habilidad: <span id="view-ability" class="text-blue-600"></span></p><p class="col-span-2">Naturaleza: <span id="view-nature" class="text-blue-600"></span></p><div class="col-span-2 mt-2 pt-2 border-t-2 border-gray-300"><p class="mb-1 text-center">Ataques:</p><ul class="list-disc pl-5 text-red-600" id="view-moves"></ul></div></div></div></div>
     <textarea id="copy-clipboard-area" style="position: absolute; top: -9999px; left: -9999px;"></textarea>
-    <div id="modal-edit-capture" class="modal-overlay">
-        <div class="cartoon-panel modal-content bg-white relative p-6">
-            <button type="button" onclick="document.getElementById('modal-edit-capture').style.display='none'" class="absolute top-4 right-4 text-2xl font-black text-gray-500">X</button>
-            <h2 class="title-font text-3xl text-center text-amber-700 mb-2">✏️ CORREGIR CAPTURA</h2>
-            <p id="edit-capture-species" class="text-center font-bold text-gray-500 mb-4 uppercase"></p>
-            <form id="editCaptureForm" class="space-y-4">
-                <input type="hidden" id="edit-capture-id">
-                <div><label for="edit-capture-nickname" class="block font-bold ml-2 mb-1 text-gray-700">MOTE</label><input id="edit-capture-nickname" type="text" required maxlength="40" class="cartoon-input w-full p-3 text-lg"></div>
-                <div><label for="edit-capture-route" class="block font-bold ml-2 mb-1 text-gray-700">RUTA/ZONA</label><input id="edit-capture-route" type="text" required maxlength="80" class="cartoon-input w-full p-3 text-lg"></div>
-                <button type="submit" class="cartoon-btn w-full bg-amber-400 hover:bg-amber-300 text-amber-950 text-xl py-3">💾 GUARDAR CAMBIOS</button>
-            </form>
-        </div>
-    </div>
 
     <!-- SCRIPT PRINCIPAL -->
     <script type="module">
@@ -475,7 +403,7 @@
         // =========================================================================
 
         let db;
-        let globalData = []; let globalBadges = {}; let rankingData = {}; let globalRepelentes = [];
+        let globalData = []; let globalBadges = {}; let rankingData = {};
         let globalEco = {}; let globalInv = {}; let globalActivos = {};
         let currentScreen = 'landing';
         let selectedBanPlayer = '';
@@ -538,7 +466,7 @@
         const G_CONSUMABLES = {
             'revivir': { name: 'Revivir Máximo (Revive a un muerto)', icon: 'max-revive' },
             'ban': { name: 'Tarjeta Roja (Banear rival)', icon: 'eject-button' },
-            'skip': { name: 'Repelente Máximo (registrar encuentro)', icon: 'max-repel' }
+            'skip': { name: 'Repelente Max (Saltar ruta)', icon: 'max-repel' }
         };
 
         const GYM_BADGES = [
@@ -628,7 +556,7 @@
         window.adminUnlock = function() { if(prompt("🔒 Contraseña:")==="adminlocke") { localStorage.removeItem('pawPatrolUser'); alert("🔓 Desvinculado."); window.updateProfileView(); updateCoinDisplay(); } }
 
         window.nav = function(targetScreen) {
-            if (['add', 'teambuilder', 'badges', 'gacha', 'collectibles', 'revive', 'ban-select', 'repel'].includes(targetScreen) && !getMyPlayer()) {
+            if (['add', 'teambuilder', 'badges', 'gacha', 'collectibles', 'revive', 'ban-select'].includes(targetScreen) && !getMyPlayer()) {
                 alert("⚠️ Primero debes ir a 'Mi Perfil' y vincular este dispositivo."); return window.nav('profile');
             }
             if(targetScreen === 'ban-select') selectedBanPlayer = '';
@@ -643,11 +571,10 @@
         function refreshCurrentScreen() {
             updateCoinDisplay();
             if(currentScreen === 'view') {
-                renderGroupedList(globalData.filter(c => c.estado === 'Vivo'), 'grid-view', true);
-                renderGroupedList(globalData.filter(c => c.estado === 'Baneado'), 'grid-view-banned', true);
-                renderRepelentes();
+                renderGroupedList(globalData.filter(c => c.estado === 'Vivo'), 'grid-view');
+                renderGroupedList(globalData.filter(c => c.estado === 'Baneado'), 'grid-view-banned');
             }
-            if(currentScreen === 'cemetery') renderGroupedList(globalData.filter(c => c.estado === 'Muerto'), 'grid-cemetery', true);
+            if(currentScreen === 'cemetery') renderGroupedList(globalData.filter(c => c.estado === 'Muerto'), 'grid-cemetery');
             if(currentScreen === 'ranking') renderRanking();
             if(currentScreen === 'profile') window.updateProfileView();
             if(currentScreen === 'teambuilder') window.updateTeambuilderView();
@@ -671,7 +598,7 @@
             
             onValue(ref(db, 'usuarios'), (snapshot) => {
                 const data = snapshot.val() || {};
-                globalData = []; globalBadges = {}; rankingData = {}; globalEco = {}; globalInv = {}; globalActivos = {}; globalRepelentes = [];
+                globalData = []; globalBadges = {}; rankingData = {}; globalEco = {}; globalInv = {}; globalActivos = {};
 
                 PLAYERS.forEach(player => {
                     const pData = data[player] || {};
@@ -686,7 +613,6 @@
                         if (pData.pokemon.muertos) Object.keys(pData.pokemon.muertos).forEach(k => globalData.push({ id: k, jugador: player, estado: 'Muerto', ...pData.pokemon.muertos[k] }));
                         if (pData.pokemon.baneados) Object.keys(pData.pokemon.baneados).forEach(k => globalData.push({ id: k, jugador: player, estado: 'Baneado', ...pData.pokemon.baneados[k] }));
                     }
-                    if (pData.repelentes) Object.values(pData.repelentes).forEach(record => globalRepelentes.push({ ...record, jugador: player }));
                 });
                 globalData.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
                 refreshCurrentScreen();
@@ -775,7 +701,6 @@
             if(count <= 0) return;
             if(id === 'revivir') return window.nav('revive');
             if(id === 'ban') return window.nav('ban-select');
-            if(id === 'skip') return window.nav('repel');
             if(confirm(`⚠️ ¿Seguro que quieres gastar este objeto? No se puede deshacer.`)) {
                 if(db) {
                     const p = getMyPlayer(); update(ref(db, `usuarios/${p}/inventario/consumibles`), { [id]: count - 1 });
@@ -785,37 +710,6 @@
                 }
             }
         }
-
-        document.getElementById('repelForm').addEventListener('submit', async (event) => {
-            event.preventDefault();
-            const player = getMyPlayer();
-            const ruta = document.getElementById('repel-route').value.trim();
-            const pokemonIgnorado = document.getElementById('repel-skipped').value.trim();
-            const pokemonCapturado = document.getElementById('repel-captured').value.trim();
-            if(!player || !ruta || !pokemonIgnorado || !pokemonCapturado || !db) return;
-
-            const recordKey = push(ref(db, `usuarios/${player}/repelentes`)).key;
-            const timestamp = Date.now();
-            try {
-                const result = await runTransaction(ref(db, `usuarios/${player}`), (user) => {
-                    const consumables = user && user.inventario && user.inventario.consumibles;
-                    if(!user || !consumables || (consumables.skip || 0) < 1) return;
-                    user.repelentes = user.repelentes || {};
-                    user.repelentes[recordKey] = { ruta, pokemonIgnorado, pokemonCapturado, timestamp };
-                    consumables.skip -= 1;
-                    return user;
-                }, { applyLocally: false });
-
-                if(!result.committed) return alert('No se pudo registrar: comprueba que aún tienes un Repelente Máximo.');
-                globalRepelentes.push({ ruta, pokemonIgnorado, pokemonCapturado, timestamp, jugador: player });
-                writeLog(player, `Usó Repelente Máximo en ${ruta}: ignoró ${pokemonIgnorado} y capturó ${pokemonCapturado}`);
-                document.getElementById('repelForm').reset();
-                alert('🌀 Uso registrado públicamente. El Repelente Máximo se ha consumido.');
-                window.nav('view');
-            } catch(error) {
-                alert('❌ No se pudo registrar el Repelente Máximo. Comprueba la conexión e inténtalo de nuevo.');
-            }
-        });
 
         window.updateReviveSelectionView = function() {
             const p = getMyPlayer();
@@ -848,7 +742,7 @@
                     if(!deadPokemon || !consumables || (consumables.revivir || 0) < 1) return;
 
                     user.pokemon.vivos = user.pokemon.vivos || {};
-                    user.pokemon.vivos[id] = { ...deadPokemon, inTeam: false, revividoPor: player, revividoEn: Date.now() };
+                    user.pokemon.vivos[id] = { ...deadPokemon, inTeam: false };
                     delete user.pokemon.muertos[id];
                     consumables.revivir -= 1;
                     return users;
@@ -873,7 +767,7 @@
                 heading.innerText = 'PASO 1 · Elige a un rival';
                 const rivals = PLAYERS.filter(name => name !== player);
                 container.innerHTML = rivals.map(rival => {
-                    const count = globalData.filter(data => data.jugador === rival && data.estado === 'Vivo').length;
+                    const count = globalData.filter(data => data.jugador === rival && ['Vivo', 'Muerto'].includes(data.estado)).length;
                     return `<button onclick="window.selectBanPlayer('${rival}')" ${count === 0 ? 'disabled' : ''} class="cartoon-panel p-5 text-center bg-white border-red-300 hover:border-red-600 disabled:opacity-50 disabled:cursor-not-allowed">
                         <span class="text-4xl block mb-2">🎯</span><span class="title-font text-2xl text-gray-800 block">${rival}</span>
                         <span class="text-sm font-bold text-gray-500">${count} Pokémon disponibles</span>
@@ -883,7 +777,7 @@
             }
 
             heading.innerHTML = `<button onclick="window.backToBanPlayers()" class="cartoon-btn-sm mb-3">⬅ CAMBIAR JUGADOR</button><p>PASO 2 · Elige qué Pokémon de ${selectedBanPlayer} quedará baneado</p>`;
-            const targetPokemon = globalData.filter(data => data.jugador === selectedBanPlayer && data.estado === 'Vivo');
+            const targetPokemon = globalData.filter(data => data.jugador === selectedBanPlayer && ['Vivo', 'Muerto'].includes(data.estado));
             if(targetPokemon.length === 0) {
                 container.innerHTML = '<div class="col-span-full text-center font-bold text-gray-500 p-8">Este jugador no tiene Pokémon disponibles para banear.</div>';
                 return;
@@ -893,7 +787,7 @@
                     <h3 class="font-bold text-lg uppercase truncate w-full mb-1">"${data.mote}"</h3>
                     <p class="text-sm font-bold text-gray-500 mb-2">${data.especie}</p>
                     <img src="https://play.pokemonshowdown.com/sprites/${data.shiny ? 'gen5-shiny' : 'gen5'}/${data.especie.toLowerCase().replace(/[^a-z0-9]/g, '')}.png" class="pixel-art h-16 mb-3" onerror="this.src='https://play.pokemonshowdown.com/sprites/itemicons/pokeball.png';">
-                    <span class="text-xs font-black text-red-700 mb-3">EQUIPO / MOCHILA</span>
+                    <span class="text-xs font-black text-red-700 mb-3">${data.estado === 'Muerto' ? 'CEMENTERIO' : 'EQUIPO / MOCHILA'}</span>
                     <button onclick="window.banPokemon('${selectedBanPlayer}', '${data.id}')" class="cartoon-btn-sm bg-red-200 border-red-700 text-red-900 w-full">🚫 BANEAR</button>
                 </div>`).join('');
         }
@@ -912,7 +806,7 @@
         window.banPokemon = async function(targetPlayer, id) {
             const player = getMyPlayer();
             if(!player || !db || targetPlayer === player || !PLAYERS.includes(targetPlayer)) return;
-            const selected = globalData.find(data => data.id === id && data.jugador === targetPlayer && data.estado === 'Vivo');
+            const selected = globalData.find(data => data.id === id && data.jugador === targetPlayer && ['Vivo', 'Muerto'].includes(data.estado));
             if(!selected || !confirm(`¿Banear a "${selected.mote}" (${selected.especie}) de ${targetPlayer}?`)) return;
 
             try {
@@ -923,17 +817,16 @@
                     const pokemon = target && target.pokemon;
                     if(!pokemon || !consumables || (consumables.ban || 0) < 1) return;
 
-                    if(!pokemon.vivos || !pokemon.vivos[id]) return;
+                    const source = pokemon.vivos && pokemon.vivos[id] ? 'vivos' : (pokemon.muertos && pokemon.muertos[id] ? 'muertos' : '');
+                    if(!source) return;
                     pokemon.baneados = pokemon.baneados || {};
-                    const bannedAt = Date.now();
-                    const livePokemon = pokemon.vivos[id];
-                    livePokemon.baneos = { ...(livePokemon.baneos || {}), [player]: bannedAt };
                     pokemon.baneados[id] = {
-                        ...livePokemon,
-                        estadoOriginal: 'Vivo',
+                        ...pokemon[source][id],
+                        estadoOriginal: source === 'vivos' ? 'Vivo' : 'Muerto',
                         baneadoPor: player,
-                        baneadoEn: bannedAt
+                        baneadoEn: Date.now()
                     };
+                    delete pokemon[source][id];
                     consumables.ban -= 1;
                     return users;
                 }, { applyLocally: false });
@@ -974,17 +867,60 @@
             const alreadyCaptured = globalData.find(x => x.jugador === p && x.ruta.toLowerCase() === routeRaw.toLowerCase());
             if (alreadyCaptured && !isShiny) return alert(`🚫 Ya tienes un registro en "${routeRaw}".`);
 
+            const mote = document.getElementById('nicknameInput').value.trim();
+            if(!mote) return alert("⚠️ ¡El mote es obligatorio para las capturas exitosas!");
+
             btnSubmit.disabled = true; btnSubmit.innerHTML = "🔍 Pokédex...";
 
             try {
                 const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${speciesClean}`); if(!res.ok) throw new Error();
-                const mote = document.getElementById('nicknameInput').value.trim(); const specieFormatted = speciesRaw.charAt(0).toUpperCase() + speciesRaw.slice(1).toLowerCase();
+                const specieFormatted = speciesRaw.charAt(0).toUpperCase() + speciesRaw.slice(1).toLowerCase();
                 const data = { ruta: routeRaw, especie: specieFormatted, mote: mote, shiny: isShiny, inTeam: false, timestamp: Date.now() };
 
                 if (db) { push(ref(db, `usuarios/${p}/pokemon/vivos`), data); writeLog(p, `Capturado ${mote} (${specieFormatted}) en ${routeRaw}`); addPoints(p, 10); }
                 alert("✅ ¡Captura registrada! (+10 🪙)"); document.getElementById('trackerForm').reset(); window.nav('menu');
             } catch (error) { alert(`❌ "${speciesRaw}" no existe.`); } finally { btnSubmit.disabled = false; btnSubmit.innerHTML = "¡CAPTURADO!"; }
         });
+
+        // --- CAPTURA FALLIDA (HUYÓ O MURIÓ) ---
+        window.registerFail = async function() {
+            const routeRaw = document.getElementById('routeInput').value.trim(); 
+            const speciesRaw = document.getElementById('speciesInput').value.trim();
+            const p = getMyPlayer();
+
+            if(!routeRaw || !speciesRaw) return alert("⚠️ Rellena al menos la RUTA y el POKÉMON para registrar el fallo.");
+
+            const alreadyCaptured = globalData.find(x => x.jugador === p && x.ruta.toLowerCase() === routeRaw.toLowerCase());
+            if (alreadyCaptured) return alert(`🚫 Ya tienes un registro en "${routeRaw}".`);
+
+            if(!confirm(`💀 ¿Registrar que has PERDIDO la captura en ${routeRaw}? Esta ruta quedará quemada y no podrás atrapar nada más aquí.`)) return;
+
+            const btn = document.querySelector("button[onclick='window.registerFail()']");
+            const originalText = btn.innerHTML;
+            btn.disabled = true; btn.innerHTML = "⏳...";
+
+            const speciesClean = speciesRaw.toLowerCase().replace(/[^a-z0-9]/g, ''); 
+            try {
+                const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${speciesClean}`); 
+                if(!res.ok) throw new Error();
+                const specieFormatted = speciesRaw.charAt(0).toUpperCase() + speciesRaw.slice(1).toLowerCase();
+                
+                // Lo mandamos como Muerto con el tag "fallida"
+                const data = { ruta: routeRaw, especie: specieFormatted, mote: '❌ FALLIDA', shiny: false, inTeam: false, timestamp: Date.now(), fallida: true };
+
+                if (db) { 
+                    push(ref(db, `usuarios/${p}/pokemon/muertos`), data); 
+                    writeLog(p, `Captura fallida (${specieFormatted}) en ${routeRaw}`); 
+                }
+                alert("❌ Ruta quemada registrada. Más suerte la próxima vez."); 
+                document.getElementById('trackerForm').reset(); 
+                window.nav('menu');
+            } catch (error) { 
+                alert(`❌ "${speciesRaw}" no existe en la Pokédex.`); 
+            } finally {
+                btn.disabled = false; btn.innerHTML = originalText;
+            }
+        };
 
         // --- VISTAS PERFIL Y EQUIPO ---
         window.updateProfileView = function() {
@@ -1001,7 +937,7 @@
             const myDead = globalData.filter(x => x.jugador === p && x.estado === 'Muerto');
             const myBanned = globalData.filter(x => x.jugador === p && x.estado === 'Baneado');
             
-            document.getElementById('grid-profile').innerHTML = `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase">⚔️ Equipo Actual</h3></div>` + generateCardsHTML(myTeam, false, false, true, false, true) + `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">🌟 Mochila (PC)</h3></div>` + generateCardsHTML(myBox, true, false, false, false, true) + `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">🪦 Cementerio</h3></div>` + generateCardsHTML(myDead, false, true, false, false, true) + `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">⛔ Baneados</h3></div>` + generateCardsHTML(myBanned, false, false, false, true, true);
+            document.getElementById('grid-profile').innerHTML = `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase">⚔️ Equipo Actual</h3></div>` + generateCardsHTML(myTeam, false, false, true) + `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">🌟 Mochila (PC)</h3></div>` + generateCardsHTML(myBox, true) + `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">🪦 Cementerio</h3></div>` + generateCardsHTML(myDead, false, true) + `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">⛔ Baneados</h3></div>` + generateCardsHTML(myBanned, false, false, false, true);
         };
 
         window.updateTeambuilderView = function() {
@@ -1010,11 +946,10 @@
                 <div class="poke-card cartoon-panel ${data.inTeam ? 'in-team-bg bg-blue-50' : 'bg-white'} p-4 flex flex-col items-center text-center relative border-[4px]" data-search="${data.ruta} ${data.especie} ${data.mote}">
                     ${data.inTeam ? '<div class="absolute top-[-15px] left-[-15px] text-3xl">⭐</div>' : ''}
                     <h3 class="font-bold text-xl uppercase truncate w-full mb-1">"${data.mote}"</h3><p class="text-sm font-bold text-gray-500 mb-2">${data.especie}</p>
-                    <img onclick="window.openViewModal('${data.id}', '${data.jugador}', '${data.estado}')" src="https://play.pokemonshowdown.com/sprites/${data.shiny ? 'gen5-shiny' : 'gen5'}/${data.especie.toLowerCase().replace(/[^a-z0-9]/g, '')}.png" class="pixel-art scale-[1.5] h-16 mb-4 cursor-pointer" onerror="this.src='https://play.pokemonshowdown.com/sprites/itemicons/pokeball.png';">
+                    <img src="https://play.pokemonshowdown.com/sprites/${data.shiny ? 'gen5-shiny' : 'gen5'}/${data.especie.toLowerCase().replace(/[^a-z0-9]/g, '')}.png" class="pixel-art scale-[1.5] h-16 mb-4" onerror="this.src='https://play.pokemonshowdown.com/sprites/itemicons/pokeball.png';">
                     <div class="flex flex-col gap-2 w-full mt-auto">
-                        <button onclick="window.openViewModal('${data.id}', '${data.jugador}', '${data.estado}')" class="cartoon-btn-sm bg-yellow-100 border-yellow-800 text-yellow-800">ℹ️ Ficha</button>
-                        ${data.inTeam ? `<button onclick="window.openEditModal('${data.id}')" class="cartoon-btn-sm teambuilder-action-btn bg-indigo-100 border-indigo-600 text-indigo-700 mb-2">⚙️ Personalizar</button>` : ''}
-                        <button onclick="window.toggleTeam('${data.id}', ${!data.inTeam})" class="cartoon-btn-sm teambuilder-action-btn ${data.inTeam ? 'bg-red-100 border-red-600 text-red-600' : 'bg-green-100 border-green-600 text-green-700'}">${data.inTeam ? '❌ Quitar' : '➕ Añadir'}</button>
+                        ${data.inTeam ? `<button onclick="window.openEditModal('${data.id}')" class="cartoon-btn-sm bg-indigo-100 border-indigo-600 text-indigo-700 mb-2">⚙️ Personalizar</button>` : ''}
+                        <button onclick="window.toggleTeam('${data.id}', ${!data.inTeam})" class="cartoon-btn-sm ${data.inTeam ? 'bg-red-100 border-red-600 text-red-600' : 'bg-green-100 border-green-600 text-green-700'}">${data.inTeam ? '❌ Quitar' : '➕ Añadir'}</button>
                     </div></div>`).join('');
         };
 
@@ -1024,38 +959,9 @@
             if(db) update(ref(db, `usuarios/${p}/pokemon/vivos/${id}`), { inTeam: newState });
         }
 
-        function ensureCaptureEditFields() {
-            const form = document.getElementById('editPokeForm');
-            if(document.getElementById('edit-capture-mote-full')) return;
-            const grid = form.querySelector('.grid');
-            const fields = [
-                { id: 'edit-capture-mote-full', label: 'Mote', value: '' },
-                { id: 'edit-capture-route-full', label: 'Ruta/Zona', value: '' }
-            ];
-            fields.forEach(field => {
-                const wrapper = document.createElement('div');
-                const label = document.createElement('label');
-                label.htmlFor = field.id;
-                label.className = 'block font-bold text-sm';
-                label.textContent = field.label;
-                const input = document.createElement('input');
-                input.id = field.id;
-                input.type = 'text';
-                input.required = true;
-                input.maxLength = field.label === 'Mote' ? 40 : 80;
-                input.className = 'cartoon-input w-full p-2';
-                wrapper.append(label, input);
-                form.insertBefore(wrapper, grid);
-            });
-        }
-
         window.openEditModal = function(id) {
             const p = globalData.find(x => x.id === id); document.getElementById('edit-poke-id').value = id;
-            if(!p || p.jugador !== getMyPlayer()) return alert('Solo puedes editar Pokémon de tu perfil.');
-            ensureCaptureEditFields();
             document.getElementById('modal-pokemon-name').innerText = `"${p.mote}" (${p.especie})`;
-            document.getElementById('edit-capture-mote-full').value = p.mote || '';
-            document.getElementById('edit-capture-route-full').value = p.ruta || '';
             document.getElementById('edit-level').value = p.nivel || ''; document.getElementById('edit-gender').value = p.gender || '';
             document.getElementById('edit-item').value = p.item || '';
             document.getElementById('edit-ability').value = p.ability || '';
@@ -1068,12 +974,10 @@
             document.getElementById('modal-edit-pokemon').style.display = 'flex';
         };
 
-        document.getElementById('editPokeForm').addEventListener('submit', async (e) => {
-            e.preventDefault(); const id = document.getElementById('edit-poke-id').value; const player = getMyPlayer();
+        document.getElementById('editPokeForm').addEventListener('submit', (e) => {
+            e.preventDefault(); const id = document.getElementById('edit-poke-id').value;
             try {
                 const updateData = {
-                    mote: document.getElementById('edit-capture-mote-full').value.trim(),
-                    ruta: document.getElementById('edit-capture-route-full').value.trim(),
                     nivel: document.getElementById('edit-level').value, gender: document.getElementById('edit-gender').value,
                     item: validarEntrada(document.getElementById('edit-item').value, 'items', 'Objeto'),
                     ability: validarEntrada(document.getElementById('edit-ability').value, 'abilities', 'Habilidad'),
@@ -1085,26 +989,13 @@
                         validarEntrada(document.getElementById('edit-m4').value.replace(/^- /g, ''), 'moves', 'Ataque 4')
                     ]
                 };
-                if(!player || !db || !updateData.mote || !updateData.ruta) return alert('El mote y la ruta son obligatorios.');
-                const result = await runTransaction(ref(db, `usuarios/${player}/pokemon`), (pokemon) => {
-                    if(!pokemon) return;
-                    for(const collection of ['vivos', 'muertos', 'baneados']) {
-                        if(pokemon[collection] && pokemon[collection][id]) {
-                            Object.assign(pokemon[collection][id], updateData);
-                            return pokemon;
-                        }
-                    }
-                    return;
-                }, { applyLocally: false });
-                if(!result.committed) return alert('No se pudo guardar: el Pokémon ya no está disponible en tu perfil.');
+                if(db) update(ref(db, `usuarios/${getMyPlayer()}/pokemon/vivos/${id}`), updateData);
                 document.getElementById('modal-edit-pokemon').style.display = 'none';
-                writeLog(player, `Editó los datos de ${updateData.mote} (${updateData.ruta})`);
             } catch (error) { alert("❌ " + error.message); }
         });
 
-        window.openViewModal = function(id, player, state) {
-            const p = globalData.find(x => x.id === id && (!player || x.jugador === player) && (!state || x.estado === state));
-            if(!p || p.jugador !== getMyPlayer()) return;
+        window.openViewModal = function(id) {
+            const p = globalData.find(x => x.id === id);
             document.getElementById('view-mote').innerText = `"${p.mote}" ${p.shiny ? '✨' : ''}`; document.getElementById('view-especie-ruta').innerText = `${p.especie} -📍 ${p.ruta}`;
             document.getElementById('view-sprite').src = `https://play.pokemonshowdown.com/sprites/${p.shiny ? 'gen5-shiny' : 'gen5'}/${p.especie.toLowerCase().replace(/[^a-z0-9]/g, '')}.png`;
             document.getElementById('view-level').innerText = p.nivel || '??'; document.getElementById('view-gender').innerText = p.gender || '---';
@@ -1112,62 +1003,8 @@
             document.getElementById('view-ability').innerText = p.ability || '---';
             document.getElementById('view-nature').innerText = p.nature || '---';
             document.getElementById('view-moves').innerHTML = (p.moves || []).map(m => m ? `<li>${m}</li>` : '').join('') || '<li>Sin movimientos</li>';
-            let statusNote = document.getElementById('view-status-note');
-            if(!statusNote) {
-                statusNote = document.createElement('p');
-                statusNote.id = 'view-status-note';
-                statusNote.className = 'hidden whitespace-pre-line font-bold text-center text-emerald-800 bg-emerald-50 border-2 border-emerald-300 rounded-xl p-3 mb-4';
-                document.getElementById('view-especie-ruta').insertAdjacentElement('afterend', statusNote);
-            }
-            const legalNotes = [];
-            if(p.revividoPor) legalNotes.push(`💚 Revivido con Revivir Máximo por ${p.revividoPor}${p.revividoEn ? ` el ${new Date(p.revividoEn).toLocaleString('es-ES')}` : ''}.`);
-            const banSenders = new Set(Object.keys(p.baneos || {}));
-            if(p.baneadoPor) banSenders.add(p.baneadoPor);
-            if(banSenders.size > 0 || p.estado === 'Baneado') legalNotes.push(`🚫 Tarjeta Roja enviada por ${[...banSenders].join(', ') || p.baneadoPor || 'un jugador'}. Solo aplica al combate PvP contra quien la envió; el Pokémon sigue disponible en el resto de la aventura.`);
-            statusNote.textContent = legalNotes.join('\n');
-            statusNote.classList.toggle('hidden', legalNotes.length === 0);
             document.getElementById('modal-view-pokemon').style.display = 'flex';
         };
-
-        window.openCaptureEditModal = function(id) {
-            const capture = globalData.find(data => data.id === id && data.jugador === getMyPlayer());
-            if(!capture) return alert('No se encontró esta captura en tu perfil.');
-            document.getElementById('edit-capture-id').value = id;
-            document.getElementById('edit-capture-species').innerText = capture.especie;
-            document.getElementById('edit-capture-nickname').value = capture.mote || '';
-            document.getElementById('edit-capture-route').value = capture.ruta || '';
-            document.getElementById('modal-edit-capture').style.display = 'flex';
-        };
-
-        document.getElementById('editCaptureForm').addEventListener('submit', async (event) => {
-            event.preventDefault();
-            const player = getMyPlayer();
-            const id = document.getElementById('edit-capture-id').value;
-            const mote = document.getElementById('edit-capture-nickname').value.trim();
-            const ruta = document.getElementById('edit-capture-route').value.trim();
-            if(!player || !id || !mote || !ruta || !db) return;
-
-            try {
-                const result = await runTransaction(ref(db, `usuarios/${player}/pokemon`), (pokemon) => {
-                    if(!pokemon) return;
-                    for(const collection of ['vivos', 'muertos', 'baneados']) {
-                        if(pokemon[collection] && pokemon[collection][id]) {
-                            pokemon[collection][id].mote = mote;
-                            pokemon[collection][id].ruta = ruta;
-                            return pokemon;
-                        }
-                    }
-                    return;
-                }, { applyLocally: false });
-
-                if(!result.committed) return alert('No se pudo modificar: la captura ya no está disponible.');
-                writeLog(player, `Ha corregido los datos de ${mote} (${ruta})`);
-                document.getElementById('modal-edit-capture').style.display = 'none';
-                alert('✅ Mote y ruta actualizados en todas las vistas.');
-            } catch(error) {
-                alert('❌ No se pudo guardar. Comprueba la conexión e inténtalo de nuevo.');
-            }
-        });
 
         window.exportShowdown = function() {
             const team = globalData.filter(p => p.jugador === getMyPlayer() && p.inTeam && p.estado === 'Vivo');
@@ -1224,23 +1061,21 @@
             }
         };
 
-        function generateCardsHTML(list, isInteractive = false, isDead = false, isViewMode = false, isBanned = false, canEditCapture = false, isPublicView = false) {
+        function generateCardsHTML(list, isInteractive = false, isDead = false, isViewMode = false, isBanned = false) {
             if (list.length === 0) return `<div class="col-span-full cartoon-panel p-6 text-center font-bold">No hay registros.</div>`;
             return `<div class="col-span-full grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">` + list.map(data => `
-                <div class="poke-card cartoon-panel flex flex-col items-center text-center relative border-4 ${isDead ? 'grayscale-dead' : (data.shiny ? 'shiny-bg' : 'bg-white')}" data-search="${data.ruta} ${data.especie} ${data.mote}">
+                <div class="poke-card cartoon-panel flex flex-col items-center text-center relative border-4 ${isDead ? 'grayscale-dead' : (isBanned ? 'bg-red-50 border-red-400' : (data.shiny ? 'shiny-bg' : 'bg-white'))}" data-search="${data.ruta} ${data.especie} ${data.mote}">
                     <h3 class="font-bold text-lg uppercase truncate w-full mb-1">"${data.mote}" ${data.shiny ? '✨' : ''}</h3><p class="text-sm font-bold text-gray-500 mb-2">${data.especie}</p>
-                    <img ${isPublicView ? '' : `onclick="window.openViewModal('${data.id}', '${data.jugador}', '${data.estado}')"`} src="https://play.pokemonshowdown.com/sprites/${data.shiny ? 'gen5-shiny' : 'gen5'}/${data.especie.toLowerCase().replace(/[^a-z0-9]/g, '')}.png" class="pixel-art scale-[1.5] h-16 mb-2 ${isPublicView ? '' : 'cursor-pointer'}" onerror="this.src='https://play.pokemonshowdown.com/sprites/itemicons/pokeball.png';">
+                    <img src="https://play.pokemonshowdown.com/sprites/${data.shiny ? 'gen5-shiny' : 'gen5'}/${data.especie.toLowerCase().replace(/[^a-z0-9]/g, '')}.png" class="pixel-art scale-[1.5] h-16 mb-2" onerror="this.src='https://play.pokemonshowdown.com/sprites/itemicons/pokeball.png';">
                     <p class="text-[10px] text-gray-400 font-black tracking-wider uppercase mb-2">📍 ${data.ruta}</p>
                     <div class="flex flex-col gap-2 w-full mt-auto">
-                        ${!isPublicView ? `<button onclick="window.openViewModal('${data.id}', '${data.jugador}', '${data.estado}')" class="cartoon-btn-sm bg-yellow-100 border-yellow-800 text-yellow-800">🔍 ${isViewMode ? 'Ver Info' : 'Ficha'}</button>` : ''}
-                        ${canEditCapture ? `<button onclick="window.openEditModal('${data.id}')" class="cartoon-btn-sm profile-edit-btn bg-amber-100 border-amber-700 text-amber-900">✏️ Editar Pokémon</button>` : ''}
-                        ${isPublicView && (isBanned || data.baneadoPor || Object.keys(data.baneos || {}).length > 0 || data.revividoPor) ? `<div class="w-full rounded-xl border-2 border-amber-300 bg-amber-50 p-2 text-left text-xs font-bold text-gray-800">${isBanned || data.baneadoPor || Object.keys(data.baneos || {}).length > 0 ? `<p>🚫 Tarjeta Roja: ${data.baneadoPor || Object.keys(data.baneos || {}).join(', ')}</p>` : ''}${data.revividoPor ? '<p>💚 Revivido: Sí</p>' : ''}</div>` : ''}
-                        ${isBanned ? `<div class="bg-red-800 text-white text-sm font-bold py-2 rounded-xl w-full">⛔ BANEADO${data.baneadoPor ? ` POR ${data.baneadoPor.toUpperCase()}` : ''}</div>` : (isInteractive ? `<button onclick="window.evolve('${data.id}', this)" class="cartoon-btn-sm bg-blue-100 border-blue-800 text-blue-800">🌟 Evolucionar</button><button onclick="window.kill('${data.id}')" class="cartoon-btn-sm bg-red-100 border-red-800 text-red-800">💀 Ha muerto</button>` : (isDead ? `<div class="bg-gray-800 text-white text-sm font-bold py-1 rounded-full w-full">DEBILITADO</div>` : ''))}
+                        ${isViewMode ? `<button onclick="window.openViewModal('${data.id}')" class="cartoon-btn-sm bg-yellow-100 border-yellow-800 text-yellow-800">🔍 Ver Info</button>` : ''}
+                        ${isInteractive ? `<button onclick="window.evolve('${data.id}', this)" class="cartoon-btn-sm bg-blue-100 border-blue-800 text-blue-800">🌟 Evolucionar</button><button onclick="window.kill('${data.id}')" class="cartoon-btn-sm bg-red-100 border-red-800 text-red-800">💀 Ha muerto</button>` : (isDead ? `<div class="bg-gray-800 text-white text-sm font-bold py-1 rounded-full w-full">${data.fallida ? 'RUTA FALLIDA' : 'DEBILITADO'}</div>` : (isBanned ? `<div class="bg-red-700 text-white text-xs font-bold py-1 rounded-full w-full">VETADO POR ${data.baneadoPor}</div>` : ''))}
                     </div>
                 </div>`).join('') + `</div>`;
         }
 
-        function renderGroupedList(list, containerId, isPublicView = false) {
+        function renderGroupedList(list, containerId) {
             const container = document.getElementById(containerId); container.innerHTML = '';
             if (list.length === 0) return container.innerHTML = `<div class="cartoon-panel p-6 text-center font-bold">Sin registros.</div>`;
             PLAYERS.forEach(player => {
@@ -1249,34 +1084,8 @@
                     const acts = globalActivos[player] || {};
                     const bannerClass = acts.banner || 'bg-gray-800';
                     const skinImg = acts.skin ? `<img src="https://play.pokemonshowdown.com/sprites/trainers/${getSkinSpriteId(acts.skin)}.png" class="h-10 pixel-art inline-block mr-2">` : '';
-                    container.innerHTML += `<div class="w-full mb-8"><div class="player-banner ${bannerClass} px-6 py-2 title-font text-3xl mb-4 ml-2 inline-flex items-center">${skinImg}${player}</div>${generateCardsHTML(playerMons, false, containerId === 'grid-cemetery', false, false, false, isPublicView)}</div>`;
+                    container.innerHTML += `<div class="w-full mb-8"><div class="player-banner ${bannerClass} px-6 py-2 title-font text-3xl mb-4 ml-2 inline-flex items-center">${skinImg}${player}</div>${generateCardsHTML(playerMons, false, containerId === 'grid-cemetery', false, containerId === 'grid-view-banned')}</div>`;
                 }
-            });
-        }
-
-        function renderRepelentes() {
-            const container = document.getElementById('grid-view-repelentes');
-            const records = [...globalRepelentes].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-            container.innerHTML = '';
-            if(records.length === 0) {
-                container.innerHTML = '<div class="cartoon-panel p-5 text-center font-bold text-gray-500">Todavía no hay usos registrados.</div>';
-                return;
-            }
-
-            records.forEach(record => {
-                const entry = document.createElement('div');
-                entry.className = 'cartoon-panel p-4 border-cyan-500 bg-cyan-50';
-                const author = document.createElement('p');
-                author.className = 'font-black text-cyan-900 mb-2';
-                author.textContent = `${record.jugador} · ${record.timestamp ? new Date(record.timestamp).toLocaleString('es-ES') : ''}`;
-                const route = document.createElement('p');
-                route.className = 'font-bold text-gray-800';
-                route.textContent = `📍 Ruta: ${record.ruta}`;
-                const encounter = document.createElement('p');
-                encounter.className = 'text-gray-700';
-                encounter.textContent = `Ignorado: ${record.pokemonIgnorado} · Capturado después: ${record.pokemonCapturado}`;
-                entry.append(author, route, encounter);
-                container.appendChild(entry);
             });
         }
 
