@@ -37,7 +37,7 @@
         }
         .cartoon-btn:active:not(:disabled) { box-shadow: 0px 0px 0px rgba(0,0,0,0.7); transform: translate(4px, 4px) scale(0.98); }
         .cartoon-btn:disabled { filter: grayscale(100%); cursor: not-allowed; }
-        
+
         .cartoon-btn-sm {
             background-color: #f8fafc;
             border: 3px solid #1e293b;
@@ -63,10 +63,10 @@
         .shiny-bg { background: linear-gradient(135deg, #fffde7 0%, #ffeb3b 100%); }
         .grayscale-dead { filter: grayscale(100%); opacity: 0.85; background-color: #e2e8f0; }
         .in-team-bg { border-color: #3b82f6 !important; box-shadow: 0 0 15px rgba(59, 130, 246, 0.6); }
-        
+
         .spin-slow { animation: spin 12s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
-        
+
         .shake-animation { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
         @keyframes shake {
             10%, 90% { transform: translate3d(-1px, 0, 0); }
@@ -76,7 +76,7 @@
         }
 
         .text-shadow-hard { text-shadow: 3px 3px 0px #000; }
-        
+
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.8); z-index: 100;
@@ -132,19 +132,19 @@
         <div class="grid grid-cols-2 gap-4 w-full">
             <button onclick="nav('profile')" class="cartoon-btn col-span-2 bg-blue-500 hover:bg-blue-400 text-white text-2xl py-4 flex items-center justify-center gap-3"><span>👤 Mi Perfil</span></button>
             <button onclick="nav('add')" class="cartoon-btn col-span-2 bg-green-500 hover:bg-green-400 text-white text-2xl py-4 flex items-center justify-center gap-3"><span>➕ Añadir Captura</span></button>
-            
+
             <button onclick="nav('view')" class="cartoon-btn bg-orange-400 hover:bg-orange-300 text-white text-xl py-3"><span>🎒 Mochila</span></button>
             <button onclick="nav('cemetery')" class="cartoon-btn bg-gray-700 hover:bg-gray-600 text-white text-xl py-3"><span>🪦 Cementerio</span></button>
             <button onclick="nav('ranking')" class="cartoon-btn bg-purple-500 hover:bg-purple-400 text-white text-xl py-3"><span>🏆 Ranking</span></button>
             <button onclick="nav('badges')" class="cartoon-btn bg-yellow-500 hover:bg-yellow-400 text-white text-xl py-3"><span>🏅 Medallas</span></button>
-            
+
             <button onclick="nav('gacha')" class="cartoon-btn col-span-2 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-400 hover:to-rose-400 text-white text-2xl py-4 flex items-center justify-center gap-3 border-pink-900">
                 <span>🎰 GACHA & RECOMPENSAS</span>
             </button>
             <button onclick="nav('collectibles')" class="cartoon-btn col-span-2 bg-teal-500 hover:bg-teal-400 text-white text-2xl py-4 flex items-center justify-center gap-3">
                 <span>🎒 MIS COLECCIONABLES</span>
             </button>
-            
+
             <button onclick="nav('rules')" class="cartoon-btn bg-cyan-600 hover:bg-cyan-500 text-white text-xl py-3 mt-4"><span>📜 Normas</span></button>
             <button onclick="nav('suggestions')" class="cartoon-btn bg-fuchsia-600 hover:bg-fuchsia-500 text-white text-xl py-3 mt-4"><span>💡 Sugerir</span></button>
         </div>
@@ -160,7 +160,7 @@
         <div class="cartoon-panel p-6 text-center bg-pink-50 border-pink-900 border-[6px]">
             <p class="text-pink-800 font-bold mb-2 text-xl">¡Prueba tu suerte! Coste: 50 🪙</p>
             <p class="text-sm font-bold text-gray-500 mb-6">Puede tocar: Skins, Banners o Consumibles Míticos.</p>
-            
+
             <div id="gacha-machine" class="w-48 h-48 mx-auto bg-gray-200 rounded-full border-8 border-pink-500 mb-6 flex items-center justify-center shadow-inner relative overflow-hidden transition-all">
                 <span class="text-6xl" id="gacha-icon">🎁</span>
             </div>
@@ -192,7 +192,7 @@
                     <li><span class="text-red-600">-100 🪙</span> Quitar victoria por error</li>
                     <li><span class="text-red-600">-20 🪙</span> Pokémon muerto (Cementerio)</li>
                 </ul>
-                
+
                 <p class="text-pink-600 text-lg border-b-2 border-pink-200 mt-4">📊 Probabilidades (Drop Rates)</p>
                 <ul class="space-y-2">
                     <li>🟡 <strong>3% Míticos (Consumibles 1% c/u):</strong>
@@ -343,7 +343,7 @@
             </section>
         </div>
     </div>
-    
+
     <!-- PANTALLA 3: MI PERFIL -->
     <div id="screen-profile" class="w-full max-w-5xl hidden flex-col mt-4">
         <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
@@ -481,7 +481,7 @@
         let selectedBanPlayer = '';
 
         const PLAYERS = ["Navas", "Varo", "Camilo", "Sergio", "Rubén", "Samu", "Víctor", "Mario"];
-        
+
         // --- 1. NUEVAS SKINS AMPLIADAS (110 ENTRENADORES) ---
         const G_SKINS = [
             'red', 'leaf', 'ethan', 'lyra', 'brendan', 'may', 'lucas', 'dawn', 'hilbert', 'hilda', 'nate', 'rosa', 'calem', 'serena',
@@ -508,7 +508,7 @@
             const normalizedId = (skinId || '').trim().toLowerCase();
             return G_SKIN_SPRITE_ALIASES[normalizedId] || normalizedId;
         }
-        
+
         const G_BANNERS = [
             'bg-gradient-to-r from-red-500 to-orange-500',
             'bg-gradient-to-r from-blue-500 to-cyan-500',
@@ -597,7 +597,7 @@
         function validarEntrada(input, category, fieldName) {
             const raw = input.trim(); if(!raw) return "";
             const normalizedInput = raw.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-            
+
             let coincidenciaExacta = null;
             for(let validWord of validLists[category]) {
                 if(validWord.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() === normalizedInput) {
@@ -668,7 +668,7 @@
             initializeApp(firebaseConfig); db = getDatabase();
             document.getElementById('connectionStatus').innerHTML = "✅ ONLINE"; 
             document.getElementById('connectionStatus').className = "text-xs font-bold px-4 py-2 bg-green-400 text-white border-4 border-[#1e293b] rounded-full shadow-[4px_4px_0_0_rgba(0,0,0,1)]";
-            
+
             onValue(ref(db, 'usuarios'), (snapshot) => {
                 const data = snapshot.val() || {};
                 globalData = []; globalBadges = {}; rankingData = {}; globalEco = {}; globalInv = {}; globalActivos = {}; globalRepelentes = [];
@@ -705,11 +705,11 @@
         window.pullGacha = function() {
             const p = getMyPlayer(); const currentPts = globalEco[p] || 0;
             if(currentPts < 50) return alert("❌ No tienes suficientes PawCoins. ¡Captura Pokémon o gana medallas!");
-            
+
             const btn = document.getElementById('btn-pull-gacha'); const icon = document.getElementById('gacha-icon');
             const resDiv = document.getElementById('gacha-result'); const machine = document.getElementById('gacha-machine');
             btn.disabled = true; resDiv.classList.add('hidden'); machine.classList.add('shake-animation'); icon.innerHTML = '🔮';
-            
+
             setTimeout(() => {
                 machine.classList.remove('shake-animation'); icon.innerHTML = '🎁';
                 const r = Math.random() * 100;
@@ -744,7 +744,7 @@
             if(tab === 'skins') document.getElementById('inv-' + tab).classList.add('grid');
             if(tab === 'consumables') document.getElementById('inv-' + tab).classList.add('grid');
             if(tab === 'banners') document.getElementById('inv-' + tab).classList.add('flex');
-            
+
             const p = getMyPlayer(); const inv = globalInv[p]; const acts = globalActivos[p];
             if(tab === 'skins') {
                 const sArr = inv.skins || [];
@@ -1000,7 +1000,7 @@
             const myTeam = myActive.filter(x => x.inTeam); const myBox = myActive.filter(x => !x.inTeam);
             const myDead = globalData.filter(x => x.jugador === p && x.estado === 'Muerto');
             const myBanned = globalData.filter(x => x.jugador === p && x.estado === 'Baneado');
-            
+
             document.getElementById('grid-profile').innerHTML = `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase">⚔️ Equipo Actual</h3></div>` + generateCardsHTML(myTeam, false, false, true, false, true) + `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">🌟 Mochila (PC)</h3></div>` + generateCardsHTML(myBox, true, false, false, false, true) + `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">🪦 Cementerio</h3></div>` + generateCardsHTML(myDead, false, true, false, false, true) + `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">⛔ Baneados</h3></div>` + generateCardsHTML(myBanned, false, false, false, true, true);
         };
 
