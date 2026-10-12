@@ -642,11 +642,11 @@
         function refreshCurrentScreen() {
             updateCoinDisplay();
             if(currentScreen === 'view') {
-                renderGroupedList(globalData.filter(c => c.estado === 'Vivo'), 'grid-view');
-                renderGroupedList(globalData.filter(c => c.estado === 'Baneado'), 'grid-view-banned');
+                renderGroupedList(globalData.filter(c => c.estado === 'Vivo'), 'grid-view', true);
+                renderGroupedList(globalData.filter(c => c.estado === 'Baneado'), 'grid-view-banned', true);
                 renderRepelentes();
             }
-            if(currentScreen === 'cemetery') renderGroupedList(globalData.filter(c => c.estado === 'Muerto'), 'grid-cemetery');
+            if(currentScreen === 'cemetery') renderGroupedList(globalData.filter(c => c.estado === 'Muerto'), 'grid-cemetery', true);
             if(currentScreen === 'ranking') renderRanking();
             if(currentScreen === 'profile') window.updateProfileView();
             if(currentScreen === 'teambuilder') window.updateTeambuilderView();
@@ -1023,9 +1023,38 @@
             if(db) update(ref(db, `usuarios/${p}/pokemon/vivos/${id}`), { inTeam: newState });
         }
 
+        function ensureCaptureEditFields() {
+            const form = document.getElementById('editPokeForm');
+            if(document.getElementById('edit-capture-mote-full')) return;
+            const grid = form.querySelector('.grid');
+            const fields = [
+                { id: 'edit-capture-mote-full', label: 'Mote', value: '' },
+                { id: 'edit-capture-route-full', label: 'Ruta/Zona', value: '' }
+            ];
+            fields.forEach(field => {
+                const wrapper = document.createElement('div');
+                const label = document.createElement('label');
+                label.htmlFor = field.id;
+                label.className = 'block font-bold text-sm';
+                label.textContent = field.label;
+                const input = document.createElement('input');
+                input.id = field.id;
+                input.type = 'text';
+                input.required = true;
+                input.maxLength = field.label === 'Mote' ? 40 : 80;
+                input.className = 'cartoon-input w-full p-2';
+                wrapper.append(label, input);
+                form.insertBefore(wrapper, grid);
+            });
+        }
+
         window.openEditModal = function(id) {
             const p = globalData.find(x => x.id === id); document.getElementById('edit-poke-id').value = id;
+            if(!p || p.jugador !== getMyPlayer()) return alert('Solo puedes editar Pokémon de tu perfil.');
+            ensureCaptureEditFields();
             document.getElementById('modal-pokemon-name').innerText = `"${p.mote}" (${p.especie})`;
+            document.getElementById('edit-capture-mote-full').value = p.mote || '';
+            document.getElementById('edit-capture-route-full').value = p.ruta || '';
             document.getElementById('edit-level').value = p.nivel || ''; document.getElementById('edit-gender').value = p.gender || '';
             document.getElementById('edit-item').value = p.item || '';
             document.getElementById('edit-ability').value = p.ability || '';
@@ -1038,10 +1067,12 @@
             document.getElementById('modal-edit-pokemon').style.display = 'flex';
         };
 
-        document.getElementById('editPokeForm').addEventListener('submit', (e) => {
-            e.preventDefault(); const id = document.getElementById('edit-poke-id').value;
+        document.getElementById('editPokeForm').addEventListener('submit', async (e) => {
+            e.preventDefault(); const id = document.getElementById('edit-poke-id').value; const player = getMyPlayer();
             try {
                 const updateData = {
+                    mote: document.getElementById('edit-capture-mote-full').value.trim(),
+                    ruta: document.getElementById('edit-capture-route-full').value.trim(),
                     nivel: document.getElementById('edit-level').value, gender: document.getElementById('edit-gender').value,
                     item: validarEntrada(document.getElementById('edit-item').value, 'items', 'Objeto'),
                     ability: validarEntrada(document.getElementById('edit-ability').value, 'abilities', 'Habilidad'),
@@ -1053,14 +1084,26 @@
                         validarEntrada(document.getElementById('edit-m4').value.replace(/^- /g, ''), 'moves', 'Ataque 4')
                     ]
                 };
-                if(db) update(ref(db, `usuarios/${getMyPlayer()}/pokemon/vivos/${id}`), updateData);
+                if(!player || !db || !updateData.mote || !updateData.ruta) return alert('El mote y la ruta son obligatorios.');
+                const result = await runTransaction(ref(db, `usuarios/${player}/pokemon`), (pokemon) => {
+                    if(!pokemon) return;
+                    for(const collection of ['vivos', 'muertos', 'baneados']) {
+                        if(pokemon[collection] && pokemon[collection][id]) {
+                            Object.assign(pokemon[collection][id], updateData);
+                            return pokemon;
+                        }
+                    }
+                    return;
+                }, { applyLocally: false });
+                if(!result.committed) return alert('No se pudo guardar: el Pokémon ya no está disponible en tu perfil.');
                 document.getElementById('modal-edit-pokemon').style.display = 'none';
+                writeLog(player, `Editó los datos de ${updateData.mote} (${updateData.ruta})`);
             } catch (error) { alert("❌ " + error.message); }
         });
 
         window.openViewModal = function(id, player, state) {
             const p = globalData.find(x => x.id === id && (!player || x.jugador === player) && (!state || x.estado === state));
-            if(!p) return;
+            if(!p || p.jugador !== getMyPlayer()) return;
             document.getElementById('view-mote').innerText = `"${p.mote}" ${p.shiny ? '✨' : ''}`; document.getElementById('view-especie-ruta').innerText = `${p.especie} -📍 ${p.ruta}`;
             document.getElementById('view-sprite').src = `https://play.pokemonshowdown.com/sprites/${p.shiny ? 'gen5-shiny' : 'gen5'}/${p.especie.toLowerCase().replace(/[^a-z0-9]/g, '')}.png`;
             document.getElementById('view-level').innerText = p.nivel || '??'; document.getElementById('view-gender').innerText = p.gender || '---';
@@ -1180,22 +1223,23 @@
             }
         };
 
-        function generateCardsHTML(list, isInteractive = false, isDead = false, isViewMode = false, isBanned = false, canEditCapture = false) {
+        function generateCardsHTML(list, isInteractive = false, isDead = false, isViewMode = false, isBanned = false, canEditCapture = false, isPublicView = false) {
             if (list.length === 0) return `<div class="col-span-full cartoon-panel p-6 text-center font-bold">No hay registros.</div>`;
             return `<div class="col-span-full grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">` + list.map(data => `
                 <div class="poke-card cartoon-panel flex flex-col items-center text-center relative border-4 ${isDead ? 'grayscale-dead' : (data.shiny ? 'shiny-bg' : 'bg-white')}" data-search="${data.ruta} ${data.especie} ${data.mote}">
                     <h3 class="font-bold text-lg uppercase truncate w-full mb-1">"${data.mote}" ${data.shiny ? '✨' : ''}</h3><p class="text-sm font-bold text-gray-500 mb-2">${data.especie}</p>
-                    <img onclick="window.openViewModal('${data.id}', '${data.jugador}', '${data.estado}')" src="https://play.pokemonshowdown.com/sprites/${data.shiny ? 'gen5-shiny' : 'gen5'}/${data.especie.toLowerCase().replace(/[^a-z0-9]/g, '')}.png" class="pixel-art scale-[1.5] h-16 mb-2 cursor-pointer" onerror="this.src='https://play.pokemonshowdown.com/sprites/itemicons/pokeball.png';">
+                    <img ${isPublicView ? '' : `onclick="window.openViewModal('${data.id}', '${data.jugador}', '${data.estado}')"`} src="https://play.pokemonshowdown.com/sprites/${data.shiny ? 'gen5-shiny' : 'gen5'}/${data.especie.toLowerCase().replace(/[^a-z0-9]/g, '')}.png" class="pixel-art scale-[1.5] h-16 mb-2 ${isPublicView ? '' : 'cursor-pointer'}" onerror="this.src='https://play.pokemonshowdown.com/sprites/itemicons/pokeball.png';">
                     <p class="text-[10px] text-gray-400 font-black tracking-wider uppercase mb-2">📍 ${data.ruta}</p>
                     <div class="flex flex-col gap-2 w-full mt-auto">
-                        <button onclick="window.openViewModal('${data.id}', '${data.jugador}', '${data.estado}')" class="cartoon-btn-sm bg-yellow-100 border-yellow-800 text-yellow-800">🔍 ${isViewMode ? 'Ver Info' : 'Ficha'}</button>
-                        ${canEditCapture ? `<button onclick="window.openCaptureEditModal('${data.id}')" class="cartoon-btn-sm profile-edit-btn bg-amber-100 border-amber-700 text-amber-900">✏️ Editar mote/ruta</button>` : ''}
+                        ${!isPublicView ? `<button onclick="window.openViewModal('${data.id}', '${data.jugador}', '${data.estado}')" class="cartoon-btn-sm bg-yellow-100 border-yellow-800 text-yellow-800">🔍 ${isViewMode ? 'Ver Info' : 'Ficha'}</button>` : ''}
+                        ${canEditCapture ? `<button onclick="window.openEditModal('${data.id}')" class="cartoon-btn-sm profile-edit-btn bg-amber-100 border-amber-700 text-amber-900">✏️ Editar Pokémon</button>` : ''}
+                        ${isPublicView && (isBanned || data.baneadoPor || Object.keys(data.baneos || {}).length > 0 || data.revividoPor) ? `<div class="w-full rounded-xl border-2 border-amber-300 bg-amber-50 p-2 text-left text-xs font-bold text-gray-800">${isBanned || data.baneadoPor || Object.keys(data.baneos || {}).length > 0 ? `<p>🚫 Tarjeta Roja: ${data.baneadoPor || Object.keys(data.baneos || {}).join(', ')}</p>` : ''}${data.revividoPor ? '<p>💚 Revivido: Sí</p>' : ''}</div>` : ''}
                         ${isBanned ? `<div class="bg-red-800 text-white text-sm font-bold py-2 rounded-xl w-full">⛔ BANEADO${data.baneadoPor ? ` POR ${data.baneadoPor.toUpperCase()}` : ''}</div>` : (isInteractive ? `<button onclick="window.evolve('${data.id}', this)" class="cartoon-btn-sm bg-blue-100 border-blue-800 text-blue-800">🌟 Evolucionar</button><button onclick="window.kill('${data.id}')" class="cartoon-btn-sm bg-red-100 border-red-800 text-red-800">💀 Ha muerto</button>` : (isDead ? `<div class="bg-gray-800 text-white text-sm font-bold py-1 rounded-full w-full">DEBILITADO</div>` : ''))}
                     </div>
                 </div>`).join('') + `</div>`;
         }
 
-        function renderGroupedList(list, containerId) {
+        function renderGroupedList(list, containerId, isPublicView = false) {
             const container = document.getElementById(containerId); container.innerHTML = '';
             if (list.length === 0) return container.innerHTML = `<div class="cartoon-panel p-6 text-center font-bold">Sin registros.</div>`;
             PLAYERS.forEach(player => {
@@ -1204,7 +1248,7 @@
                     const acts = globalActivos[player] || {};
                     const bannerClass = acts.banner || 'bg-gray-800';
                     const skinImg = acts.skin ? `<img src="https://play.pokemonshowdown.com/sprites/trainers/${getSkinSpriteId(acts.skin)}.png" class="h-10 pixel-art inline-block mr-2">` : '';
-                    container.innerHTML += `<div class="w-full mb-8"><div class="player-banner ${bannerClass} px-6 py-2 title-font text-3xl mb-4 ml-2 inline-flex items-center">${skinImg}${player}</div>${generateCardsHTML(playerMons, false, containerId === 'grid-cemetery', false)}</div>`;
+                    container.innerHTML += `<div class="w-full mb-8"><div class="player-banner ${bannerClass} px-6 py-2 title-font text-3xl mb-4 ml-2 inline-flex items-center">${skinImg}${player}</div>${generateCardsHTML(playerMons, false, containerId === 'grid-cemetery', false, false, false, isPublicView)}</div>`;
                 }
             });
         }
