@@ -352,7 +352,8 @@
     <div id="screen-view" class="w-full max-w-5xl hidden flex-col mt-4">
         <div class="flex justify-between items-center mb-4"><button onclick="nav('menu')" class="cartoon-btn-sm">⬅ VOLVER</button><h2 class="title-font text-4xl text-white text-shadow-hard uppercase">🎒 MOCHILA</h2></div>
         <input type="text" oninput="window.filterCards(this.value, 'grid-view')" placeholder="🔍 Buscar..." class="cartoon-input w-full p-4 text-xl shadow-lg mb-6"><div id="grid-view" class="w-full"></div>
-        <div class="w-full mb-4"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase">⛔ Baneados</h3><div id="grid-view-banned" class="w-full mt-3"></div></div>
+        <div class="w-full mb-4 mt-6"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase">⛔ Baneados</h3><div id="grid-view-banned" class="w-full mt-3"></div></div>
+        <div class="w-full mb-4 mt-6"><h3 class="title-font text-3xl text-gray-400 text-shadow-hard uppercase">💨 Capturas Perdidas</h3><div id="grid-view-lost" class="w-full mt-3"></div></div>
     </div>
     <div id="screen-cemetery" class="w-full max-w-5xl hidden flex-col mt-4">
         <div class="flex justify-between items-center mb-4"><button onclick="nav('menu')" class="cartoon-btn-sm">⬅ VOLVER</button><h2 class="title-font text-4xl text-white text-shadow-hard uppercase">🪦 CEMENTERIO</h2></div>
@@ -378,7 +379,12 @@
 
     <!-- MODALES Y DATALISTS POKÉMON -->
     <datalist id="all-moves-list"></datalist><datalist id="valid-abilities-list"></datalist><datalist id="valid-items-list"></datalist><datalist id="valid-natures-list"></datalist>
-    <div id="modal-edit-pokemon" class="modal-overlay"><div class="cartoon-panel modal-content bg-white relative"><button onclick="document.getElementById('modal-edit-pokemon').style.display='none'" class="absolute top-4 right-4 text-2xl font-black text-gray-500">X</button><h2 class="title-font text-3xl text-center text-blue-600 mb-2">⚙️ PERSONALIZAR</h2><p id="modal-pokemon-name" class="text-center font-bold text-gray-500 mb-4 uppercase"></p><form id="editPokeForm" class="space-y-3"><input type="hidden" id="edit-poke-id"><div class="grid grid-cols-1 md:grid-cols-2 gap-3"><div><label class="block font-bold text-sm">Nivel:</label><input type="number" id="edit-level" class="cartoon-input w-full p-2"></div><div><label class="block font-bold text-sm">Objeto (@):</label><input type="text" id="edit-item" list="valid-items-list" autocomplete="off" class="cartoon-input w-full p-2"></div><div><label class="block font-bold text-sm">Habilidad:</label><input type="text" id="edit-ability" list="valid-abilities-list" autocomplete="off" class="cartoon-input w-full p-2"></div><div><label class="block font-bold text-sm">Naturaleza:</label><input type="text" id="edit-nature" list="valid-natures-list" autocomplete="off" class="cartoon-input w-full p-2"></div><div class="md:col-span-2"><label class="block font-bold text-sm">Género:</label><select id="edit-gender" class="cartoon-input w-full p-2"><option value="">Sin Género</option><option value="(M)">Macho (M)</option><option value="(F)">Hembra (F)</option></select></div></div><div class="pt-2 border-t-2 border-gray-200 mt-2"><label class="block font-bold text-sm text-center mb-1 text-red-600">Ataques Randomlocke</label><div class="grid grid-cols-1 md:grid-cols-2 gap-2"><input type="text" id="edit-m1" list="all-moves-list" autocomplete="off" class="cartoon-input w-full p-2"><input type="text" id="edit-m2" list="all-moves-list" autocomplete="off" class="cartoon-input w-full p-2"><input type="text" id="edit-m3" list="all-moves-list" autocomplete="off" class="cartoon-input w-full p-2"><input type="text" id="edit-m4" list="all-moves-list" autocomplete="off" class="cartoon-input w-full p-2"></div></div><button type="submit" id="btn-save-edit" class="cartoon-btn w-full bg-blue-500 text-white text-xl py-3 mt-4">💾 GUARDAR</button></form></div></div>
+    <div id="modal-edit-pokemon" class="modal-overlay"><div class="cartoon-panel modal-content bg-white relative"><button onclick="document.getElementById('modal-edit-pokemon').style.display='none'" class="absolute top-4 right-4 text-2xl font-black text-gray-500">X</button><h2 class="title-font text-3xl text-center text-blue-600 mb-2">⚙️ PERSONALIZAR</h2><p id="modal-pokemon-name" class="text-center font-bold text-gray-500 mb-4 uppercase"></p><form id="editPokeForm" class="space-y-3"><input type="hidden" id="edit-poke-id"><div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <!-- NUEVOS CAMPOS: MOTE Y RUTA -->
+        <div><label class="block font-bold text-sm">Mote:</label><input type="text" id="edit-mote" class="cartoon-input w-full p-2"></div>
+        <div><label class="block font-bold text-sm">Ruta:</label><input type="text" id="edit-ruta" class="cartoon-input w-full p-2"></div>
+        <!-- CAMPOS EXISTENTES -->
+        <div><label class="block font-bold text-sm">Nivel:</label><input type="number" id="edit-level" class="cartoon-input w-full p-2"></div><div><label class="block font-bold text-sm">Objeto (@):</label><input type="text" id="edit-item" list="valid-items-list" autocomplete="off" class="cartoon-input w-full p-2"></div><div><label class="block font-bold text-sm">Habilidad:</label><input type="text" id="edit-ability" list="valid-abilities-list" autocomplete="off" class="cartoon-input w-full p-2"></div><div><label class="block font-bold text-sm">Naturaleza:</label><input type="text" id="edit-nature" list="valid-natures-list" autocomplete="off" class="cartoon-input w-full p-2"></div><div class="md:col-span-2"><label class="block font-bold text-sm">Género:</label><select id="edit-gender" class="cartoon-input w-full p-2"><option value="">Sin Género</option><option value="(M)">Macho (M)</option><option value="(F)">Hembra (F)</option></select></div></div><div class="pt-2 border-t-2 border-gray-200 mt-2"><label class="block font-bold text-sm text-center mb-1 text-red-600">Ataques Randomlocke</label><div class="grid grid-cols-1 md:grid-cols-2 gap-2"><input type="text" id="edit-m1" list="all-moves-list" autocomplete="off" class="cartoon-input w-full p-2"><input type="text" id="edit-m2" list="all-moves-list" autocomplete="off" class="cartoon-input w-full p-2"><input type="text" id="edit-m3" list="all-moves-list" autocomplete="off" class="cartoon-input w-full p-2"><input type="text" id="edit-m4" list="all-moves-list" autocomplete="off" class="cartoon-input w-full p-2"></div></div><button type="submit" id="btn-save-edit" class="cartoon-btn w-full bg-blue-500 text-white text-xl py-3 mt-4">💾 GUARDAR</button></form></div></div>
     <div id="modal-view-pokemon" class="modal-overlay"><div class="cartoon-panel modal-content bg-white relative text-center"><button onclick="document.getElementById('modal-view-pokemon').style.display='none'" class="absolute top-4 right-4 text-2xl font-black text-gray-500">X</button><h2 class="title-font text-3xl text-blue-600 mb-1" id="view-mote"></h2><p class="font-bold text-gray-500 mb-4" id="view-especie-ruta"></p><div class="flex justify-center mb-4"><img id="view-sprite" src="" class="pixel-art scale-[2] h-24"></div><div class="grid grid-cols-2 gap-2 text-left bg-gray-100 p-4 rounded-xl border-4 border-gray-200 font-bold text-sm"><p>Nivel: <span id="view-level" class="text-blue-600"></span></p><p>Género: <span id="view-gender" class="text-blue-600"></span></p><p>Objeto: <span id="view-item" class="text-blue-600"></span></p><p>Habilidad: <span id="view-ability" class="text-blue-600"></span></p><p class="col-span-2">Naturaleza: <span id="view-nature" class="text-blue-600"></span></p><div class="col-span-2 mt-2 pt-2 border-t-2 border-gray-300"><p class="mb-1 text-center">Ataques:</p><ul class="list-disc pl-5 text-red-600" id="view-moves"></ul></div></div></div></div>
     <textarea id="copy-clipboard-area" style="position: absolute; top: -9999px; left: -9999px;"></textarea>
 
@@ -573,6 +579,7 @@
             if(currentScreen === 'view') {
                 renderGroupedList(globalData.filter(c => c.estado === 'Vivo'), 'grid-view');
                 renderGroupedList(globalData.filter(c => c.estado === 'Baneado'), 'grid-view-banned');
+                renderGroupedList(globalData.filter(c => c.estado === 'Perdido'), 'grid-view-lost');
             }
             if(currentScreen === 'cemetery') renderGroupedList(globalData.filter(c => c.estado === 'Muerto'), 'grid-cemetery');
             if(currentScreen === 'ranking') renderRanking();
@@ -610,8 +617,15 @@
 
                     if (pData.pokemon) {
                         if (pData.pokemon.vivos) Object.keys(pData.pokemon.vivos).forEach(k => globalData.push({ id: k, jugador: player, estado: 'Vivo', ...pData.pokemon.vivos[k] }));
-                        if (pData.pokemon.muertos) Object.keys(pData.pokemon.muertos).forEach(k => globalData.push({ id: k, jugador: player, estado: 'Muerto', ...pData.pokemon.muertos[k] }));
+                        if (pData.pokemon.muertos) Object.keys(pData.pokemon.muertos).forEach(k => {
+                            if (pData.pokemon.muertos[k].fallida) {
+                                globalData.push({ id: k, jugador: player, estado: 'Perdido', ...pData.pokemon.muertos[k] });
+                            } else {
+                                globalData.push({ id: k, jugador: player, estado: 'Muerto', ...pData.pokemon.muertos[k] });
+                            }
+                        });
                         if (pData.pokemon.baneados) Object.keys(pData.pokemon.baneados).forEach(k => globalData.push({ id: k, jugador: player, estado: 'Baneado', ...pData.pokemon.baneados[k] }));
+                        if (pData.pokemon.perdidos) Object.keys(pData.pokemon.perdidos).forEach(k => globalData.push({ id: k, jugador: player, estado: 'Perdido', ...pData.pokemon.perdidos[k] }));
                     }
                 });
                 globalData.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
@@ -882,7 +896,7 @@
             } catch (error) { alert(`❌ "${speciesRaw}" no existe.`); } finally { btnSubmit.disabled = false; btnSubmit.innerHTML = "¡CAPTURADO!"; }
         });
 
-        // --- CAPTURA FALLIDA (HUYÓ O MURIÓ) ---
+        // --- CAPTURA FALLIDA ---
         window.registerFail = async function() {
             const routeRaw = document.getElementById('routeInput').value.trim(); 
             const speciesRaw = document.getElementById('speciesInput').value.trim();
@@ -905,12 +919,11 @@
                 if(!res.ok) throw new Error();
                 const specieFormatted = speciesRaw.charAt(0).toUpperCase() + speciesRaw.slice(1).toLowerCase();
                 
-                // Lo mandamos como Muerto con el tag "fallida"
-                const data = { ruta: routeRaw, especie: specieFormatted, mote: '❌ FALLIDA', shiny: false, inTeam: false, timestamp: Date.now(), fallida: true };
+                const data = { ruta: routeRaw, especie: specieFormatted, mote: '💨 PERDIDA', shiny: false, inTeam: false, timestamp: Date.now(), fallida: true };
 
                 if (db) { 
-                    push(ref(db, `usuarios/${p}/pokemon/muertos`), data); 
-                    writeLog(p, `Captura fallida (${specieFormatted}) en ${routeRaw}`); 
+                    push(ref(db, `usuarios/${p}/pokemon/perdidos`), data); 
+                    writeLog(p, `Captura perdida (${specieFormatted}) en ${routeRaw}`); 
                 }
                 alert("❌ Ruta quemada registrada. Más suerte la próxima vez."); 
                 document.getElementById('trackerForm').reset(); 
@@ -936,8 +949,10 @@
             const myTeam = myActive.filter(x => x.inTeam); const myBox = myActive.filter(x => !x.inTeam);
             const myDead = globalData.filter(x => x.jugador === p && x.estado === 'Muerto');
             const myBanned = globalData.filter(x => x.jugador === p && x.estado === 'Baneado');
+            const myLost = globalData.filter(x => x.jugador === p && x.estado === 'Perdido');
             
-            document.getElementById('grid-profile').innerHTML = `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase">⚔️ Equipo Actual</h3></div>` + generateCardsHTML(myTeam, false, false, true) + `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">🌟 Mochila (PC)</h3></div>` + generateCardsHTML(myBox, true) + `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">🪦 Cementerio</h3></div>` + generateCardsHTML(myDead, false, true) + `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">⛔ Baneados</h3></div>` + generateCardsHTML(myBanned, false, false, false, true);
+            // AHORA EL EQUIPO Y LA MOCHILA SON INTERACTIVOS EN MI PERFIL (PASAMOS "TRUE" EN EL SEGUNDO PARÁMETRO)
+            document.getElementById('grid-profile').innerHTML = `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase">⚔️ Equipo Actual</h3></div>` + generateCardsHTML(myTeam, true, false, false) + `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">🌟 Mochila (PC)</h3></div>` + generateCardsHTML(myBox, true, false, false) + `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">🪦 Cementerio</h3></div>` + generateCardsHTML(myDead, false, true) + `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">⛔ Baneados</h3></div>` + generateCardsHTML(myBanned, false, false, false, true) + `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-gray-400 text-shadow-hard uppercase mt-6">💨 Capturas Perdidas</h3></div>` + generateCardsHTML(myLost, false, false, false, false, true);
         };
 
         window.updateTeambuilderView = function() {
@@ -948,7 +963,7 @@
                     <h3 class="font-bold text-xl uppercase truncate w-full mb-1">"${data.mote}"</h3><p class="text-sm font-bold text-gray-500 mb-2">${data.especie}</p>
                     <img src="https://play.pokemonshowdown.com/sprites/${data.shiny ? 'gen5-shiny' : 'gen5'}/${data.especie.toLowerCase().replace(/[^a-z0-9]/g, '')}.png" class="pixel-art scale-[1.5] h-16 mb-4" onerror="this.src='https://play.pokemonshowdown.com/sprites/itemicons/pokeball.png';">
                     <div class="flex flex-col gap-2 w-full mt-auto">
-                        ${data.inTeam ? `<button onclick="window.openEditModal('${data.id}')" class="cartoon-btn-sm bg-indigo-100 border-indigo-600 text-indigo-700 mb-2">⚙️ Personalizar</button>` : ''}
+                        ${data.inTeam ? `<button onclick="window.openEditModal('${data.id}')" class="cartoon-btn-sm bg-indigo-100 border-indigo-800 text-indigo-800 mb-2">⚙️ Personalizar</button>` : ''}
                         <button onclick="window.toggleTeam('${data.id}', ${!data.inTeam})" class="cartoon-btn-sm ${data.inTeam ? 'bg-red-100 border-red-600 text-red-600' : 'bg-green-100 border-green-600 text-green-700'}">${data.inTeam ? '❌ Quitar' : '➕ Añadir'}</button>
                     </div></div>`).join('');
         };
@@ -959,9 +974,16 @@
             if(db) update(ref(db, `usuarios/${p}/pokemon/vivos/${id}`), { inTeam: newState });
         }
 
+        // --- SISTEMA DE PERSONALIZACIÓN INTEGRADO ---
         window.openEditModal = function(id) {
             const p = globalData.find(x => x.id === id); document.getElementById('edit-poke-id').value = id;
             document.getElementById('modal-pokemon-name').innerText = `"${p.mote}" (${p.especie})`;
+            
+            // Nuevos campos
+            document.getElementById('edit-mote').value = p.mote || '';
+            document.getElementById('edit-ruta').value = p.ruta || '';
+            
+            // Campos existentes
             document.getElementById('edit-level').value = p.nivel || ''; document.getElementById('edit-gender').value = p.gender || '';
             document.getElementById('edit-item').value = p.item || '';
             document.getElementById('edit-ability').value = p.ability || '';
@@ -977,7 +999,15 @@
         document.getElementById('editPokeForm').addEventListener('submit', (e) => {
             e.preventDefault(); const id = document.getElementById('edit-poke-id').value;
             try {
+                const moteValue = document.getElementById('edit-mote').value.trim();
+                const rutaValue = document.getElementById('edit-ruta').value.trim();
+                
+                if(!moteValue) throw new Error("El mote no puede estar vacío.");
+                if(!rutaValue) throw new Error("La ruta no puede estar vacía.");
+
                 const updateData = {
+                    mote: moteValue,
+                    ruta: rutaValue,
                     nivel: document.getElementById('edit-level').value, gender: document.getElementById('edit-gender').value,
                     item: validarEntrada(document.getElementById('edit-item').value, 'items', 'Objeto'),
                     ability: validarEntrada(document.getElementById('edit-ability').value, 'abilities', 'Habilidad'),
@@ -1061,16 +1091,17 @@
             }
         };
 
-        function generateCardsHTML(list, isInteractive = false, isDead = false, isViewMode = false, isBanned = false) {
+        // AHORA EL BOTÓN DE PERSONALIZAR APARECE CUANDO "ISINTERACTIVE" ES TRUE
+        function generateCardsHTML(list, isInteractive = false, isDead = false, isViewMode = false, isBanned = false, isLost = false) {
             if (list.length === 0) return `<div class="col-span-full cartoon-panel p-6 text-center font-bold">No hay registros.</div>`;
             return `<div class="col-span-full grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">` + list.map(data => `
-                <div class="poke-card cartoon-panel flex flex-col items-center text-center relative border-4 ${isDead ? 'grayscale-dead' : (isBanned ? 'bg-red-50 border-red-400' : (data.shiny ? 'shiny-bg' : 'bg-white'))}" data-search="${data.ruta} ${data.especie} ${data.mote}">
+                <div class="poke-card cartoon-panel flex flex-col items-center text-center relative border-4 ${isLost ? 'bg-gray-200 border-gray-400 opacity-80 grayscale' : (isDead ? 'grayscale-dead' : (isBanned ? 'bg-red-50 border-red-400' : (data.shiny ? 'shiny-bg' : 'bg-white')))}" data-search="${data.ruta} ${data.especie} ${data.mote}">
                     <h3 class="font-bold text-lg uppercase truncate w-full mb-1">"${data.mote}" ${data.shiny ? '✨' : ''}</h3><p class="text-sm font-bold text-gray-500 mb-2">${data.especie}</p>
                     <img src="https://play.pokemonshowdown.com/sprites/${data.shiny ? 'gen5-shiny' : 'gen5'}/${data.especie.toLowerCase().replace(/[^a-z0-9]/g, '')}.png" class="pixel-art scale-[1.5] h-16 mb-2" onerror="this.src='https://play.pokemonshowdown.com/sprites/itemicons/pokeball.png';">
                     <p class="text-[10px] text-gray-400 font-black tracking-wider uppercase mb-2">📍 ${data.ruta}</p>
                     <div class="flex flex-col gap-2 w-full mt-auto">
                         ${isViewMode ? `<button onclick="window.openViewModal('${data.id}')" class="cartoon-btn-sm bg-yellow-100 border-yellow-800 text-yellow-800">🔍 Ver Info</button>` : ''}
-                        ${isInteractive ? `<button onclick="window.evolve('${data.id}', this)" class="cartoon-btn-sm bg-blue-100 border-blue-800 text-blue-800">🌟 Evolucionar</button><button onclick="window.kill('${data.id}')" class="cartoon-btn-sm bg-red-100 border-red-800 text-red-800">💀 Ha muerto</button>` : (isDead ? `<div class="bg-gray-800 text-white text-sm font-bold py-1 rounded-full w-full">${data.fallida ? 'RUTA FALLIDA' : 'DEBILITADO'}</div>` : (isBanned ? `<div class="bg-red-700 text-white text-xs font-bold py-1 rounded-full w-full">VETADO POR ${data.baneadoPor}</div>` : ''))}
+                        ${isInteractive ? `<button onclick="window.openEditModal('${data.id}')" class="cartoon-btn-sm bg-indigo-100 border-indigo-800 text-indigo-800">⚙️ Personalizar</button><button onclick="window.evolve('${data.id}', this)" class="cartoon-btn-sm bg-blue-100 border-blue-800 text-blue-800">🌟 Evolucionar</button><button onclick="window.kill('${data.id}')" class="cartoon-btn-sm bg-red-100 border-red-800 text-red-800">💀 Ha muerto</button>` : (isLost ? `<div class="bg-gray-500 text-white text-xs font-bold py-1 rounded-full w-full">RUTA PERDIDA</div>` : (isDead ? `<div class="bg-gray-800 text-white text-sm font-bold py-1 rounded-full w-full">DEBILITADO</div>` : (isBanned ? `<div class="bg-red-700 text-white text-xs font-bold py-1 rounded-full w-full">VETADO POR ${data.baneadoPor}</div>` : '')))}
                     </div>
                 </div>`).join('') + `</div>`;
         }
@@ -1084,7 +1115,7 @@
                     const acts = globalActivos[player] || {};
                     const bannerClass = acts.banner || 'bg-gray-800';
                     const skinImg = acts.skin ? `<img src="https://play.pokemonshowdown.com/sprites/trainers/${getSkinSpriteId(acts.skin)}.png" class="h-10 pixel-art inline-block mr-2">` : '';
-                    container.innerHTML += `<div class="w-full mb-8"><div class="player-banner ${bannerClass} px-6 py-2 title-font text-3xl mb-4 ml-2 inline-flex items-center">${skinImg}${player}</div>${generateCardsHTML(playerMons, false, containerId === 'grid-cemetery', false, containerId === 'grid-view-banned')}</div>`;
+                    container.innerHTML += `<div class="w-full mb-8"><div class="player-banner ${bannerClass} px-6 py-2 title-font text-3xl mb-4 ml-2 inline-flex items-center">${skinImg}${player}</div>${generateCardsHTML(playerMons, false, containerId === 'grid-cemetery', false, containerId === 'grid-view-banned', containerId === 'grid-view-lost')}</div>`;
                 }
             });
         }
