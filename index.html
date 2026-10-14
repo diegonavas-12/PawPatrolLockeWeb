@@ -7,8 +7,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Chewy&family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { 
-            font-family: 'Fredoka', sans-serif; 
+        body {
+            font-family: 'Fredoka', sans-serif;
             background: url('fondo.jpg') no-repeat center center fixed;
             background-size: cover;
             overflow-x: hidden;
@@ -382,6 +382,10 @@
                 <img id="profile-my-skin" src="" class="h-16 pixel-art hidden">
                 <span id="locked-player-name"></span>
             </div>
+        </div>
+        <div id="profile-failed-routes" class="cartoon-panel p-3 mb-4 bg-gray-100 border-gray-300 hidden">
+            <h3 class="font-bold text-sm text-gray-600 mb-2">❌ Rutas de captura fallida:</h3>
+            <div id="failed-routes-list" class="flex flex-wrap gap-2"></div>
         </div>
         <input type="text" id="search-profile" oninput="window.filterCards(this.value, 'grid-profile')" placeholder="🔍 Buscar pokemon..." class="cartoon-input w-full p-4 text-xl shadow-lg mb-6">
         <div id="grid-profile"></div>
@@ -1116,6 +1120,9 @@
             const routeRaw = document.getElementById('failedRouteInput').value.trim();
             const p = getMyPlayer();
 
+            if (!p) return alert("❌ Debes vincular tu dispositivo primero.");
+            if (!routeRaw) return alert("❌ Debes introducir una ruta/zona.");
+
             const playerFailedRoutes = globalFailedRoutes[p] || [];
             if (playerFailedRoutes.some(r => r.toLowerCase() === routeRaw.toLowerCase())) {
                 return alert(`🚫 Ya has registrado "${routeRaw}" anteriormente.`);
@@ -1129,14 +1136,15 @@
             try {
                 if (db) {
                     const newFailedRoutes = [...playerFailedRoutes, routeRaw];
-                    update(ref(db, `usuarios/${p}/rutasFallidas`), newFailedRoutes);
+                    await set(ref(db, `usuarios/${p}/rutasFallidas`), newFailedRoutes);
                     writeLog(p, `Captura fallida registrada en ${routeRaw}`);
                 }
                 alert("❌ Captura fallida registrada. Esta ruta queda bloqueada para futuras capturas.");
                 document.getElementById('failedCaptureForm').reset();
                 window.nav('menu');
             } catch (error) {
-                alert("❌ Error al registrar la captura fallida.");
+                console.error("Error registrando captura fallida:", error);
+                alert("❌ Error al registrar la captura fallida: " + error.message);
             } finally {
                 btnSubmit.disabled = false;
                 btnSubmit.innerHTML = "❌ REGISTRAR FALLIDA";
@@ -1156,7 +1164,7 @@
             }
 
             const alreadyCaptured = globalData.find(x => x.jugador === p && x.ruta.toLowerCase() === routeRaw.toLowerCase());
-            if (alreadyCaptured && !isShiny) return alert(`🚫 Ya tienes un registro en "${routeRaw}".`);
+            if (alreadyCaptured && !isShiny) return alert(`🚫 Ya tienes un registro en "${routeRaw}".\n✨ ¡Solo puedes capturar shiny en rutas ya usadas!`);
 
             btnSubmit.disabled = true; btnSubmit.innerHTML = "🔍 Pokédex...";
 
@@ -1173,12 +1181,22 @@
         // --- VISTAS PERFIL Y EQUIPO ---
         window.updateProfileView = function() {
             const p = getMyPlayer();
-            if (!p) { document.getElementById('profile-link-area').classList.remove('hidden'); document.getElementById('profile-locked-area').classList.add('hidden'); document.getElementById('btn-formar-equipo').classList.add('hidden'); document.getElementById('grid-profile').innerHTML = ''; return; } 
+            if (!p) { document.getElementById('profile-link-area').classList.remove('hidden'); document.getElementById('profile-locked-area').classList.add('hidden'); document.getElementById('btn-formar-equipo').classList.add('hidden'); document.getElementById('grid-profile').innerHTML = ''; document.getElementById('profile-failed-routes').classList.add('hidden'); return; }
             else { document.getElementById('profile-link-area').classList.add('hidden'); document.getElementById('profile-locked-area').classList.remove('hidden'); document.getElementById('btn-formar-equipo').classList.remove('hidden'); document.getElementById('locked-player-name').innerText = p; }
 
             const acts = globalActivos[p] || {}; const bannerEl = document.getElementById('profile-my-banner'); const skinEl = document.getElementById('profile-my-skin');
             bannerEl.className = `mt-4 mx-auto w-fit px-8 py-3 player-banner flex items-center justify-center gap-4 text-2xl md:text-4xl title-font uppercase ${acts.banner || 'bg-gray-800'}`;
             if(acts.skin) { skinEl.src = `https://play.pokemonshowdown.com/sprites/trainers/${getSkinSpriteId(acts.skin)}.png`; skinEl.classList.remove('hidden'); } else skinEl.classList.add('hidden');
+
+            const playerFailedRoutes = globalFailedRoutes[p] || [];
+            const failedRoutesEl = document.getElementById('profile-failed-routes');
+            const failedRoutesList = document.getElementById('failed-routes-list');
+            if (playerFailedRoutes.length > 0) {
+                failedRoutesEl.classList.remove('hidden');
+                failedRoutesList.innerHTML = playerFailedRoutes.map(route => `<span class="bg-gray-200 text-gray-600 text-xs px-2 py-1 rounded">${route}</span>`).join('');
+            } else {
+                failedRoutesEl.classList.add('hidden');
+            }
 
             const myActive = globalData.filter(x => x.jugador === p && x.estado === 'Vivo');
             const myTeam = myActive.filter(x => x.inTeam); const myBox = myActive.filter(x => !x.inTeam);
@@ -1398,12 +1416,11 @@
         window.deevolve = async function(id) {
             const p = globalData.find(x => x.id === id);
             if(!p || p.jugador !== getMyPlayer()) return alert('Solo puedes desevolucionar tus Pokémon.');
-            if(!confirm(`🔄 ¿Seguro que quieres desevolucionar a "${p.mote}" (${p.especie})?\nEsto solo funcionará si hay una evolución previa conocida.`)) return;
 
             try {
                 const sName = p.especie.toLowerCase().replace(/[^a-z0-9]/g, '');
                 const res = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${sName}`);
-                if (!res.ok) throw new Error();
+                if (!res.ok) return;
                 const dataS = await res.json();
                 const resE = await fetch(dataS.evolution_chain.url);
                 const dataE = await resE.json();
@@ -1431,35 +1448,19 @@
                     }
                 }
 
-                if (parentNode) {
-                    prevSp = parentNode.species.name;
-                } else {
-                    const manual = prompt("⚠️ No se encontró evolución previa en la cadena.\nEscribe a mano el nombre de la forma anterior:");
-                    if (manual && manual.trim() !== "") {
-                        prevSp = manual.trim().toLowerCase();
-                    } else {
-                        return alert("❌ Cancelado.");
-                    }
-                }
+                if (!parentNode) return;
+
+                prevSp = parentNode.species.name;
 
                 if (prevSp && prevSp.trim() !== "") {
                     const form = prevSp.charAt(0).toUpperCase() + prevSp.slice(1).toLowerCase();
                     if(db) {
                         await update(ref(db, `usuarios/${getMyPlayer()}/pokemon/vivos/${id}`), { especie: form });
                         writeLog(getMyPlayer(), `El Pokémon ${p.mote} fue desevolucionado a ${form} (BBC)`);
-                        alert(`✅ ${p.mote} ha vuelto a ser ${form}.`);
                     }
                 }
             } catch (error) {
-                const manual = prompt("⚠️ Error de red al buscar la evolución previa.\nEscribe a mano el nombre de la forma anterior:");
-                if (manual && manual.trim() !== "") {
-                    const form = manual.trim().charAt(0).toUpperCase() + manual.trim().slice(1).toLowerCase();
-                    if(db) {
-                        await update(ref(db, `usuarios/${getMyPlayer()}/pokemon/vivos/${id}`), { especie: form });
-                        writeLog(getMyPlayer(), `El Pokémon ${p.mote} fue desevolucionado manualmente a ${form} (BBC)`);
-                        alert(`✅ ${p.mote} ha vuelto a ser ${form}.`);
-                    }
-                }
+                return;
             }
         };
 
@@ -1552,6 +1553,17 @@
                 return `<tr class="hover:bg-gray-50 transition"><td class="p-3 title-font text-2xl">${medal}</td><td class="p-3 text-left font-black uppercase text-gray-800">${bannerHtml}</td><td class="p-3"><div class="flex items-center justify-center gap-2"><button onclick="window.changeRank('${p.name}', 'victorias', -1)" class="bg-gray-200 px-2 rounded font-bold hover:bg-gray-300">-</button><span class="text-green-600 text-2xl font-black">${p.victorias}</span><button onclick="window.changeRank('${p.name}', 'victorias', 1)" class="bg-green-200 text-green-800 px-2 rounded font-bold hover:bg-green-300">+</button></div></td><td class="p-3"><div class="flex items-center justify-center gap-2"><button onclick="window.changeRank('${p.name}', 'derrotas', -1)" class="bg-gray-200 px-2 rounded font-bold hover:bg-gray-300">-</button><span class="text-red-600 text-2xl font-black">${p.derrotas}</span><button onclick="window.changeRank('${p.name}', 'derrotas', 1)" class="bg-red-200 text-red-800 px-2 rounded font-bold hover:bg-red-300">+</button></div></td></tr>`;
             }).join('');
         }
+
+        // Cambio de fondo automático
+        const backgrounds = ['fondo.jpg', 'fondo2.jpg', 'fondo3.jpg',  'fondo6.jpg', 'fondo7.jpg', 'fondo8.jpg'];
+        let currentBgIndex = 0;
+
+        function changeBackground() {
+            currentBgIndex = (currentBgIndex + 1) % backgrounds.length;
+            document.body.style.backgroundImage = `url('${backgrounds[currentBgIndex]}')`;
+        }
+
+        setInterval(changeBackground, 5000);
     </script>
 </body>
 </html>
