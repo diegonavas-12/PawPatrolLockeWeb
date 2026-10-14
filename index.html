@@ -131,7 +131,7 @@
         <h1 class="title-font text-5xl text-center mb-6 text-yellow-400 text-shadow-hard" style="-webkit-text-stroke: 2px #000;">MENÚ PRINCIPAL</h1>
         <div class="grid grid-cols-2 gap-4 w-full">
             <button onclick="nav('profile')" class="cartoon-btn col-span-2 bg-blue-500 hover:bg-blue-400 text-white text-2xl py-4 flex items-center justify-center gap-3"><span>👤 Mi Perfil</span></button>
-            <button onclick="nav('add')" class="cartoon-btn col-span-2 bg-green-500 hover:bg-green-400 text-white text-2xl py-4 flex items-center justify-center gap-3"><span>➕ Añadir Captura</span></button>
+            <button onclick="nav('capture-select')" class="cartoon-btn col-span-2 bg-green-500 hover:bg-green-400 text-white text-2xl py-4 flex items-center justify-center gap-3"><span>➕ Añadir Captura</span></button>
 
             <button onclick="nav('view')" class="cartoon-btn bg-orange-400 hover:bg-orange-300 text-white text-xl py-3"><span>🎒 Mochila</span></button>
             <button onclick="nav('cemetery')" class="cartoon-btn bg-gray-700 hover:bg-gray-600 text-white text-xl py-3"><span>🪦 Cementerio</span></button>
@@ -165,9 +165,14 @@
                 <span class="text-6xl" id="gacha-icon">🎁</span>
             </div>
 
-            <button id="btn-pull-gacha" onclick="window.pullGacha()" class="cartoon-btn w-full md:w-2/3 mx-auto bg-yellow-400 hover:bg-yellow-300 text-yellow-900 border-yellow-700 text-3xl py-4 shadow-xl">
+            <button id="btn-pull-gacha" onclick="window.pullGacha()" class="cartoon-btn w-full md:w-2/3 mx-auto bg-yellow-400 hover:bg-yellow-300 text-yellow-900 border-yellow-700 text-3xl py-4 shadow-xl mb-4">
                 TIRAR X1 (50 🪙)
             </button>
+
+            <button id="btn-daily-gacha" onclick="window.pullDailyGacha()" class="cartoon-btn w-full md:w-2/3 mx-auto bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-white border-blue-800 text-2xl py-3 shadow-xl">
+                🎁 TIRADA DIARIA GRATIS (Skins/Banners)
+            </button>
+            <p id="daily-timer" class="text-sm font-bold text-gray-500 mt-2"></p>
 
             <div id="gacha-result" class="mt-6 hidden bg-white p-4 rounded-xl border-4 border-dashed border-pink-400">
                 <h3 class="title-font text-3xl text-pink-600 mb-2">¡TE HA TOCADO!</h3>
@@ -191,6 +196,14 @@
                     <li><span class="text-green-600">+100 🪙</span> Victoria en Torneo</li>
                     <li><span class="text-red-600">-100 🪙</span> Quitar victoria por error</li>
                     <li><span class="text-red-600">-20 🪙</span> Pokémon muerto (Cementerio)</li>
+                </ul>
+
+                <p class="text-cyan-600 text-lg border-b-2 border-cyan-200 mt-4">🎁 Tirada Diaria Gratuita</p>
+                <ul class="list-disc pl-5">
+                    <li><strong>1 vez al día</strong> por jugador</li>
+                    <li><strong>50% Skins</strong> - Cosméticos de entrenador</li>
+                    <li><strong>50% Banners</strong> - Fondos de color para tu nombre</li>
+                    <li>Si sale repetido, recibes +10 🪙 de compensación</li>
                 </ul>
 
                 <p class="text-pink-600 text-lg border-b-2 border-pink-200 mt-4">📊 Probabilidades (Drop Rates)</p>
@@ -298,10 +311,11 @@
             <section class="mt-8">
                 <h3 class="font-bold text-2xl mb-4 border-b-4 border-gray-800 pb-2 text-amber-700">3. Economía y Gacha 🎰</h3>
                 <ul class="list-disc pl-6 space-y-2 font-bold text-gray-700">
-                    <li><strong>Tirada:</strong> 50 🪙 PawCoins.</li>
+                    <li><strong>Tirada normal:</strong> 50 🪙 PawCoins.</li>
+                    <li><strong>Tirada diaria gratuita:</strong> 1 vez al día, solo da Skins (50%) o Banners (50%). ¡Gratis!</li>
                     <li><strong>Recompensas:</strong> captura nueva (+10 🪙), medalla (+50 🪙), victoria añadida al Ranking (+100 🪙).</li>
                     <li><strong>Penalizaciones:</strong> Pokémon al Cementerio (-20 🪙), quitar una victoria añadida por error (-100 🪙).</li>
-                    <li><strong>Drop rates:</strong> 3% Objetos Míticos de un uso (Revivir Máximo 1%, Tarjeta Roja 1%, Repelente Máximo 1%); 27% Skins; 30% Banners; 40% Pepita (+25 🪙).</li>
+                    <li><strong>Drop rates (tirada normal):</strong> 3% Objetos Míticos de un uso (Revivir Máximo 1%, Tarjeta Roja 1%, Repelente Máximo 1%); 27% Skins; 30% Banners; 40% Pepita (+25 🪙).</li>
                     <li>Si sale una Skin o un Banner repetido, se reciben +10 🪙 de compensación.</li>
                 </ul>
             </section>
@@ -386,9 +400,40 @@
         </div>
     </div>
 
+    <!-- PANTALLA 3.5: SELECCIÓN CAPTURA -->
+    <div id="screen-capture-select" class="w-full max-w-md hidden flex-col mt-4">
+        <button onclick="nav('menu')" class="cartoon-btn-sm mb-4 self-start">⬅ VOLVER</button>
+        <div class="cartoon-panel p-6 text-center">
+            <h2 class="title-font text-3xl mb-6 text-gray-800">¿RESULTADO DE LA CAPTURA?</h2>
+            <div class="grid grid-cols-1 gap-4">
+                <button onclick="nav('add')" class="cartoon-btn bg-green-500 hover:bg-green-400 text-white text-2xl py-6 flex items-center justify-center gap-3">
+                    <span>✅</span> <span>CAPTURA CONSEGUIDA</span>
+                </button>
+                <button onclick="nav('capture-failed')" class="cartoon-btn bg-red-500 hover:bg-red-400 text-white text-2xl py-6 flex items-center justify-center gap-3">
+                    <span>❌</span> <span>CAPTURA FALLIDA</span>
+                </button>
+            </div>
+            <p class="text-sm text-gray-500 font-bold mt-4">Solo puedes registrar una captura por ruta/zona</p>
+        </div>
+    </div>
+
+    <!-- PANTALLA 3.6: CAPTURA FALLIDA -->
+    <div id="screen-capture-failed" class="w-full max-w-md hidden flex-col mt-4">
+        <button onclick="nav('capture-select')" class="cartoon-btn-sm mb-4 self-start">⬅ VOLVER</button>
+        <div class="cartoon-panel p-6">
+            <h2 class="title-font text-3xl mb-6 text-center text-red-600">CAPTURA FALLIDA</h2>
+            <form id="failedCaptureForm" class="space-y-5">
+                <div><label class="block font-bold ml-2 mb-1 text-gray-700">JUGADOR:</label><input type="text" id="failedPlayerInput" disabled class="cartoon-input w-full p-3 text-lg"></div>
+                <div><label class="block font-bold ml-2 mb-1 text-gray-700">RUTA/ZONA:</label><input type="text" id="failedRouteInput" required placeholder="Ej: Ruta 19..." class="cartoon-input w-full p-3 text-lg"></div>
+                <p class="text-xs text-center text-gray-500 font-bold">Esta ruta quedará registrada como fallida y no podrás capturar aquí en el futuro.</p>
+                <button type="submit" id="btn-submit-failed" class="cartoon-btn w-full bg-red-500 hover:bg-red-400 text-white text-2xl py-4 mt-2">❌ REGISTRAR FALLIDA</button>
+            </form>
+        </div>
+    </div>
+
     <!-- PANTALLA 4: INTRODUCIR CAPTURA -->
     <div id="screen-add" class="w-full max-w-md hidden flex-col mt-4">
-        <button onclick="nav('menu')" class="cartoon-btn-sm mb-4 self-start">⬅ VOLVER</button>
+        <button onclick="nav('capture-select')" class="cartoon-btn-sm mb-4 self-start">⬅ VOLVER</button>
         <div class="cartoon-panel p-6">
             <h2 class="title-font text-3xl mb-6 text-center text-green-600">NUEVA CAPTURA</h2>
             <form id="trackerForm" class="space-y-5">
@@ -476,7 +521,7 @@
 
         let db;
         let globalData = []; let globalBadges = {}; let rankingData = {}; let globalRepelentes = [];
-        let globalEco = {}; let globalInv = {}; let globalActivos = {};
+        let globalEco = {}; let globalInv = {}; let globalActivos = {}; let globalFailedRoutes = {};
         let currentScreen = 'landing';
         let selectedBanPlayer = '';
 
@@ -628,7 +673,7 @@
         window.adminUnlock = function() { if(prompt("🔒 Contraseña:")==="adminlocke") { localStorage.removeItem('pawPatrolUser'); alert("🔓 Desvinculado."); window.updateProfileView(); updateCoinDisplay(); } }
 
         window.nav = function(targetScreen) {
-            if (['add', 'teambuilder', 'badges', 'gacha', 'collectibles', 'revive', 'ban-select', 'repel'].includes(targetScreen) && !getMyPlayer()) {
+            if (['add', 'capture-select', 'capture-failed', 'teambuilder', 'badges', 'gacha', 'collectibles', 'revive', 'ban-select', 'repel'].includes(targetScreen) && !getMyPlayer()) {
                 alert("⚠️ Primero debes ir a 'Mi Perfil' y vincular este dispositivo."); return window.nav('profile');
             }
             if(targetScreen === 'ban-select') selectedBanPlayer = '';
@@ -637,6 +682,7 @@
             const target = document.getElementById('screen-' + targetScreen);
             if(target) { target.classList.remove('hidden'); target.classList.add('flex'); }
             if(targetScreen === 'add') document.getElementById('playerInput').value = getMyPlayer();
+            if(targetScreen === 'capture-failed') document.getElementById('failedPlayerInput').value = getMyPlayer();
             refreshCurrentScreen();
         };
 
@@ -655,6 +701,14 @@
             if(currentScreen === 'collectibles') window.switchInvTab('skins');
             if(currentScreen === 'revive') window.updateReviveSelectionView();
             if(currentScreen === 'ban-select') window.updateBanSelectionView();
+            if(currentScreen === 'gacha') updateDailyTimer();
+            if(currentScreen === 'add') {
+                const p = getMyPlayer();
+                const playerFailedRoutes = globalFailedRoutes[p] || [];
+                if(playerFailedRoutes.length > 0) {
+                    document.getElementById('routeInput').placeholder = `Rutas ya usadas: ${playerFailedRoutes.join(', ')}`;
+                }
+            }
         }
 
         function updateCoinDisplay() {
@@ -671,7 +725,7 @@
 
             onValue(ref(db, 'usuarios'), (snapshot) => {
                 const data = snapshot.val() || {};
-                globalData = []; globalBadges = {}; rankingData = {}; globalEco = {}; globalInv = {}; globalActivos = {}; globalRepelentes = [];
+                globalData = []; globalBadges = {}; rankingData = {}; globalEco = {}; globalInv = {}; globalActivos = {}; globalRepelentes = []; globalFailedRoutes = {};
 
                 PLAYERS.forEach(player => {
                     const pData = data[player] || {};
@@ -680,6 +734,7 @@
                     globalEco[player] = pData.economia?.puntos || 0;
                     globalInv[player] = pData.inventario || { skins: [], banners: [], consumibles: {} };
                     globalActivos[player] = pData.activos || { skin: '', banner: 'bg-gray-800' };
+                    globalFailedRoutes[player] = pData.rutasFallidas || [];
 
                     if (pData.pokemon) {
                         if (pData.pokemon.vivos) Object.keys(pData.pokemon.vivos).forEach(k => globalData.push({ id: k, jugador: player, estado: 'Vivo', ...pData.pokemon.vivos[k] }));
@@ -719,13 +774,13 @@
                 else if (r < 2) { type = 'consumible'; id = 'ban'; name = G_CONSUMABLES[id].name; desc = "Mítico (1%). Jode a un rival."; imgUrl = `https://play.pokemonshowdown.com/sprites/itemicons/${G_CONSUMABLES[id].icon}.png`; }
                 else if (r < 3) { type = 'consumible'; id = 'skip'; name = G_CONSUMABLES[id].name; desc = "Mítico (1%). Sáltate tu primer Pokémon de ruta."; imgUrl = `https://play.pokemonshowdown.com/sprites/itemicons/${G_CONSUMABLES[id].icon}.png`; }
                 else if (r < 30) { type = 'skin'; id = G_SKINS[Math.floor(Math.random()*G_SKINS.length)]; name = `Skin: ${id.toUpperCase()}`; desc = "Cosmético Raro (27%)"; imgUrl = `https://play.pokemonshowdown.com/sprites/trainers/${getSkinSpriteId(id)}.png`; }
-                else if (r < 60) { type = 'banner'; id = G_BANNERS[Math.floor(Math.random()*G_BANNERS.length)]; name = `Banner Mágico`; desc = "Cosmético Común (30%)"; } 
+                else if (r < 60) { type = 'banner'; id = G_BANNERS[Math.floor(Math.random()*G_BANNERS.length)]; name = `Banner Mágico`; desc = "Cosmético Común (30%)"; }
                 else { type = 'pepita'; name = "Pepita"; desc = "¡Consolación! (40%). Te devuelven 25 🪙"; imgUrl = `https://play.pokemonshowdown.com/sprites/itemicons/nugget.png`; extraCoins = 25; }
 
                 if (db) {
                     const refInv = `usuarios/${p}/inventario`;
-                    if (type === 'skin') { let arr = globalInv[p].skins || []; if(!arr.includes(id)) { arr.push(id); update(ref(db, refInv), { skins: arr }); } else { desc += " (Repetido: compensación +10 🪙)"; extraCoins = 10; } } 
-                    else if (type === 'banner') { let arr = globalInv[p].banners || []; if(!arr.includes(id)) { arr.push(id); update(ref(db, refInv), { banners: arr }); } else { desc += " (Repetido: compensación +10 🪙)"; extraCoins = 10; } } 
+                    if (type === 'skin') { let arr = globalInv[p].skins || []; if(!arr.includes(id)) { arr.push(id); update(ref(db, refInv), { skins: arr }); } else { desc += " (Repetido: compensación +10 🪙)"; extraCoins = 10; } }
+                    else if (type === 'banner') { let arr = globalInv[p].banners || []; if(!arr.includes(id)) { arr.push(id); update(ref(db, refInv), { banners: arr }); } else { desc += " (Repetido: compensación +10 🪙)"; extraCoins = 10; } }
                     else if (type === 'consumible') { let cons = globalInv[p].consumibles || {}; cons[id] = (cons[id]||0) + 1; update(ref(db, refInv), { consumibles: cons }); }
                     update(ref(db, `usuarios/${p}/economia`), { puntos: currentPts - 50 + extraCoins });
                 }
@@ -735,6 +790,97 @@
                 if(imgUrl) { imgEl.src = imgUrl; imgEl.classList.remove('hidden'); } else { imgEl.classList.add('hidden'); }
                 resDiv.classList.remove('hidden'); btn.disabled = false;
             }, 1000);
+        }
+
+        window.pullDailyGacha = function() {
+            const p = getMyPlayer();
+            const lastDaily = localStorage.getItem(`dailyGacha_${p}`);
+            const now = new Date();
+            const today = now.toDateString();
+
+            if (lastDaily === today) {
+                return alert("❌ Ya has usado tu tirada diaria gratuita hoy. ¡Vuelve mañana!");
+            }
+
+            const btn = document.getElementById('btn-daily-gacha'); const icon = document.getElementById('gacha-icon');
+            const resDiv = document.getElementById('gacha-result'); const machine = document.getElementById('gacha-machine');
+            btn.disabled = true; resDiv.classList.add('hidden'); machine.classList.add('shake-animation'); icon.innerHTML = '🔮';
+
+            setTimeout(() => {
+                machine.classList.remove('shake-animation'); icon.innerHTML = '🎁';
+                const r = Math.random() * 100;
+                let type, id, name, desc, imgUrl = '';
+
+                if (r < 50) {
+                    type = 'skin';
+                    id = G_SKINS[Math.floor(Math.random()*G_SKINS.length)];
+                    name = `Skin: ${id.toUpperCase()}`;
+                    desc = "Cosmético Raro (50%)";
+                    imgUrl = `https://play.pokemonshowdown.com/sprites/trainers/${getSkinSpriteId(id)}.png`;
+                } else {
+                    type = 'banner';
+                    id = G_BANNERS[Math.floor(Math.random()*G_BANNERS.length)];
+                    name = `Banner Mágico`;
+                    desc = "Cosmético Común (50%)";
+                }
+
+                if (db) {
+                    const refInv = `usuarios/${p}/inventario`;
+                    if (type === 'skin') {
+                        let arr = globalInv[p].skins || [];
+                        if(!arr.includes(id)) {
+                            arr.push(id);
+                            update(ref(db, refInv), { skins: arr });
+                        } else {
+                            desc += " (Repetido: compensación +10 🪙)";
+                            update(ref(db, `usuarios/${p}/economia`), { puntos: (globalEco[p] || 0) + 10 });
+                        }
+                    } else if (type === 'banner') {
+                        let arr = globalInv[p].banners || [];
+                        if(!arr.includes(id)) {
+                            arr.push(id);
+                            update(ref(db, refInv), { banners: arr });
+                        } else {
+                            desc += " (Repetido: compensación +10 🪙)";
+                            update(ref(db, `usuarios/${p}/economia`), { puntos: (globalEco[p] || 0) + 10 });
+                        }
+                    }
+                    localStorage.setItem(`dailyGacha_${p}`, today);
+                    writeLog(p, `Usó tirada diaria gratuita: ${name}`);
+                }
+
+                document.getElementById('gacha-result-name').innerText = name;
+                document.getElementById('gacha-result-desc').innerText = desc;
+                const imgEl = document.getElementById('gacha-result-img');
+                if(imgUrl) { imgEl.src = imgUrl; imgEl.classList.remove('hidden'); } else { imgEl.classList.add('hidden'); }
+                resDiv.classList.remove('hidden');
+                btn.disabled = false;
+                updateDailyTimer();
+            }, 1000);
+        }
+
+        function updateDailyTimer() {
+            const p = getMyPlayer();
+            const timerEl = document.getElementById('daily-timer');
+            if (!p || !timerEl) return;
+
+            const lastDaily = localStorage.getItem(`dailyGacha_${p}`);
+            const now = new Date();
+            const today = now.toDateString();
+
+            if (lastDaily === today) {
+                const tomorrow = new Date(now);
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                tomorrow.setHours(0, 0, 0, 0);
+                const diff = tomorrow - now;
+                const hours = Math.floor(diff / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                timerEl.innerText = `⏰ Siguiente tirada en: ${hours}h ${minutes}m`;
+                timerEl.classList.remove('hidden');
+            } else {
+                timerEl.innerText = "✅ ¡Tirada diaria disponible!";
+                timerEl.classList.remove('hidden');
+            }
         }
 
         // --- SISTEMA DE INVENTARIO ---
@@ -964,12 +1110,50 @@
             }
         }
 
+        // --- CAPTURA FALLIDA ---
+        document.getElementById('failedCaptureForm').addEventListener('submit', async (e) => {
+            e.preventDefault(); const btnSubmit = document.getElementById('btn-submit-failed');
+            const routeRaw = document.getElementById('failedRouteInput').value.trim();
+            const p = getMyPlayer();
+
+            const playerFailedRoutes = globalFailedRoutes[p] || [];
+            if (playerFailedRoutes.some(r => r.toLowerCase() === routeRaw.toLowerCase())) {
+                return alert(`🚫 Ya has registrado "${routeRaw}" anteriormente.`);
+            }
+
+            const alreadyCaptured = globalData.find(x => x.jugador === p && x.ruta.toLowerCase() === routeRaw.toLowerCase());
+            if (alreadyCaptured) return alert(`🚫 Ya tienes un registro exitoso en "${routeRaw}".`);
+
+            btnSubmit.disabled = true; btnSubmit.innerHTML = "💾 Registrando...";
+
+            try {
+                if (db) {
+                    const newFailedRoutes = [...playerFailedRoutes, routeRaw];
+                    update(ref(db, `usuarios/${p}/rutasFallidas`), newFailedRoutes);
+                    writeLog(p, `Captura fallida registrada en ${routeRaw}`);
+                }
+                alert("❌ Captura fallida registrada. Esta ruta queda bloqueada para futuras capturas.");
+                document.getElementById('failedCaptureForm').reset();
+                window.nav('menu');
+            } catch (error) {
+                alert("❌ Error al registrar la captura fallida.");
+            } finally {
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = "❌ REGISTRAR FALLIDA";
+            }
+        });
+
         // --- CAPTURA ---
         document.getElementById('trackerForm').addEventListener('submit', async (e) => {
             e.preventDefault(); const btnSubmit = document.getElementById('btn-submit-capture');
             const routeRaw = document.getElementById('routeInput').value.trim(); const speciesRaw = document.getElementById('speciesInput').value.trim();
             const speciesClean = speciesRaw.toLowerCase().replace(/[^a-z0-9]/g, ''); const isShiny = document.getElementById('shinyInput').checked;
             const p = getMyPlayer();
+
+            const playerFailedRoutes = globalFailedRoutes[p] || [];
+            if (playerFailedRoutes.some(r => r.toLowerCase() === routeRaw.toLowerCase())) {
+                return alert(`🚫 Ya has registrado "${routeRaw}" como fallida anteriormente.`);
+            }
 
             const alreadyCaptured = globalData.find(x => x.jugador === p && x.ruta.toLowerCase() === routeRaw.toLowerCase());
             if (alreadyCaptured && !isShiny) return alert(`🚫 Ya tienes un registro en "${routeRaw}".`);
@@ -1001,7 +1185,7 @@
             const myDead = globalData.filter(x => x.jugador === p && x.estado === 'Muerto');
             const myBanned = globalData.filter(x => x.jugador === p && x.estado === 'Baneado');
 
-            document.getElementById('grid-profile').innerHTML = `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase">⚔️ Equipo Actual</h3></div>` + generateCardsHTML(myTeam, false, false, true, false, true) + `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">🌟 Mochila (PC)</h3></div>` + generateCardsHTML(myBox, true, false, false, false, true) + `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">🪦 Cementerio</h3></div>` + generateCardsHTML(myDead, false, true, false, false, true) + `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">⛔ Baneados</h3></div>` + generateCardsHTML(myBanned, false, false, false, true, true);
+            document.getElementById('grid-profile').innerHTML = `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase">⚔️ Equipo Actual</h3></div>` + generateCardsHTML(myTeam, false, false, true, false, true, true, false) + `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">🌟 Mochila (PC)</h3></div>` + generateCardsHTML(myBox, true, false, false, false, true, true, false) + `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">🪦 Cementerio</h3></div>` + generateCardsHTML(myDead, false, true, false, false, true, false, false) + `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">⛔ Baneados</h3></div>` + generateCardsHTML(myBanned, false, false, false, true, true, false, false);
         };
 
         window.updateTeambuilderView = function() {
@@ -1211,6 +1395,74 @@
             } finally { btnElement.innerHTML = originalText; btnElement.disabled = false; }
         };
 
+        window.deevolve = async function(id) {
+            const p = globalData.find(x => x.id === id);
+            if(!p || p.jugador !== getMyPlayer()) return alert('Solo puedes desevolucionar tus Pokémon.');
+            if(!confirm(`🔄 ¿Seguro que quieres desevolucionar a "${p.mote}" (${p.especie})?\nEsto solo funcionará si hay una evolución previa conocida.`)) return;
+
+            try {
+                const sName = p.especie.toLowerCase().replace(/[^a-z0-9]/g, '');
+                const res = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${sName}`);
+                if (!res.ok) throw new Error();
+                const dataS = await res.json();
+                const resE = await fetch(dataS.evolution_chain.url);
+                const dataE = await resE.json();
+
+                let prevSp = "";
+                let queue = [dataE.chain];
+                let foundNode = null;
+                let parentNode = null;
+
+                while (queue.length > 0) {
+                    let curr = queue.shift();
+                    if (curr.species.name === sName) {
+                        foundNode = curr;
+                        break;
+                    }
+                    if (curr.evolves_to && curr.evolves_to.length > 0) {
+                        for (let child of curr.evolves_to) {
+                            if (child.species.name === sName) {
+                                parentNode = curr;
+                                foundNode = child;
+                                break;
+                            }
+                            queue.push(child);
+                        }
+                    }
+                }
+
+                if (parentNode) {
+                    prevSp = parentNode.species.name;
+                } else {
+                    const manual = prompt("⚠️ No se encontró evolución previa en la cadena.\nEscribe a mano el nombre de la forma anterior:");
+                    if (manual && manual.trim() !== "") {
+                        prevSp = manual.trim().toLowerCase();
+                    } else {
+                        return alert("❌ Cancelado.");
+                    }
+                }
+
+                if (prevSp && prevSp.trim() !== "") {
+                    const form = prevSp.charAt(0).toUpperCase() + prevSp.slice(1).toLowerCase();
+                    if(db) {
+                        await update(ref(db, `usuarios/${getMyPlayer()}/pokemon/vivos/${id}`), { especie: form });
+                        writeLog(getMyPlayer(), `El Pokémon ${p.mote} fue desevolucionado a ${form} (BBC)`);
+                        alert(`✅ ${p.mote} ha vuelto a ser ${form}.`);
+                    }
+                }
+            } catch (error) {
+                const manual = prompt("⚠️ Error de red al buscar la evolución previa.\nEscribe a mano el nombre de la forma anterior:");
+                if (manual && manual.trim() !== "") {
+                    const form = manual.trim().charAt(0).toUpperCase() + manual.trim().slice(1).toLowerCase();
+                    if(db) {
+                        await update(ref(db, `usuarios/${getMyPlayer()}/pokemon/vivos/${id}`), { especie: form });
+                        writeLog(getMyPlayer(), `El Pokémon ${p.mote} fue desevolucionado manualmente a ${form} (BBC)`);
+                        alert(`✅ ${p.mote} ha vuelto a ser ${form}.`);
+                    }
+                }
+            }
+        };
+
         window.kill = function(id) {
             if (confirm("💀 ¿Seguro que ha caído en combate? Pasará a Muertos y perderás 20 🪙.")) {
                 if (db) {
@@ -1224,7 +1476,7 @@
             }
         };
 
-        function generateCardsHTML(list, isInteractive = false, isDead = false, isViewMode = false, isBanned = false, canEditCapture = false, isPublicView = false) {
+        function generateCardsHTML(list, isInteractive = false, isDead = false, isViewMode = false, isBanned = false, canEditCapture = false, showBBC = false, isPublicView = false) {
             if (list.length === 0) return `<div class="col-span-full cartoon-panel p-6 text-center font-bold">No hay registros.</div>`;
             return `<div class="col-span-full grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">` + list.map(data => `
                 <div class="poke-card cartoon-panel flex flex-col items-center text-center relative border-4 ${isDead ? 'grayscale-dead' : (data.shiny ? 'shiny-bg' : 'bg-white')}" data-search="${data.ruta} ${data.especie} ${data.mote}">
@@ -1233,7 +1485,8 @@
                     <p class="text-[10px] text-gray-400 font-black tracking-wider uppercase mb-2">📍 ${data.ruta}</p>
                     <div class="flex flex-col gap-2 w-full mt-auto">
                         ${!isPublicView ? `<button onclick="window.openViewModal('${data.id}', '${data.jugador}', '${data.estado}')" class="cartoon-btn-sm bg-yellow-100 border-yellow-800 text-yellow-800">🔍 ${isViewMode ? 'Ver Info' : 'Ficha'}</button>` : ''}
-                        ${canEditCapture ? `<button onclick="window.openEditModal('${data.id}')" class="cartoon-btn-sm profile-edit-btn bg-amber-100 border-amber-700 text-amber-900">✏️ Editar Pokémon</button>` : ''}
+                        ${canEditCapture && !isPublicView ? `<button onclick="window.openEditModal('${data.id}')" class="cartoon-btn-sm profile-edit-btn bg-amber-100 border-amber-700 text-amber-900">✏️ Editar Pokémon</button>` : ''}
+                        ${showBBC && !isDead && !isBanned && !isPublicView ? `<button onclick="window.deevolve('${data.id}')" class="cartoon-btn-sm profile-edit-btn bg-purple-100 border-purple-700 text-purple-900">🔄 BBC</button>` : ''}
                         ${isPublicView && (isBanned || data.baneadoPor || Object.keys(data.baneos || {}).length > 0 || data.revividoPor) ? `<div class="w-full rounded-xl border-2 border-amber-300 bg-amber-50 p-2 text-left text-xs font-bold text-gray-800">${isBanned || data.baneadoPor || Object.keys(data.baneos || {}).length > 0 ? `<p>🚫 Tarjeta Roja: ${data.baneadoPor || Object.keys(data.baneos || {}).join(', ')}</p>` : ''}${data.revividoPor ? '<p>💚 Revivido: Sí</p>' : ''}</div>` : ''}
                         ${isBanned ? `<div class="bg-red-800 text-white text-sm font-bold py-2 rounded-xl w-full">⛔ BANEADO${data.baneadoPor ? ` POR ${data.baneadoPor.toUpperCase()}` : ''}</div>` : (isInteractive ? `<button onclick="window.evolve('${data.id}', this)" class="cartoon-btn-sm bg-blue-100 border-blue-800 text-blue-800">🌟 Evolucionar</button><button onclick="window.kill('${data.id}')" class="cartoon-btn-sm bg-red-100 border-red-800 text-red-800">💀 Ha muerto</button>` : (isDead ? `<div class="bg-gray-800 text-white text-sm font-bold py-1 rounded-full w-full">DEBILITADO</div>` : ''))}
                     </div>
@@ -1249,7 +1502,7 @@
                     const acts = globalActivos[player] || {};
                     const bannerClass = acts.banner || 'bg-gray-800';
                     const skinImg = acts.skin ? `<img src="https://play.pokemonshowdown.com/sprites/trainers/${getSkinSpriteId(acts.skin)}.png" class="h-10 pixel-art inline-block mr-2">` : '';
-                    container.innerHTML += `<div class="w-full mb-8"><div class="player-banner ${bannerClass} px-6 py-2 title-font text-3xl mb-4 ml-2 inline-flex items-center">${skinImg}${player}</div>${generateCardsHTML(playerMons, false, containerId === 'grid-cemetery', false, false, false, isPublicView)}</div>`;
+                    container.innerHTML += `<div class="w-full mb-8"><div class="player-banner ${bannerClass} px-6 py-2 title-font text-3xl mb-4 ml-2 inline-flex items-center">${skinImg}${player}</div>${generateCardsHTML(playerMons, false, containerId === 'grid-cemetery', false, false, false, false, isPublicView)}</div>`;
                 }
             });
         }
