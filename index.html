@@ -503,6 +503,45 @@
         </div>
     </div>
 
+    <!-- MODAL SELECCIÓN EQUIPO PARA MEDALLA -->
+    <div id="modal-badge-team" class="modal-overlay">
+        <div class="cartoon-panel modal-content bg-white relative p-6">
+            <button type="button" onclick="document.getElementById('modal-badge-team').style.display='none'" class="absolute top-4 right-4 text-2xl font-black text-gray-500">X</button>
+            <h2 class="title-font text-3xl text-center text-amber-700 mb-2">🏅 EQUIPO PARA LA MEDALLA</h2>
+            <p id="badge-team-name" class="text-center font-bold text-gray-500 mb-4 uppercase"></p>
+            <input type="hidden" id="badge-id-temp">
+            <div class="space-y-4">
+                <button onclick="window.useCurrentTeamForBadge()" class="cartoon-btn w-full bg-blue-500 hover:bg-blue-400 text-white text-xl py-4">
+                    ⚔️ Usar Equipo Actual
+                </button>
+                <button onclick="window.configTeamForBadge()" class="cartoon-btn w-full bg-green-500 hover:bg-green-400 text-white text-xl py-4">
+                    ✏️ Configurar Equipo Manualmente
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PANTALLA CONFIGURAR EQUIPO PARA MEDALLA -->
+    <div id="screen-badge-team-config" class="w-full max-w-6xl hidden flex-col mt-4">
+        <div class="flex justify-between items-center mb-4 gap-2">
+            <button onclick="nav('badges')" class="cartoon-btn-sm">⬅ VOLVER</button>
+            <h2 class="title-font text-3xl md:text-4xl text-white text-shadow-hard uppercase">⚔️ CONFIGURAR EQUIPO</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="cartoon-panel p-4 bg-gray-50">
+                <h3 class="title-font text-2xl text-center text-gray-800 mb-4">📋 TUS POKÉMON</h3>
+                <input type="text" id="search-badge-poke" oninput="window.filterBadgePoke(this.value)" placeholder="🔍 Buscar..." class="cartoon-input w-full p-3 text-lg shadow-lg mb-4">
+                <div id="badge-poke-list" class="grid grid-cols-2 gap-3 max-h-[500px] overflow-y-auto"></div>
+            </div>
+            <div class="cartoon-panel p-4 bg-blue-50">
+                <h3 class="title-font text-2xl text-center text-blue-800 mb-4">⚔️ EQUIPO SELECCIONADO (máx 6)</h3>
+                <div id="badge-selected-team" class="space-y-3 max-h-[500px] overflow-y-auto mb-4"></div>
+                <input type="hidden" id="badge-id-config">
+                <button onclick="window.saveBadgeTeam()" class="cartoon-btn w-full bg-green-500 hover:bg-green-400 text-white text-xl py-3">💾 GUARDAR EQUIPO Y MEDALLA</button>
+            </div>
+        </div>
+    </div>
+
     <!-- SCRIPT PRINCIPAL -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
@@ -591,11 +630,11 @@
         };
 
         const GYM_BADGES = [
-            { id: 'b1', name: 'Medalla Base', icon: '🏢' }, { id: 'b2', name: 'Medalla Ponzoña', icon: '☠️' },
-            { id: 'b3', name: 'Medalla Élitro', icon: '🐛' }, { id: 'b4', name: 'Medalla Voltio', icon: '⚡' },
-            { id: 'b5', name: 'Medalla Temblor', icon: '🪨' }, { id: 'b6', name: 'Medalla Jet', icon: '✈️' },
-            { id: 'b7', name: 'Medalla Leyenda', icon: '🐉' }, { id: 'b8', name: 'Medalla Ola', icon: '🌊' },
-            { id: 'b9', name: 'Liga Pokémon', icon: '🏆' }
+            { id: 'b1', name: 'Medalla Base', icon: '🏢', maxLevel: 13 }, { id: 'b2', name: 'Medalla Ponzoña', icon: '☠️', maxLevel: 18 },
+            { id: 'b3', name: 'Medalla Élitro', icon: '🐛', maxLevel: 24 }, { id: 'b4', name: 'Medalla Voltio', icon: '⚡', maxLevel: 30 },
+            { id: 'b5', name: 'Medalla Temblor', icon: '🪨', maxLevel: 33 }, { id: 'b6', name: 'Medalla Jet', icon: '✈️', maxLevel: 39 },
+            { id: 'b7', name: 'Medalla Leyenda', icon: '🐉', maxLevel: 43 }, { id: 'b8', name: 'Medalla Ola', icon: '🌊', maxLevel: 51 },
+            { id: 'b9', name: 'Liga Pokémon', icon: '🏆', maxLevel: 59 }
         ];
 
         // --- 2. DICCIONARIO UNIVERSAL (100% DE ATAQUES, OBJETOS Y HABILIDADES) ---
@@ -677,7 +716,7 @@
         window.adminUnlock = function() { if(prompt("🔒 Contraseña:")==="adminlocke") { localStorage.removeItem('pawPatrolUser'); alert("🔓 Desvinculado."); window.updateProfileView(); updateCoinDisplay(); } }
 
         window.nav = function(targetScreen) {
-            if (['add', 'capture-select', 'capture-failed', 'teambuilder', 'badges', 'gacha', 'collectibles', 'revive', 'ban-select', 'repel'].includes(targetScreen) && !getMyPlayer()) {
+            if (['add', 'capture-select', 'capture-failed', 'teambuilder', 'badges', 'gacha', 'collectibles', 'revive', 'ban-select', 'repel', 'badge-team-config'].includes(targetScreen) && !getMyPlayer()) {
                 alert("⚠️ Primero debes ir a 'Mi Perfil' y vincular este dispositivo."); return window.nav('profile');
             }
             if(targetScreen === 'ban-select') selectedBanPlayer = '';
@@ -706,6 +745,10 @@
             if(currentScreen === 'revive') window.updateReviveSelectionView();
             if(currentScreen === 'ban-select') window.updateBanSelectionView();
             if(currentScreen === 'gacha') updateDailyTimer();
+            if(currentScreen === 'badge-team-config') {
+                window.renderBadgePokeList();
+                window.renderBadgeSelectedTeam();
+            }
             if(currentScreen === 'add') {
                 const p = getMyPlayer();
                 const playerFailedRoutes = globalFailedRoutes[p] || [];
@@ -1108,10 +1151,177 @@
         }
         window.toggleBadge = function(badgeId, badgeName, isUnlocked) {
             if(isUnlocked) return alert("Ya tienes esta medalla.");
-            if(confirm(`🏆 ¿Confirmas que has conseguido la ${badgeName}?\nRecompensa: +50 🪙`)) {
-                const p = getMyPlayer();
-                if(db) { update(ref(db, `usuarios/${p}/medallas`), { [badgeId]: true }); writeLog(p, `Conseguida la ${badgeName}`); addPoints(p, 50); }
+            document.getElementById('badge-id-temp').value = badgeId;
+            document.getElementById('badge-team-name').innerText = badgeName;
+            document.getElementById('modal-badge-team').style.display = 'flex';
+        }
+
+        window.useCurrentTeamForBadge = function() {
+            const badgeId = document.getElementById('badge-id-temp').value;
+            const p = getMyPlayer();
+            const myTeam = globalData.filter(x => x.jugador === p && x.inTeam && x.estado === 'Vivo');
+
+            if(myTeam.length === 0) return alert("❌ No tienes Pokémon en el equipo actual. Usa 'Configurar Equipo Manualmente'.");
+
+            const teamData = myTeam.map(poke => ({ especie: poke.especie, mote: poke.mote, shiny: poke.shiny }));
+
+            if(db) {
+                update(ref(db, `usuarios/${p}/medallas`), { [badgeId]: true });
+                update(ref(db, `usuarios/${p}/equiposMedallas/${badgeId}`), teamData);
+                writeLog(p, `Conseguida la medalla con el equipo actual`);
+                addPoints(p, 50);
             }
+            document.getElementById('modal-badge-team').style.display = 'none';
+            alert("✅ ¡Medalla registrada con tu equipo actual! (+50 🪙)");
+            window.updateBadgesView();
+        }
+
+        window.configTeamForBadge = function() {
+            const badgeId = document.getElementById('badge-id-temp').value;
+            document.getElementById('badge-id-config').value = badgeId;
+            document.getElementById('modal-badge-team').style.display = 'none';
+            badgeSelectedTeam = [];
+            window.renderBadgePokeList();
+            window.renderBadgeSelectedTeam();
+            nav('badge-team-config');
+        }
+
+        let badgeSelectedTeam = [];
+
+        window.renderBadgePokeList = function() {
+            const p = getMyPlayer();
+            const myPoke = globalData.filter(x => x.jugador === p && x.estado === 'Vivo');
+            const container = document.getElementById('badge-poke-list');
+            const search = document.getElementById('search-badge-poke').value.toLowerCase();
+
+            const filtered = myPoke.filter(x => x.mote.toLowerCase().includes(search) || x.especie.toLowerCase().includes(search));
+
+            container.innerHTML = filtered.map(poke => `
+                <div class="cartoon-panel p-3 text-center bg-white ${badgeSelectedTeam.find(t => t.id === poke.id) ? 'opacity-50' : ''}">
+                    <img src="https://play.pokemonshowdown.com/sprites/${poke.shiny ? 'gen5-shiny' : 'gen5'}/${poke.especie.toLowerCase().replace(/[^a-z0-9]/g, '')}.png" class="pixel-art h-12 mb-2">
+                    <p class="font-bold text-sm truncate">"${poke.mote}"</p>
+                    <p class="text-xs text-gray-500">${poke.especie}</p>
+                    <button onclick="window.addToBadgeTeam('${poke.id}')" ${badgeSelectedTeam.find(t => t.id === poke.id) ? 'disabled' : ''} class="cartoon-btn-sm mt-2 ${badgeSelectedTeam.find(t => t.id === poke.id) ? 'bg-gray-300' : 'bg-blue-100 text-blue-800'}">➕ Añadir</button>
+                </div>
+            `).join('');
+        }
+
+        window.filterBadgePoke = function(value) {
+            window.renderBadgePokeList();
+        }
+
+        window.addToBadgeTeam = function(id) {
+            if(badgeSelectedTeam.length >= 6) return alert("❌ Máximo 6 Pokémon en el equipo.");
+            const poke = globalData.find(x => x.id === id);
+            if(!poke) return;
+
+            badgeSelectedTeam.push({
+                id: poke.id,
+                especie: poke.especie,
+                mote: poke.mote,
+                ruta: poke.ruta,
+                shiny: poke.shiny,
+                nivel: poke.nivel || '',
+                item: poke.item || '',
+                ability: poke.ability || '',
+                nature: poke.nature || '',
+                moves: poke.moves || ['', '', '', '']
+            });
+
+            window.renderBadgePokeList();
+            window.renderBadgeSelectedTeam();
+        }
+
+        window.removeFromBadgeTeam = function(id) {
+            badgeSelectedTeam = badgeSelectedTeam.filter(t => t.id !== id);
+            window.renderBadgePokeList();
+            window.renderBadgeSelectedTeam();
+        }
+
+        window.renderBadgeSelectedTeam = function() {
+            const container = document.getElementById('badge-selected-team');
+            if(badgeSelectedTeam.length === 0) {
+                container.innerHTML = '<p class="text-center text-gray-500 font-bold">No hay Pokémon seleccionados</p>';
+                return;
+            }
+
+            container.innerHTML = badgeSelectedTeam.map((poke, index) => `
+                <div class="cartoon-panel p-3 bg-white border-2 border-blue-300">
+                    <div class="flex justify-between items-center mb-2">
+                        <div class="flex items-center gap-2">
+                            <img src="https://play.pokemonshowdown.com/sprites/${poke.shiny ? 'gen5-shiny' : 'gen5'}/${poke.especie.toLowerCase().replace(/[^a-z0-9]/g, '')}.png" class="pixel-art h-10">
+                            <div>
+                                <p class="font-bold text-sm">"${poke.mote}"</p>
+                                <p class="text-xs text-gray-500">${poke.especie}</p>
+                            </div>
+                        </div>
+                        <button onclick="window.removeFromBadgeTeam('${poke.id}')" class="text-red-500 font-bold text-xl">✕</button>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div><label class="font-bold">Nivel:</label><input type="number" value="${poke.nivel}" onchange="window.updateBadgePokeField('${poke.id}', 'nivel', this.value)" class="cartoon-input w-full p-1"></div>
+                        <div><label class="font-bold">Objeto:</label><input type="text" value="${poke.item}" onchange="window.updateBadgePokeField('${poke.id}', 'item', this.value)" class="cartoon-input w-full p-1"></div>
+                        <div><label class="font-bold">Habilidad:</label><input type="text" value="${poke.ability}" onchange="window.updateBadgePokeField('${poke.id}', 'ability', this.value)" class="cartoon-input w-full p-1"></div>
+                        <div><label class="font-bold">Naturaleza:</label><input type="text" value="${poke.nature}" onchange="window.updateBadgePokeField('${poke.id}', 'nature', this.value)" class="cartoon-input w-full p-1"></div>
+                    </div>
+                    <div class="mt-2">
+                        <label class="font-bold text-xs">Ataques:</label>
+                        <div class="grid grid-cols-2 gap-1">
+                            <input type="text" value="${poke.moves[0] || ''}" onchange="window.updateBadgePokeMove('${poke.id}', 0, this.value)" class="cartoon-input w-full p-1 text-xs" placeholder="Ataque 1">
+                            <input type="text" value="${poke.moves[1] || ''}" onchange="window.updateBadgePokeMove('${poke.id}', 1, this.value)" class="cartoon-input w-full p-1 text-xs" placeholder="Ataque 2">
+                            <input type="text" value="${poke.moves[2] || ''}" onchange="window.updateBadgePokeMove('${poke.id}', 2, this.value)" class="cartoon-input w-full p-1 text-xs" placeholder="Ataque 3">
+                            <input type="text" value="${poke.moves[3] || ''}" onchange="window.updateBadgePokeMove('${poke.id}', 3, this.value)" class="cartoon-input w-full p-1 text-xs" placeholder="Ataque 4">
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.updateBadgePokeField = function(id, field, value) {
+            const poke = badgeSelectedTeam.find(t => t.id === id);
+            if(poke) poke[field] = value;
+        }
+
+        window.updateBadgePokeMove = function(id, index, value) {
+            const poke = badgeSelectedTeam.find(t => t.id === id);
+            if(poke) poke.moves[index] = value;
+        }
+
+        window.saveBadgeTeam = function() {
+            if(badgeSelectedTeam.length === 0) return alert("❌ Debes añadir al menos 1 Pokémon al equipo.");
+            const badgeId = document.getElementById('badge-id-config').value;
+            const p = getMyPlayer();
+
+            const badge = GYM_BADGES.find(b => b.id === badgeId);
+            const maxLevel = badge ? badge.maxLevel : 999;
+
+            for(let poke of badgeSelectedTeam) {
+                const level = parseInt(poke.nivel) || 0;
+                if(level > maxLevel) {
+                    return alert(`❌ El nivel de "${poke.mote}" (${level}) supera el máximo permitido para la ${badge.name} (Nivel máximo: ${maxLevel}).`);
+                }
+            }
+
+            const teamData = badgeSelectedTeam.map(poke => ({
+                especie: poke.especie,
+                mote: poke.mote,
+                ruta: poke.ruta,
+                shiny: poke.shiny,
+                nivel: poke.nivel,
+                item: poke.item,
+                ability: poke.ability,
+                nature: poke.nature,
+                moves: poke.moves
+            }));
+
+            if(db) {
+                update(ref(db, `usuarios/${p}/medallas`), { [badgeId]: true });
+                update(ref(db, `usuarios/${p}/equiposMedallas/${badgeId}`), teamData);
+                writeLog(p, `Conseguida la medalla con equipo configurado manualmente`);
+                addPoints(p, 50);
+            }
+            badgeSelectedTeam = [];
+            alert("✅ ¡Medalla registrada con el equipo configurado! (+50 🪙)");
+            nav('badges');
         }
 
         // --- CAPTURA FALLIDA ---
