@@ -522,6 +522,25 @@
     <div id="modal-edit-pokemon" class="modal-overlay"><div class="cartoon-panel modal-content bg-white relative"><button onclick="document.getElementById('modal-edit-pokemon').style.display='none'" class="absolute top-4 right-4 text-2xl font-black text-gray-500">X</button><h2 class="title-font text-3xl text-center text-blue-600 mb-2">⚙️ PERSONALIZAR</h2><p id="modal-pokemon-name" class="text-center font-bold text-gray-500 mb-4 uppercase"></p><form id="editPokeForm" class="space-y-3"><input type="hidden" id="edit-poke-id"><div class="grid grid-cols-1 md:grid-cols-2 gap-3"><div><label class="block font-bold text-sm">Objeto (@):</label><input type="text" id="edit-item" list="valid-items-list" autocomplete="off" class="cartoon-input w-full p-2"></div><div><label class="block font-bold text-sm">Habilidad:</label><input type="text" id="edit-ability" list="valid-abilities-list" autocomplete="off" class="cartoon-input w-full p-2"></div><div class="md:col-span-2"><label class="block font-bold text-sm">Género:</label><select id="edit-gender" class="cartoon-input w-full p-2"><option value="">Sin Género</option><option value="(M)">Macho (M)</option><option value="(F)">Hembra (F)</option></select></div></div><div class="pt-2 border-t-2 border-gray-200 mt-2"><label class="block font-bold text-sm text-center mb-1 text-red-600">Ataques Randomlocke</label><div class="grid grid-cols-1 md:grid-cols-2 gap-2"><input type="text" id="edit-m1" list="all-moves-list" autocomplete="off" class="cartoon-input w-full p-2"><input type="text" id="edit-m2" list="all-moves-list" autocomplete="off" class="cartoon-input w-full p-2"><input type="text" id="edit-m3" list="all-moves-list" autocomplete="off" class="cartoon-input w-full p-2"><input type="text" id="edit-m4" list="all-moves-list" autocomplete="off" class="cartoon-input w-full p-2"></div></div><button type="submit" id="btn-save-edit" class="cartoon-btn w-full bg-blue-500 text-white text-xl py-3 mt-4">💾 GUARDAR</button></form></div></div>
     <div id="modal-view-pokemon" class="modal-overlay"><div class="cartoon-panel modal-content bg-white relative text-center"><button onclick="document.getElementById('modal-view-pokemon').style.display='none'" class="absolute top-4 right-4 text-2xl font-black text-gray-500">X</button><h2 class="title-font text-3xl text-blue-600 mb-1" id="view-mote"></h2><p class="font-bold text-gray-500 mb-4" id="view-especie-ruta"></p><div class="flex justify-center mb-4"><img id="view-sprite" src="" class="pixel-art scale-[2] h-24"></div><div class="grid grid-cols-2 gap-2 text-left bg-gray-100 p-4 rounded-xl border-4 border-gray-200 font-bold text-sm"><p>Nivel: <span id="view-level" class="text-blue-600"></span></p><p>Género: <span id="view-gender" class="text-blue-600"></span></p><p>Objeto: <span id="view-item" class="text-blue-600"></span></p><p>Habilidad: <span id="view-ability" class="text-blue-600"></span></p><p class="col-span-2">Naturaleza: <span id="view-nature" class="text-blue-600"></span></p><div class="col-span-2 mt-2 pt-2 border-t-2 border-gray-300"><p class="mb-1 text-center">Ataques:</p><ul class="list-disc pl-5 text-red-600" id="view-moves"></ul></div></div></div></div>
     <textarea id="copy-clipboard-area" style="position: absolute; top: -9999px; left: -9999px;"></textarea>
+
+    <!-- MODAL DEDICATORIA -->
+    <div id="modal-dedicatoria" class="modal-overlay">
+        <div class="cartoon-panel modal-content bg-white relative p-6">
+            <button type="button" onclick="document.getElementById('modal-dedicatoria').style.display='none'" class="absolute top-4 right-4 text-2xl font-black text-gray-500">X</button>
+            <h2 class="title-font text-3xl text-center text-gray-700 mb-2">💀 DEDICATORIA</h2>
+            <p id="dedicatoria-pokemon-name" class="text-center font-bold text-gray-500 mb-4 uppercase"></p>
+            <form id="dedicatoriaForm" class="space-y-4">
+                <input type="hidden" id="dedicatoria-poke-id">
+                <input type="hidden" id="dedicatoria-is-new-death">
+                <div>
+                    <label for="dedicatoria-text" class="block font-bold ml-2 mb-1 text-gray-700">Escribe una dedicatoria para este Pokémon:</label>
+                    <textarea id="dedicatoria-text" rows="3" maxlength="200" placeholder="Ej: Un guerrero valiente que luchó hasta el final..." class="cartoon-input w-full p-3 text-lg"></textarea>
+                </div>
+                <button type="submit" class="cartoon-btn w-full bg-red-600 hover:bg-red-500 text-white text-xl py-3">💾 GUARDAR DEDICATORIA</button>
+            </form>
+        </div>
+    </div>
+
     <div id="modal-edit-capture" class="modal-overlay">
         <div class="cartoon-panel modal-content bg-white relative p-6">
             <button type="button" onclick="document.getElementById('modal-edit-capture').style.display='none'" class="absolute top-4 right-4 text-2xl font-black text-gray-500">X</button>
@@ -1237,27 +1256,48 @@
             if(isUnlocked) return alert("Ya tienes esta medalla.");
             document.getElementById('badge-id-temp').value = badgeId;
             document.getElementById('badge-team-name').innerText = badgeName;
+
+            // Determinar el número de gimnasio basado en el ID de la medalla
+            const gymMap = { 'b1': '1', 'b2': '2', 'b3': '3', 'b4': '4', 'b5': '5', 'b6': '6', 'b7': '7', 'b8': '8', 'b9': 'league' };
+            const gymNumber = gymMap[badgeId] || '';
+
+            // Cambiar el texto del botón
+            const useTeamBtn = document.querySelector('#modal-badge-team button[onclick="window.useCurrentTeamForBadge()"]');
+            if(gymNumber && gymNumber !== 'league') {
+                useTeamBtn.innerText = `⚔️ Usar Equipo del Gimnasio ${gymNumber}`;
+            } else if(gymNumber === 'league') {
+                useTeamBtn.innerText = `⚔️ Usar Equipo de la Liga`;
+            } else {
+                useTeamBtn.innerText = `⚔️ Usar Equipo Actual`;
+            }
+
             document.getElementById('modal-badge-team').style.display = 'flex';
         }
 
         window.useCurrentTeamForBadge = function() {
             const badgeId = document.getElementById('badge-id-temp').value;
             const p = getMyPlayer();
-            const myTeam = globalData.filter(x => x.jugador === p && x.inTeam && x.estado === 'Vivo');
 
-            if(myTeam.length === 0) return alert("❌ No tienes Pokémon en el equipo actual. Usa 'Configurar Equipo Manualmente'.");
+            // Determinar el número de gimnasio basado en el ID de la medalla
+            const gymMap = { 'b1': '1', 'b2': '2', 'b3': '3', 'b4': '4', 'b5': '5', 'b6': '6', 'b7': '7', 'b8': '8', 'b9': 'league' };
+            const gymNumber = gymMap[badgeId];
 
-            const teamData = myTeam.map(poke => ({ especie: poke.especie, mote: poke.mote, shiny: poke.shiny }));
+            // Obtener equipo guardado para el gimnasio
+            const gymTeam = globalEquiposGimnasio[p]?.[gymNumber] || [];
+
+            if(gymTeam.length === 0) return alert(`❌ No tienes un equipo guardado para el ${gymNumber === 'league' ? 'Liga' : 'Gimnasio ' + gymNumber}. Ve a 'Formar Equipo' y crea uno.`);
+
+            const teamData = gymTeam.map(poke => ({ especie: poke.especie, mote: poke.mote, shiny: poke.shiny }));
 
             if(db) {
                 Promise.all([
                     update(ref(db, `usuarios/${p}/medallas`), { [badgeId]: true }),
                     set(ref(db, `usuarios/${p}/equiposMedallas/${badgeId}`), teamData)
                 ]).then(() => {
-                    writeLog(p, `Conseguida la medalla con el equipo actual`);
+                    writeLog(p, `Conseguida la medalla con el equipo del ${gymNumber === 'league' ? 'Liga' : 'Gimnasio ' + gymNumber}`);
                     addPoints(p, 50);
                     document.getElementById('modal-badge-team').style.display = 'none';
-                    alert("✅ ¡Medalla registrada con tu equipo actual! (+50 🪙)");
+                    alert(`✅ ¡Medalla registrada con el equipo del ${gymNumber === 'league' ? 'Liga' : 'Gimnasio ' + gymNumber}! (+50 🪙)`);
                     nav('badges');
                 }).catch((error) => {
                     console.error('Error al registrar medalla:', error);
@@ -1544,9 +1584,12 @@
             const myDead = globalData.filter(x => x.jugador === p && x.estado === 'Muerto');
             const myBanned = globalData.filter(x => x.jugador === p && x.estado === 'Baneado');
 
+            // Filtrar Pokémon bloqueados por otros jugadores (que están en vivos pero tienen baneos)
+            const myBlocked = myActive.filter(x => x.baneos && Object.keys(x.baneos).length > 0);
+
             const teamTitle = selectedGym ? `⚔️ Equipo ${selectedGym === 'league' ? 'Liga' : 'Gimnasio ' + selectedGym}` : '⚔️ Equipo Actual';
 
-            document.getElementById('grid-profile').innerHTML = `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase">${teamTitle}</h3></div>` + generateCardsHTML(myTeam, false, false, true, false, true, true, false) + (selectedGym ? '' : `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">🌟 Mochila (PC)</h3></div>` + generateCardsHTML(myBox, true, false, false, false, true, true, false)) + `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">🪦 Cementerio</h3></div>` + generateCardsHTML(myDead, false, true, false, false, true, false, false) + `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">⛔ Baneados</h3></div>` + generateCardsHTML(myBanned, false, false, false, true, true, false, false);
+            document.getElementById('grid-profile').innerHTML = `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase">${teamTitle}</h3></div>` + generateCardsHTML(myTeam, false, false, true, false, true, true, false) + (selectedGym ? '' : `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">🌟 Mochila (PC)</h3></div>` + generateCardsHTML(myBox, true, false, false, false, true, true, false)) + `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">🪦 Cementerio</h3></div>` + generateCardsHTML(myDead, false, true, false, false, true, false, false, false, true) + (myBlocked.length > 0 ? `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">🔒 Bloqueados</h3></div>` + generateCardsHTML(myBlocked, false, false, false, false, false, false, true) : '') + `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">⛔ Baneados</h3></div>` + generateCardsHTML(myBanned, false, false, false, true, true, false, false);
         };
 
         // Variable temporal para el teambuilder de gimnasio
@@ -1561,6 +1604,9 @@
             const p = getMyPlayer();
             const gymNumber = document.getElementById('teambuilder-gym-selector').value;
             let myActive = globalData.filter(x => x.jugador === p && x.estado === 'Vivo');
+
+            // Filtrar Pokémon bloqueados (que tienen baneos)
+            myActive = myActive.filter(x => !x.baneos || Object.keys(x.baneos).length === 0);
 
             // Para gimnasio 1 y 2, también incluir muertos de rutas permitidas
             if(gymNumber === '1' || gymNumber === '2') {
@@ -1608,6 +1654,52 @@
             }
             window.updateTeambuilderView();
         }
+
+        window.unbanPokemon = function(id) {
+            const p = getMyPlayer();
+            const poke = globalData.find(x => x.id === id && x.jugador === p);
+            if(!poke) return;
+
+            if(!confirm(`🔓 ¿Desbloquear a "${poke.mote}"?`)) return;
+
+            if(db) {
+                const result = runTransaction(ref(db, `usuarios/${p}/pokemon`), (pokemon) => {
+                    if(!pokemon) return;
+                    for(const collection of ['vivos', 'muertos', 'baneados']) {
+                        if(pokemon[collection] && pokemon[collection][id]) {
+                            const pokeData = pokemon[collection][id];
+                            if(pokeData.baneos) {
+                                delete pokeData.baneos;
+                                delete pokeData.baneadoPor;
+                                delete pokeData.baneadoEn;
+                                delete pokeData.estadoOriginal;
+                            }
+                            return pokemon;
+                        }
+                    }
+                    return;
+                }, { applyLocally: false });
+
+                if(result.committed) {
+                    writeLog(p, `Desbloqueó a ${poke.mote} (${poke.especie})`);
+                    alert(`✅ ${poke.mote} ha sido desbloqueado.`);
+                    window.updateProfileView();
+                } else {
+                    alert("❌ No se pudo desbloquear. El Pokémon ya no está disponible.");
+                }
+            }
+        }
+
+        window.editDedicatoria = function(id) {
+            const poke = globalData.find(x => x.id === id);
+            if(!poke) return;
+
+            document.getElementById('dedicatoria-poke-id').value = id;
+            document.getElementById('dedicatoria-is-new-death').value = 'false';
+            document.getElementById('dedicatoria-pokemon-name').innerText = `"${poke.mote}" (${poke.especie})`;
+            document.getElementById('dedicatoria-text').value = poke.dedicatoria || '';
+            document.getElementById('modal-dedicatoria').style.display = 'flex';
+        };
 
         window.saveGymTeam = function() {
             const p = getMyPlayer();
@@ -1918,29 +2010,80 @@
         };
 
         window.kill = function(id) {
-            if (confirm("💀 ¿Seguro que ha caído en combate? Pasará a Muertos y perderás 10 🪙.")) {
-                if (db) {
-                    const p = getMyPlayer(); const pokeData = globalData.find(x => x.id === id);
+            const pokeData = globalData.find(x => x.id === id);
+            if(!pokeData) return;
+
+            document.getElementById('dedicatoria-poke-id').value = id;
+            document.getElementById('dedicatoria-is-new-death').value = 'true';
+            document.getElementById('dedicatoria-pokemon-name').innerText = `"${pokeData.mote}" (${pokeData.especie})`;
+            document.getElementById('dedicatoria-text').value = '';
+            document.getElementById('modal-dedicatoria').style.display = 'flex';
+        };
+
+        document.getElementById('dedicatoriaForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const id = document.getElementById('dedicatoria-poke-id').value;
+            const dedicatoria = document.getElementById('dedicatoria-text').value.trim();
+            const isNewDeath = document.getElementById('dedicatoria-is-new-death')?.value === 'true';
+
+            if (db) {
+                const p = getMyPlayer();
+                const pokeData = globalData.find(x => x.id === id);
+
+                if(isNewDeath) {
+                    // Es una nueva muerte
                     const copyData = { ...pokeData }; delete copyData.id; delete copyData.jugador; delete copyData.estado; copyData.inTeam = false;
+                    if(dedicatoria) copyData.dedicatoria = dedicatoria;
                     set(ref(db, `usuarios/${p}/pokemon/muertos/${id}`), copyData).then(() => {
                         remove(ref(db, `usuarios/${p}/pokemon/vivos/${id}`));
                         writeLog(p, `¡BAJA! ${pokeData.mote} (${pokeData.especie}) ha muerto.`); addPoints(p, -10);
+                        document.getElementById('modal-dedicatoria').style.display = 'none';
+                        alert(`💀 ${pokeData.mote} ha pasado al cementerio.`);
                     });
+                } else {
+                    // Es edición de dedicatoria existente
+                    // Encontrar en qué colección está el Pokémon
+                    const collections = ['vivos', 'muertos', 'baneados'];
+                    let foundCollection = null;
+                    for(const collection of collections) {
+                        if(pokeData.estado.toLowerCase() === collection.replace('s', '') || (collection === 'muertos' && pokeData.estado === 'Muerto')) {
+                            foundCollection = collection;
+                            break;
+                        }
+                    }
+
+                    if(foundCollection) {
+                        const updateData = dedicatoria ? { dedicadoria: dedicatoria } : { dedicadoria: null };
+                        update(ref(db, `usuarios/${p}/pokemon/${foundCollection}/${id}`), updateData).then(() => {
+                            writeLog(p, `Editó la dedicatoria de ${pokeData.mote} (${pokeData.especie})`);
+                            document.getElementById('modal-dedicatoria').style.display = 'none';
+                            alert(`✅ Dedicatoria actualizada.`);
+                            window.updateProfileView();
+                        }).catch((error) => {
+                            console.error('Error al actualizar dedicatoria:', error);
+                            alert("❌ No se pudo actualizar. El Pokémon ya no está disponible.");
+                        });
+                    } else {
+                        alert("❌ No se pudo encontrar el Pokémon en la base de datos.");
+                    }
                 }
             }
-        };
+        });
 
-        function generateCardsHTML(list, isInteractive = false, isDead = false, isViewMode = false, isBanned = false, canEditCapture = false, showBBC = false, isPublicView = false) {
+        function generateCardsHTML(list, isInteractive = false, isDead = false, isViewMode = false, isBanned = false, canEditCapture = false, showBBC = false, isPublicView = false, showUnban = false, showEditDedicatoria = false) {
             if (list.length === 0) return `<div class="col-span-full cartoon-panel p-6 text-center font-bold">No hay registros.</div>`;
             return `<div class="col-span-full grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">` + list.map(data => `
                 <div class="poke-card cartoon-panel flex flex-col items-center text-center relative border-4 ${isDead ? 'grayscale-dead' : (data.shiny ? 'shiny-bg' : 'bg-white')}" data-search="${data.ruta} ${data.especie} ${data.mote}">
                     <h3 class="font-bold text-lg uppercase truncate w-full mb-1">"${data.mote}" ${data.shiny ? '✨' : ''}</h3><p class="text-sm font-bold text-gray-500 mb-2">${data.especie}</p>
                     <img ${isPublicView ? '' : `onclick="window.openViewModal('${data.id}', '${data.jugador}', '${data.estado}')"`} src="https://play.pokemonshowdown.com/sprites/${data.shiny ? 'gen5-shiny' : 'gen5'}/${data.especie.toLowerCase().replace(/[^a-z0-9]/g, '')}.png" class="pixel-art scale-[1.5] h-16 mb-2 ${isPublicView ? '' : 'cursor-pointer'}" onerror="this.src='https://play.pokemonshowdown.com/sprites/itemicons/pokeball.png';">
                     <p class="text-[10px] text-gray-400 font-black tracking-wider uppercase mb-2">📍 ${data.ruta}</p>
+                    ${isDead && data.dedicatoria ? `<p class="text-xs text-gray-600 italic mb-2 px-2">"${data.dedicatoria}"</p>` : ''}
                     <div class="flex flex-col gap-2 w-full mt-auto">
                         ${!isPublicView ? `<button onclick="window.openViewModal('${data.id}', '${data.jugador}', '${data.estado}')" class="cartoon-btn-sm bg-yellow-100 border-yellow-800 text-yellow-800">🔍 ${isViewMode ? 'Ver Info' : 'Ficha'}</button>` : ''}
                         ${canEditCapture && !isPublicView ? `<button onclick="window.openEditModal('${data.id}')" class="cartoon-btn-sm profile-edit-btn bg-amber-100 border-amber-700 text-amber-900">✏️ Editar Pokémon</button>` : ''}
+                        ${showEditDedicatoria && isDead && !isPublicView ? `<button onclick="window.editDedicatoria('${data.id}')" class="cartoon-btn-sm profile-edit-btn bg-purple-100 border-purple-700 text-purple-900">📝 Editar Dedicatoria</button>` : ''}
                         ${showBBC && !isDead && !isBanned && !isPublicView ? `<button onclick="window.deevolve('${data.id}')" class="cartoon-btn-sm profile-edit-btn bg-purple-100 border-purple-700 text-purple-900">🔄 BBC</button>` : ''}
+                        ${showUnban && !isPublicView ? `<button onclick="window.unbanPokemon('${data.id}')" class="cartoon-btn-sm profile-edit-btn bg-green-100 border-green-700 text-green-900">🔓 Desbloquear</button>` : ''}
                         ${isPublicView && (isBanned || data.baneadoPor || Object.keys(data.baneos || {}).length > 0 || data.revividoPor) ? `<div class="w-full rounded-xl border-2 border-amber-300 bg-amber-50 p-2 text-left text-xs font-bold text-gray-800">${isBanned || data.baneadoPor || Object.keys(data.baneos || {}).length > 0 ? `<p>🚫 Tarjeta Roja: ${data.baneadoPor || Object.keys(data.baneos || {}).join(', ')}</p>` : ''}${data.revividoPor ? '<p>💚 Revivido: Sí</p>' : ''}</div>` : ''}
                         ${isBanned ? `<div class="bg-red-800 text-white text-sm font-bold py-2 rounded-xl w-full">⛔ BANEADO${data.baneadoPor ? ` POR ${data.baneadoPor.toUpperCase()}` : ''}</div>` : (isInteractive ? `<button onclick="window.evolve('${data.id}', this)" class="cartoon-btn-sm bg-blue-100 border-blue-800 text-blue-800">🌟 Evolucionar</button><button onclick="window.kill('${data.id}')" class="cartoon-btn-sm bg-red-100 border-red-800 text-red-800">💀 Ha muerto</button>` : (isDead ? `<div class="bg-gray-800 text-white text-sm font-bold py-1 rounded-full w-full">DEBILITADO</div>` : ''))}
                     </div>
