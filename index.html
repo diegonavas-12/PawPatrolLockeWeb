@@ -1589,8 +1589,7 @@
 
             const teamTitle = selectedGym ? `⚔️ Equipo ${selectedGym === 'league' ? 'Liga' : 'Gimnasio ' + selectedGym}` : '⚔️ Equipo Actual';
 
-            document.getElementById('grid-profile').innerHTML = `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase">${teamTitle}</h3></div>` + generateCardsHTML(myTeam, false, false, true, false, true, true, false) + (selectedGym ? '' : `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">🌟 Mochila (PC)</h3></div>` + generateCardsHTML(myBox, true, false, false, false, true, true, false)) + `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">🪦 Cementerio</h3></div>` + generateCardsHTML(myDead, false, true, false, false, true, false, false, false, true) + (myBlocked.length > 0 ? `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">🔒 Bloqueados</h3></div>` + generateCardsHTML(myBlocked, false, false, false, false, false, false, true) : '') + `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">⛔ Baneados</h3></div>` + generateCardsHTML(myBanned, false, false, false, true, true, false, false);
-        };
+            document.getElementById('grid-profile').innerHTML = `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase">${teamTitle}</h3></div>` + generateCardsHTML(myTeam, false, false, true, false, true, true, false) + (selectedGym ? '' : `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">🌟 Mochila (PC)</h3></div>` + generateCardsHTML(myBox, true, false, false, false, true, true, false)) + `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">🪦 Cementerio</h3></div>` + generateCardsHTML(myDead, false, true, false, false, true, false, false, false, true) + (myBlocked.length > 0 ? `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">🔒 Bloqueados</h3></div>` + generateCardsHTML(myBlocked, false, false, false, false, false, false, true) : '') + `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">⛔ Baneados</h3></div>` + generateCardsHTML(myBanned, false, false, false, true, true, false, false);        };
 
         // Variable temporal para el teambuilder de gimnasio
         let gymTeamSelection = [];
@@ -2053,7 +2052,7 @@
                     }
 
                     if(foundCollection) {
-                        const updateData = dedicatoria ? { dedicadoria: dedicatoria } : { dedicadoria: null };
+                        const updateData = dedicatoria ? { dedicatoria: dedicatoria } : { dedicatoria: null };
                         update(ref(db, `usuarios/${p}/pokemon/${foundCollection}/${id}`), updateData).then(() => {
                             writeLog(p, `Editó la dedicatoria de ${pokeData.mote} (${pokeData.especie})`);
                             document.getElementById('modal-dedicatoria').style.display = 'none';
