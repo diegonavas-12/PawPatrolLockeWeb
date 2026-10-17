@@ -1264,7 +1264,7 @@
                 const unlocked = myBadges[badge.id] === true;
                 // Para la primera medalla (b1), usar la imagen Medalla1.png
                 if(badge.id === 'b1') {
-                    container.innerHTML += `<div class="flex flex-col items-center"><div class="${unlocked ? 'badge-slot unlocked' : 'badge-slot'}" onclick="window.toggleBadge('${badge.id}', '${badge.name}', ${unlocked})">${unlocked ? `<img src="Medalla1.jpg" class="w-16 h-16 object-contain cursor-pointer" onclick="event.stopPropagation(); window.enlargeBadge('Medalla1.png')">` : '🔒'}</div><p class="font-bold text-gray-700 mt-2 text-sm">${unlocked ? badge.name : '???'}</p></div>`;
+                    container.innerHTML += `<div class="flex flex-col items-center"><div class="${unlocked ? 'badge-slot unlocked' : 'badge-slot'}" onclick="window.toggleBadge('${badge.id}', '${badge.name}', ${unlocked})">${unlocked ? `<img src="Medalla1.jpg" class="w-16 h-16 object-contain cursor-pointer" onclick="event.stopPropagation(); window.enlargeBadge('Medalla1.jpg')">` : '🔒'}</div><p class="font-bold text-gray-700 mt-2 text-sm">${unlocked ? badge.name : '???'}</p></div>`;
                 } else {
                     container.innerHTML += `<div class="flex flex-col items-center"><div class="${unlocked ? 'badge-slot unlocked' : 'badge-slot'}" onclick="window.toggleBadge('${badge.id}', '${badge.name}', ${unlocked})">${unlocked ? badge.icon : '🔒'}</div><p class="font-bold text-gray-700 mt-2 text-sm">${unlocked ? badge.name : '???'}</p></div>`;
                 }
