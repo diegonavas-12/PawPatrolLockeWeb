@@ -649,6 +649,62 @@
             return G_SKIN_SPRITE_ALIASES[normalizedId] || normalizedId;
         }
 
+        function compactSpeciesName(name) {
+            return (name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+                .replace(/♀/g, 'f').replace(/♂/g, 'm').replace(/[^a-z0-9]/g, '');
+        }
+
+        function getPokemonSpriteId(name) {
+            return compactSpeciesName(name);
+        }
+
+        function slugifySpeciesName(name) {
+            return (name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+                .replace(/♀/g, '-f').replace(/♂/g, '-m').replace(/['’.]/g, '')
+                .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+        }
+
+        let speciesIndexPromise = null;
+        function loadSpeciesIndex() {
+            if (!speciesIndexPromise) {
+                speciesIndexPromise = fetch('https://pokeapi.co/api/v2/pokemon-species?limit=2000')
+                    .then(res => { if (!res.ok) throw new Error(); return res.json(); })
+                    .then(data => {
+                        const index = {};
+                        data.results.forEach(r => { index[compactSpeciesName(r.name)] = r.name; });
+                        return index;
+                    })
+                    .catch(err => { speciesIndexPromise = null; throw err; });
+            }
+            return speciesIndexPromise;
+        }
+
+        async function resolveSpeciesSlug(name) {
+            try {
+                const index = await loadSpeciesIndex();
+                const slug = index[compactSpeciesName(name)];
+                if (slug) return slug;
+            } catch (e) {}
+            return slugifySpeciesName(name);
+        }
+
+        function formatSpeciesName(name) {
+            return (name || '').trim().split(/([\s-]+)/).map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()).join('');
+        }
+
+        function getSpeciesEnglishName(speciesData) {
+            const en = speciesData && speciesData.names && speciesData.names.find(n => n.language && n.language.name === 'en');
+            return en ? en.name.replace(/’/g, "'") : formatSpeciesName(speciesData.name.replace(/-/g, ' '));
+        }
+
+        async function getSpeciesDisplayName(slug) {
+            try {
+                const res = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${slug}`);
+                if (res.ok) return getSpeciesEnglishName(await res.json());
+            } catch (e) {}
+            return formatSpeciesName(slug.replace(/-/g, ' '));
+        }
+
         const G_BANNERS = [
             'bg-gradient-to-r from-red-500 to-orange-500',
             'bg-gradient-to-r from-blue-500 to-cyan-500',
@@ -1125,7 +1181,7 @@
                 <div class="cartoon-panel flex flex-col items-center text-center p-4 bg-white border-emerald-300">
                     <h3 class="font-bold text-lg uppercase truncate w-full mb-1">"${data.mote}"</h3>
                     <p class="text-sm font-bold text-gray-500 mb-2">${data.especie}</p>
-                    <img src="https://play.pokemonshowdown.com/sprites/${data.shiny ? 'gen5-shiny' : 'gen5'}/${data.especie.toLowerCase().replace(/[^a-z0-9]/g, '')}.png" class="pixel-art h-16 mb-3" onerror="this.src='https://play.pokemonshowdown.com/sprites/itemicons/pokeball.png';">
+                    <img src="https://play.pokemonshowdown.com/sprites/${data.shiny ? 'gen5-shiny' : 'gen5'}/${getPokemonSpriteId(data.especie)}.png" class="pixel-art h-16 mb-3" onerror="this.src='https://play.pokemonshowdown.com/sprites/itemicons/pokeball.png';">
                     <p class="text-xs text-gray-400 font-bold mb-3">📍 ${data.ruta}</p>
                     <button onclick="window.revivePokemon('${data.id}')" class="cartoon-btn-sm bg-emerald-200 border-emerald-700 text-emerald-900 w-full">💚 REVIVIR</button>
                 </div>`).join('');
@@ -1188,7 +1244,7 @@
                 <div class="cartoon-panel flex flex-col items-center text-center p-4 bg-white border-red-300">
                     <h3 class="font-bold text-lg uppercase truncate w-full mb-1">"${data.mote}"</h3>
                     <p class="text-sm font-bold text-gray-500 mb-2">${data.especie}</p>
-                    <img src="https://play.pokemonshowdown.com/sprites/${data.shiny ? 'gen5-shiny' : 'gen5'}/${data.especie.toLowerCase().replace(/[^a-z0-9]/g, '')}.png" class="pixel-art h-16 mb-3" onerror="this.src='https://play.pokemonshowdown.com/sprites/itemicons/pokeball.png';">
+                    <img src="https://play.pokemonshowdown.com/sprites/${data.shiny ? 'gen5-shiny' : 'gen5'}/${getPokemonSpriteId(data.especie)}.png" class="pixel-art h-16 mb-3" onerror="this.src='https://play.pokemonshowdown.com/sprites/itemicons/pokeball.png';">
                     <span class="text-xs font-black text-red-700 mb-3">EQUIPO / MOCHILA</span>
                     <button onclick="window.banPokemon('${selectedBanPlayer}', '${data.id}')" class="cartoon-btn-sm bg-red-200 border-red-700 text-red-900 w-full">🚫 BANEAR</button>
                 </div>`).join('');
@@ -1332,7 +1388,7 @@
 
             container.innerHTML = filtered.map(poke => `
                 <div class="cartoon-panel p-3 text-center bg-white ${badgeSelectedTeam.find(t => t.id === poke.id) ? 'opacity-50' : ''}">
-                    <img src="https://play.pokemonshowdown.com/sprites/${poke.shiny ? 'gen5-shiny' : 'gen5'}/${poke.especie.toLowerCase().replace(/[^a-z0-9]/g, '')}.png" class="pixel-art h-12 mb-2">
+                    <img src="https://play.pokemonshowdown.com/sprites/${poke.shiny ? 'gen5-shiny' : 'gen5'}/${getPokemonSpriteId(poke.especie)}.png" class="pixel-art h-12 mb-2">
                     <p class="font-bold text-sm truncate">"${poke.mote}"</p>
                     <p class="text-xs text-gray-500">${poke.especie}</p>
                     <button onclick="window.addToBadgeTeam('${poke.id}')" ${badgeSelectedTeam.find(t => t.id === poke.id) ? 'disabled' : ''} class="cartoon-btn-sm mt-2 ${badgeSelectedTeam.find(t => t.id === poke.id) ? 'bg-gray-300' : 'bg-blue-100 text-blue-800'}">➕ Añadir</button>
@@ -1383,7 +1439,7 @@
                 <div class="cartoon-panel p-3 bg-white border-2 border-blue-300">
                     <div class="flex justify-between items-center mb-2">
                         <div class="flex items-center gap-2">
-                            <img src="https://play.pokemonshowdown.com/sprites/${poke.shiny ? 'gen5-shiny' : 'gen5'}/${poke.especie.toLowerCase().replace(/[^a-z0-9]/g, '')}.png" class="pixel-art h-10">
+                            <img src="https://play.pokemonshowdown.com/sprites/${poke.shiny ? 'gen5-shiny' : 'gen5'}/${getPokemonSpriteId(poke.especie)}.png" class="pixel-art h-10">
                             <div>
                                 <p class="font-bold text-sm">"${poke.mote}"</p>
                                 <p class="text-xs text-gray-500">${poke.especie}</p>
@@ -1507,7 +1563,7 @@
         document.getElementById('trackerForm').addEventListener('submit', async (e) => {
             e.preventDefault(); const btnSubmit = document.getElementById('btn-submit-capture');
             const routeRaw = document.getElementById('routeInput').value.trim(); const speciesRaw = document.getElementById('speciesInput').value.trim();
-            const speciesClean = speciesRaw.toLowerCase().replace(/[^a-z0-9]/g, ''); const isShiny = document.getElementById('shinyInput').checked;
+            const isShiny = document.getElementById('shinyInput').checked;
             const p = getMyPlayer();
 
             const playerFailedRoutes = globalFailedRoutes[p] || [];
@@ -1521,8 +1577,9 @@
             btnSubmit.disabled = true; btnSubmit.innerHTML = "🔍 Pokédex...";
 
             try {
-                const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${speciesClean}`); if(!res.ok) throw new Error();
-                const mote = document.getElementById('nicknameInput').value.trim(); const specieFormatted = speciesRaw.charAt(0).toUpperCase() + speciesRaw.slice(1).toLowerCase();
+                const speciesSlug = await resolveSpeciesSlug(speciesRaw);
+                const res = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${speciesSlug}`); if(!res.ok) throw new Error();
+                const mote = document.getElementById('nicknameInput').value.trim(); const specieFormatted = getSpeciesEnglishName(await res.json());
                 const data = { ruta: routeRaw, especie: specieFormatted, mote: mote, shiny: isShiny, inTeam: false, timestamp: Date.now() };
 
                 if (db) { push(ref(db, `usuarios/${p}/pokemon/vivos`), data); writeLog(p, `Capturado ${mote} (${specieFormatted}) en ${routeRaw}`); addPoints(p, 10); }
@@ -1634,7 +1691,7 @@
                     ${isOriginallyDead ? '<div class="absolute top-[-15px] right-[-15px] text-3xl">💀</div>' : ''}
                     <h3 class="font-bold text-xl uppercase truncate w-full mb-1">"${data.mote}"</h3><p class="text-sm font-bold text-gray-500 mb-2">${data.especie}</p>
                     <p class="text-xs text-blue-600 font-bold">📍 ${data.ruta}</p>
-                    <img onclick="window.openViewModal('${data.id}', '${data.jugador}', 'Vivo')" src="https://play.pokemonshowdown.com/sprites/${data.shiny ? 'gen5-shiny' : 'gen5'}/${data.especie.toLowerCase().replace(/[^a-z0-9]/g, '')}.png" class="pixel-art scale-[1.5] h-16 mb-4 cursor-pointer" onerror="this.src='https://play.pokemonshowdown.com/sprites/itemicons/pokeball.png';">
+                    <img onclick="window.openViewModal('${data.id}', '${data.jugador}', 'Vivo')" src="https://play.pokemonshowdown.com/sprites/${data.shiny ? 'gen5-shiny' : 'gen5'}/${getPokemonSpriteId(data.especie)}.png" class="pixel-art scale-[1.5] h-16 mb-4 cursor-pointer" onerror="this.src='https://play.pokemonshowdown.com/sprites/itemicons/pokeball.png';">
                     <div class="flex flex-col gap-2 w-full mt-auto">
                         <button onclick="window.openViewModal('${data.id}', '${data.jugador}', 'Vivo')" class="cartoon-btn-sm bg-yellow-100 border-yellow-800 text-yellow-800">ℹ️ Ficha</button>
                         ${isSelected ? `<button onclick="window.openEditModal('${data.id}')" class="cartoon-btn-sm teambuilder-action-btn bg-indigo-100 border-indigo-600 text-indigo-700 mb-2">⚙️ Personalizar</button>` : ''}
@@ -1830,7 +1887,7 @@
             const p = globalData.find(x => x.id === id && (!player || x.jugador === player) && (!state || x.estado === state));
             if(!p || p.jugador !== getMyPlayer()) return;
             document.getElementById('view-mote').innerText = `"${p.mote}" ${p.shiny ? '✨' : ''}`; document.getElementById('view-especie-ruta').innerText = `${p.especie} -📍 ${p.ruta}`;
-            document.getElementById('view-sprite').src = `https://play.pokemonshowdown.com/sprites/${p.shiny ? 'gen5-shiny' : 'gen5'}/${p.especie.toLowerCase().replace(/[^a-z0-9]/g, '')}.png`;
+            document.getElementById('view-sprite').src = `https://play.pokemonshowdown.com/sprites/${p.shiny ? 'gen5-shiny' : 'gen5'}/${getPokemonSpriteId(p.especie)}.png`;
             document.getElementById('view-level').innerText = p.nivel || '??'; document.getElementById('view-gender').innerText = p.gender || '---';
             document.getElementById('view-item').innerText = p.item || 'Ninguno';
             document.getElementById('view-ability').innerText = p.ability || '---';
@@ -1935,7 +1992,7 @@
         window.evolve = async function(id, btnElement) {
             let p = globalData.find(x => x.id === id); const originalText = btnElement.innerHTML; btnElement.innerHTML = "⏳ Buscando..."; btnElement.disabled = true;
             try {
-                const sName = p.especie.toLowerCase().replace(/[^a-z0-9]/g, ''); const res = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${sName}`);
+                const sName = await resolveSpeciesSlug(p.especie); const res = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${sName}`);
                 if (!res.ok) throw new Error(); const dataS = await res.json(); const resE = await fetch(dataS.evolution_chain.url); const dataE = await resE.json();
                 let queue = [dataE.chain]; let foundNode = null;
                 while (queue.length > 0) { let curr = queue.shift(); if (curr.species.name === sName) { foundNode = curr; break; } curr.evolves_to.forEach(c => queue.push(c)); }
@@ -1945,13 +2002,13 @@
                     else newSp = prompt(`🌟 Evolución múltiple (${foundNode.evolves_to.map(e => e.species.name).join(", ")}).\n¿A cuál ha evolucionado?`);
                 } else return alert("❌ Este Pokémon ya está en su fase final.");
                 if (newSp && newSp.trim() !== "") {
-                    const form = newSp.charAt(0).toUpperCase() + newSp.slice(1).toLowerCase();
+                    const form = await getSpeciesDisplayName(await resolveSpeciesSlug(newSp));
                     if(db) { await update(ref(db, `usuarios/${getMyPlayer()}/pokemon/vivos/${id}`), { especie: form }); writeLog(getMyPlayer(), `El Pokémon ${p.mote} evolucionó a ${form}`); }
                 }
             } catch (error) {
                 const manual = prompt("⚠️ Error de red.\nEscribe a mano a qué Pokémon evoluciona:");
                 if (manual && manual.trim() !== "") {
-                    const form = manual.trim().charAt(0).toUpperCase() + manual.trim().slice(1).toLowerCase();
+                    const form = formatSpeciesName(manual);
                     if(db) { await update(ref(db, `usuarios/${getMyPlayer()}/pokemon/vivos/${id}`), { especie: form }); writeLog(getMyPlayer(), `El Pokémon ${p.mote} evolucionó manualmente a ${form}`); }
                 }
             } finally { btnElement.innerHTML = originalText; btnElement.disabled = false; }
@@ -1962,7 +2019,7 @@
             if(!p || p.jugador !== getMyPlayer()) return alert('Solo puedes desevolucionar tus Pokémon.');
 
             try {
-                const sName = p.especie.toLowerCase().replace(/[^a-z0-9]/g, '');
+                const sName = await resolveSpeciesSlug(p.especie);
                 const res = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${sName}`);
                 if (!res.ok) return;
                 const dataS = await res.json();
@@ -1997,7 +2054,7 @@
                 prevSp = parentNode.species.name;
 
                 if (prevSp && prevSp.trim() !== "") {
-                    const form = prevSp.charAt(0).toUpperCase() + prevSp.slice(1).toLowerCase();
+                    const form = await getSpeciesDisplayName(prevSp);
                     if(db) {
                         await update(ref(db, `usuarios/${getMyPlayer()}/pokemon/vivos/${id}`), { especie: form });
                         writeLog(getMyPlayer(), `El Pokémon ${p.mote} fue desevolucionado a ${form} (BBC)`);
@@ -2074,7 +2131,7 @@
             return `<div class="col-span-full grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">` + list.map(data => `
                 <div class="poke-card cartoon-panel flex flex-col items-center text-center relative border-4 ${isDead ? 'grayscale-dead' : (data.shiny ? 'shiny-bg' : 'bg-white')}" data-search="${data.ruta} ${data.especie} ${data.mote}">
                     <h3 class="font-bold text-lg uppercase truncate w-full mb-1">"${data.mote}" ${data.shiny ? '✨' : ''}</h3><p class="text-sm font-bold text-gray-500 mb-2">${data.especie}</p>
-                    <img ${isPublicView ? '' : `onclick="window.openViewModal('${data.id}', '${data.jugador}', '${data.estado}')"`} src="https://play.pokemonshowdown.com/sprites/${data.shiny ? 'gen5-shiny' : 'gen5'}/${data.especie.toLowerCase().replace(/[^a-z0-9]/g, '')}.png" class="pixel-art scale-[1.5] h-16 mb-2 ${isPublicView ? '' : 'cursor-pointer'}" onerror="this.src='https://play.pokemonshowdown.com/sprites/itemicons/pokeball.png';">
+                    <img ${isPublicView ? '' : `onclick="window.openViewModal('${data.id}', '${data.jugador}', '${data.estado}')"`} src="https://play.pokemonshowdown.com/sprites/${data.shiny ? 'gen5-shiny' : 'gen5'}/${getPokemonSpriteId(data.especie)}.png" class="pixel-art scale-[1.5] h-16 mb-2 ${isPublicView ? '' : 'cursor-pointer'}" onerror="this.src='https://play.pokemonshowdown.com/sprites/itemicons/pokeball.png';">
                     <p class="text-[10px] text-gray-400 font-black tracking-wider uppercase mb-2">📍 ${data.ruta}</p>
                     ${isDead && data.dedicatoria ? `<p class="text-xs text-gray-600 italic mb-2 px-2">"${data.dedicatoria}"</p>` : ''}
                     <div class="flex flex-col gap-2 w-full mt-auto">
