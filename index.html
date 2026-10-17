@@ -390,7 +390,6 @@
             <div class="flex items-center gap-4 mb-3">
                 <label class="font-bold text-gray-700">Ver equipo de:</label>
                 <select id="profile-gym-selector" onchange="window.updateProfileView()" class="cartoon-input p-2 text-lg">
-                    <option value="">-- Equipo Actual --</option>
                     <option value="1">Gimnasio 1</option>
                     <option value="2">Gimnasio 2</option>
                     <option value="3">Gimnasio 3</option>
@@ -555,44 +554,6 @@
         </div>
     </div>
 
-    <!-- MODAL SELECCIÓN EQUIPO PARA MEDALLA -->
-    <div id="modal-badge-team" class="modal-overlay">
-        <div class="cartoon-panel modal-content bg-white relative p-6">
-            <button type="button" onclick="document.getElementById('modal-badge-team').style.display='none'" class="absolute top-4 right-4 text-2xl font-black text-gray-500">X</button>
-            <h2 class="title-font text-3xl text-center text-amber-700 mb-2">🏅 EQUIPO PARA LA MEDALLA</h2>
-            <p id="badge-team-name" class="text-center font-bold text-gray-500 mb-4 uppercase"></p>
-            <input type="hidden" id="badge-id-temp">
-            <div class="space-y-4">
-                <button onclick="window.useCurrentTeamForBadge()" class="cartoon-btn w-full bg-blue-500 hover:bg-blue-400 text-white text-xl py-4">
-                    ⚔️ Usar Equipo Actual
-                </button>
-                <button onclick="window.configTeamForBadge()" class="cartoon-btn w-full bg-green-500 hover:bg-green-400 text-white text-xl py-4">
-                    ✏️ Configurar Equipo Manualmente
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- PANTALLA CONFIGURAR EQUIPO PARA MEDALLA -->
-    <div id="screen-badge-team-config" class="w-full max-w-6xl hidden flex-col mt-4">
-        <div class="flex justify-between items-center mb-4 gap-2">
-            <button onclick="nav('badges')" class="cartoon-btn-sm">⬅ VOLVER</button>
-            <h2 class="title-font text-3xl md:text-4xl text-white text-shadow-hard uppercase">⚔️ CONFIGURAR EQUIPO</h2>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="cartoon-panel p-4 bg-gray-50">
-                <h3 class="title-font text-2xl text-center text-gray-800 mb-4">📋 TUS POKÉMON</h3>
-                <input type="text" id="search-badge-poke" oninput="window.filterBadgePoke(this.value)" placeholder="🔍 Buscar..." class="cartoon-input w-full p-3 text-lg shadow-lg mb-4">
-                <div id="badge-poke-list" class="grid grid-cols-2 gap-3 max-h-[500px] overflow-y-auto"></div>
-            </div>
-            <div class="cartoon-panel p-4 bg-blue-50">
-                <h3 class="title-font text-2xl text-center text-blue-800 mb-4">⚔️ EQUIPO SELECCIONADO (máx 6)</h3>
-                <div id="badge-selected-team" class="space-y-3 max-h-[500px] overflow-y-auto mb-4"></div>
-                <input type="hidden" id="badge-id-config">
-                <button onclick="window.saveBadgeTeam()" class="cartoon-btn w-full bg-green-500 hover:bg-green-400 text-white text-xl py-3">💾 GUARDAR EQUIPO Y MEDALLA</button>
-            </div>
-        </div>
-    </div>
 
     <!-- SCRIPT PRINCIPAL -->
     <script type="module">
@@ -874,7 +835,7 @@
         window.adminUnlock = function() { if(prompt("🔒 Contraseña:")==="adminlocke") { localStorage.removeItem('pawPatrolUser'); alert("🔓 Desvinculado."); window.updateProfileView(); updateCoinDisplay(); } }
 
         window.nav = function(targetScreen) {
-            if (['add', 'capture-select', 'capture-failed', 'teambuilder', 'badges', 'gacha', 'collectibles', 'revive', 'ban-select', 'repel', 'badge-team-config'].includes(targetScreen) && !getMyPlayer()) {
+            if (['add', 'capture-select', 'capture-failed', 'teambuilder', 'badges', 'gacha', 'collectibles', 'revive', 'ban-select', 'repel'].includes(targetScreen) && !getMyPlayer()) {
                 alert("⚠️ Primero debes ir a 'Mi Perfil' y vincular este dispositivo."); return window.nav('profile');
             }
             if(targetScreen === 'ban-select') selectedBanPlayer = '';
@@ -903,10 +864,6 @@
             if(currentScreen === 'revive') window.updateReviveSelectionView();
             if(currentScreen === 'ban-select') window.updateBanSelectionView();
             if(currentScreen === 'gacha') updateDailyTimer();
-            if(currentScreen === 'badge-team-config') {
-                window.renderBadgePokeList();
-                window.renderBadgeSelectedTeam();
-            }
             if(currentScreen === 'add') {
                 const p = getMyPlayer();
                 const playerFailedRoutes = globalFailedRoutes[p] || [];
@@ -1303,45 +1260,57 @@
 
         window.updateBadgesView = function() {
             const player = getMyPlayer(); const container = document.getElementById('grid-badges'); container.innerHTML = ''; const myBadges = globalBadges[player] || {};
-            GYM_BADGES.forEach(badge => {
+            GYM_BADGES.forEach((badge, index) => {
                 const unlocked = myBadges[badge.id] === true;
-                container.innerHTML += `<div class="flex flex-col items-center"><div class="${unlocked ? 'badge-slot unlocked' : 'badge-slot'}" onclick="window.toggleBadge('${badge.id}', '${badge.name}', ${unlocked})">${unlocked ? badge.icon : '🔒'}</div><p class="font-bold text-gray-700 mt-2 text-sm">${unlocked ? badge.name : '???'}</p></div>`;
+                // Para la primera medalla (b1), usar la imagen Medalla1.png
+                if(badge.id === 'b1') {
+                    container.innerHTML += `<div class="flex flex-col items-center"><div class="${unlocked ? 'badge-slot unlocked' : 'badge-slot'}" onclick="window.toggleBadge('${badge.id}', '${badge.name}', ${unlocked})">${unlocked ? `<img src="Medalla1.png" class="w-16 h-16 object-contain cursor-pointer" onclick="event.stopPropagation(); window.enlargeBadge('Medalla1.png')">` : '🔒'}</div><p class="font-bold text-gray-700 mt-2 text-sm">${unlocked ? badge.name : '???'}</p></div>`;
+                } else {
+                    container.innerHTML += `<div class="flex flex-col items-center"><div class="${unlocked ? 'badge-slot unlocked' : 'badge-slot'}" onclick="window.toggleBadge('${badge.id}', '${badge.name}', ${unlocked})">${unlocked ? badge.icon : '🔒'}</div><p class="font-bold text-gray-700 mt-2 text-sm">${unlocked ? badge.name : '???'}</p></div>`;
+                }
             });
+        }
+
+        window.enlargeBadge = function(imageSrc) {
+            // Crear modal temporal para mostrar la imagen grande
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.style.display = 'flex';
+            modal.innerHTML = `
+                <div class="cartoon-panel modal-content bg-white relative p-6 text-center">
+                    <button type="button" class="absolute top-4 right-4 text-2xl font-black text-gray-500">X</button>
+                    <img src="${imageSrc}" class="max-w-full max-h-[80vh] object-contain mx-auto">
+                </div>
+            `;
+            modal.querySelector('button').onclick = () => modal.remove();
+            modal.onclick = (e) => { if(e.target === modal) modal.remove(); };
+            document.body.appendChild(modal);
         }
         window.toggleBadge = function(badgeId, badgeName, isUnlocked) {
             if(isUnlocked) return alert("Ya tienes esta medalla.");
-            document.getElementById('badge-id-temp').value = badgeId;
-            document.getElementById('badge-team-name').innerText = badgeName;
 
             // Determinar el número de gimnasio basado en el ID de la medalla
             const gymMap = { 'b1': '1', 'b2': '2', 'b3': '3', 'b4': '4', 'b5': '5', 'b6': '6', 'b7': '7', 'b8': '8', 'b9': 'league' };
             const gymNumber = gymMap[badgeId] || '';
 
-            // Cambiar el texto del botón
-            const useTeamBtn = document.querySelector('#modal-badge-team button[onclick="window.useCurrentTeamForBadge()"]');
-            if(gymNumber && gymNumber !== 'league') {
-                useTeamBtn.innerText = `⚔️ Usar Equipo del Gimnasio ${gymNumber}`;
-            } else if(gymNumber === 'league') {
-                useTeamBtn.innerText = `⚔️ Usar Equipo de la Liga`;
-            } else {
-                useTeamBtn.innerText = `⚔️ Usar Equipo Actual`;
-            }
-
-            document.getElementById('modal-badge-team').style.display = 'flex';
+            // Usar automáticamente el equipo del gimnasio correspondiente
+            window.useCurrentTeamForBadge(badgeId, gymNumber);
         }
 
-        window.useCurrentTeamForBadge = function() {
-            const badgeId = document.getElementById('badge-id-temp').value;
+        window.useCurrentTeamForBadge = function(badgeId = null, gymNumber = null) {
             const p = getMyPlayer();
 
-            // Determinar el número de gimnasio basado en el ID de la medalla
-            const gymMap = { 'b1': '1', 'b2': '2', 'b3': '3', 'b4': '4', 'b5': '5', 'b6': '6', 'b7': '7', 'b8': '8', 'b9': 'league' };
-            const gymNumber = gymMap[badgeId];
+            // Si no se pasan parámetros, obtenerlos del modal
+            if(!badgeId) badgeId = document.getElementById('badge-id-temp').value;
+            if(!gymNumber) {
+                const gymMap = { 'b1': '1', 'b2': '2', 'b3': '3', 'b4': '4', 'b5': '5', 'b6': '6', 'b7': '7', 'b8': '8', 'b9': 'league' };
+                gymNumber = gymMap[badgeId];
+            }
 
             // Obtener equipo guardado para el gimnasio
             const gymTeam = globalEquiposGimnasio[p]?.[gymNumber] || [];
 
-            if(gymTeam.length === 0) return alert(`❌ No tienes un equipo guardado para el ${gymNumber === 'league' ? 'Liga' : 'Gimnasio ' + gymNumber}. Ve a 'Formar Equipo' y crea uno.`);
+            if(gymTeam.length === 0) return alert(`❌ No tienes un equipo asignado al ${gymNumber === 'league' ? 'Liga' : 'Gimnasio ' + gymNumber}. Ve a 'Formar Equipo' y asigna uno antes de recibir la medalla.`);
 
             const teamData = gymTeam.map(poke => ({ especie: poke.especie, mote: poke.mote, shiny: poke.shiny }));
 
@@ -1352,175 +1321,18 @@
                 ]).then(() => {
                     writeLog(p, `Conseguida la medalla con el equipo del ${gymNumber === 'league' ? 'Liga' : 'Gimnasio ' + gymNumber}`);
                     addPoints(p, 50);
-                    document.getElementById('modal-badge-team').style.display = 'none';
                     alert(`✅ ¡Medalla registrada con el equipo del ${gymNumber === 'league' ? 'Liga' : 'Gimnasio ' + gymNumber}! (+50 🪙)`);
                     nav('badges');
                 }).catch((error) => {
                     console.error('Error al registrar medalla:', error);
-                    document.getElementById('modal-badge-team').style.display = 'none';
-                    alert("❌ Error al registrar la medalla: " + error.message);
-                });
-            } else {
-                document.getElementById('modal-badge-team').style.display = 'none';
-                alert("❌ No hay conexión a la base de datos");
-            }
-        }
-
-        window.configTeamForBadge = function() {
-            const badgeId = document.getElementById('badge-id-temp').value;
-            document.getElementById('badge-id-config').value = badgeId;
-            document.getElementById('modal-badge-team').style.display = 'none';
-            badgeSelectedTeam = [];
-            window.renderBadgePokeList();
-            window.renderBadgeSelectedTeam();
-            nav('badge-team-config');
-        }
-
-        let badgeSelectedTeam = [];
-
-        window.renderBadgePokeList = function() {
-            const p = getMyPlayer();
-            const myPoke = globalData.filter(x => x.jugador === p && x.estado === 'Vivo');
-            const container = document.getElementById('badge-poke-list');
-            const search = document.getElementById('search-badge-poke').value.toLowerCase();
-
-            const filtered = myPoke.filter(x => x.mote.toLowerCase().includes(search) || x.especie.toLowerCase().includes(search));
-
-            container.innerHTML = filtered.map(poke => `
-                <div class="cartoon-panel p-3 text-center bg-white ${badgeSelectedTeam.find(t => t.id === poke.id) ? 'opacity-50' : ''}">
-                    <img src="https://play.pokemonshowdown.com/sprites/${poke.shiny ? 'gen5-shiny' : 'gen5'}/${getPokemonSpriteId(poke.especie)}.png" class="pixel-art h-12 mb-2">
-                    <p class="font-bold text-sm truncate">"${poke.mote}"</p>
-                    <p class="text-xs text-gray-500">${poke.especie}</p>
-                    <button onclick="window.addToBadgeTeam('${poke.id}')" ${badgeSelectedTeam.find(t => t.id === poke.id) ? 'disabled' : ''} class="cartoon-btn-sm mt-2 ${badgeSelectedTeam.find(t => t.id === poke.id) ? 'bg-gray-300' : 'bg-blue-100 text-blue-800'}">➕ Añadir</button>
-                </div>
-            `).join('');
-        }
-
-        window.filterBadgePoke = function(value) {
-            window.renderBadgePokeList();
-        }
-
-        window.addToBadgeTeam = function(id) {
-            if(badgeSelectedTeam.length >= 6) return alert("❌ Máximo 6 Pokémon en el equipo.");
-            const poke = globalData.find(x => x.id === id);
-            if(!poke) return;
-
-            badgeSelectedTeam.push({
-                id: poke.id,
-                especie: poke.especie,
-                mote: poke.mote,
-                ruta: poke.ruta,
-                shiny: poke.shiny,
-                nivel: poke.nivel || '',
-                item: poke.item || '',
-                ability: poke.ability || '',
-                nature: poke.nature || '',
-                moves: poke.moves || ['', '', '', '']
-            });
-
-            window.renderBadgePokeList();
-            window.renderBadgeSelectedTeam();
-        }
-
-        window.removeFromBadgeTeam = function(id) {
-            badgeSelectedTeam = badgeSelectedTeam.filter(t => t.id !== id);
-            window.renderBadgePokeList();
-            window.renderBadgeSelectedTeam();
-        }
-
-        window.renderBadgeSelectedTeam = function() {
-            const container = document.getElementById('badge-selected-team');
-            if(badgeSelectedTeam.length === 0) {
-                container.innerHTML = '<p class="text-center text-gray-500 font-bold">No hay Pokémon seleccionados</p>';
-                return;
-            }
-
-            container.innerHTML = badgeSelectedTeam.map((poke, index) => `
-                <div class="cartoon-panel p-3 bg-white border-2 border-blue-300">
-                    <div class="flex justify-between items-center mb-2">
-                        <div class="flex items-center gap-2">
-                            <img src="https://play.pokemonshowdown.com/sprites/${poke.shiny ? 'gen5-shiny' : 'gen5'}/${getPokemonSpriteId(poke.especie)}.png" class="pixel-art h-10">
-                            <div>
-                                <p class="font-bold text-sm">"${poke.mote}"</p>
-                                <p class="text-xs text-gray-500">${poke.especie}</p>
-                            </div>
-                        </div>
-                        <button onclick="window.removeFromBadgeTeam('${poke.id}')" class="text-red-500 font-bold text-xl">✕</button>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2 text-xs">
-                        <div><label class="font-bold">Nivel:</label><input type="number" value="${poke.nivel}" onchange="window.updateBadgePokeField('${poke.id}', 'nivel', this.value)" class="cartoon-input w-full p-1"></div>
-                        <div><label class="font-bold">Objeto:</label><input type="text" value="${poke.item}" onchange="window.updateBadgePokeField('${poke.id}', 'item', this.value)" class="cartoon-input w-full p-1"></div>
-                        <div><label class="font-bold">Habilidad:</label><input type="text" value="${poke.ability}" onchange="window.updateBadgePokeField('${poke.id}', 'ability', this.value)" class="cartoon-input w-full p-1"></div>
-                        <div><label class="font-bold">Naturaleza:</label><input type="text" value="${poke.nature}" onchange="window.updateBadgePokeField('${poke.id}', 'nature', this.value)" class="cartoon-input w-full p-1"></div>
-                    </div>
-                    <div class="mt-2">
-                        <label class="font-bold text-xs">Ataques:</label>
-                        <div class="grid grid-cols-2 gap-1">
-                            <input type="text" value="${poke.moves[0] || ''}" onchange="window.updateBadgePokeMove('${poke.id}', 0, this.value)" class="cartoon-input w-full p-1 text-xs" placeholder="Ataque 1">
-                            <input type="text" value="${poke.moves[1] || ''}" onchange="window.updateBadgePokeMove('${poke.id}', 1, this.value)" class="cartoon-input w-full p-1 text-xs" placeholder="Ataque 2">
-                            <input type="text" value="${poke.moves[2] || ''}" onchange="window.updateBadgePokeMove('${poke.id}', 2, this.value)" class="cartoon-input w-full p-1 text-xs" placeholder="Ataque 3">
-                            <input type="text" value="${poke.moves[3] || ''}" onchange="window.updateBadgePokeMove('${poke.id}', 3, this.value)" class="cartoon-input w-full p-1 text-xs" placeholder="Ataque 4">
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        window.updateBadgePokeField = function(id, field, value) {
-            const poke = badgeSelectedTeam.find(t => t.id === id);
-            if(poke) poke[field] = value;
-        }
-
-        window.updateBadgePokeMove = function(id, index, value) {
-            const poke = badgeSelectedTeam.find(t => t.id === id);
-            if(poke) poke.moves[index] = value;
-        }
-
-        window.saveBadgeTeam = function() {
-            if(badgeSelectedTeam.length === 0) return alert("❌ Debes añadir al menos 1 Pokémon al equipo.");
-            const badgeId = document.getElementById('badge-id-config').value;
-            const p = getMyPlayer();
-
-            const badge = GYM_BADGES.find(b => b.id === badgeId);
-            const maxLevel = badge ? badge.maxLevel : 999;
-
-            for(let poke of badgeSelectedTeam) {
-                const level = parseInt(poke.nivel) || 0;
-                if(level > maxLevel) {
-                    return alert(`❌ El nivel de "${poke.mote}" (${level}) supera el máximo permitido para la ${badge.name} (Nivel máximo: ${maxLevel}).`);
-                }
-            }
-
-            const teamData = badgeSelectedTeam.map(poke => ({
-                especie: poke.especie,
-                mote: poke.mote,
-                ruta: poke.ruta,
-                shiny: poke.shiny,
-                nivel: poke.nivel,
-                item: poke.item,
-                ability: poke.ability,
-                nature: poke.nature,
-                moves: poke.moves
-            }));
-
-            if(db) {
-                Promise.all([
-                    update(ref(db, `usuarios/${p}/medallas`), { [badgeId]: true }),
-                    set(ref(db, `usuarios/${p}/equiposMedallas/${badgeId}`), teamData)
-                ]).then(() => {
-                    writeLog(p, `Conseguida la medalla con equipo configurado manualmente`);
-                    addPoints(p, 50);
-                    badgeSelectedTeam = [];
-                    alert("✅ ¡Medalla registrada con el equipo configurado! (+50 🪙)");
-                    nav('badges');
-                }).catch((error) => {
-                    console.error('Error al registrar medalla:', error);
                     alert("❌ Error al registrar la medalla: " + error.message);
                 });
             } else {
                 alert("❌ No hay conexión a la base de datos");
             }
         }
+
+
 
         // --- CAPTURA FALLIDA ---
         document.getElementById('failedCaptureForm').addEventListener('submit', async (e) => {
@@ -1609,7 +1421,13 @@
 
             const gymSelector = document.getElementById('profile-gym-selector');
             const gymTeamsDiv = document.getElementById('profile-gym-teams');
-            const selectedGym = gymSelector.value;
+            let selectedGym = gymSelector.value;
+
+            // Si no hay gimnasio seleccionado, seleccionar el primero por defecto
+            if(!selectedGym) {
+                selectedGym = '1';
+                gymSelector.value = '1';
+            }
 
             // Mostrar desplegable si hay equipos guardados o siempre mostrarlo
             gymTeamsDiv.classList.remove('hidden');
@@ -1617,25 +1435,19 @@
             const myActive = globalData.filter(x => x.jugador === p && x.estado === 'Vivo');
             let myTeam, myBox;
 
-            if(selectedGym) {
-                // Mostrar SOLO el equipo guardado para el gimnasio
-                const gymTeam = globalEquiposGimnasio[p]?.[selectedGym] || [];
-                if(gymTeam.length > 0) {
-                    // Añadir propiedades necesarias para generateCardsHTML
-                    myTeam = gymTeam.map(poke => ({
-                        ...poke,
-                        jugador: p,
-                        estado: 'Vivo'
-                    }));
-                    myBox = []; // No mostrar mochila cuando se ve equipo de gimnasio
-                } else {
-                    myTeam = [];
-                    myBox = [];
-                }
+            // Mostrar SOLO el equipo guardado para el gimnasio
+            const gymTeam = globalEquiposGimnasio[p]?.[selectedGym] || [];
+            if(gymTeam.length > 0) {
+                // Añadir propiedades necesarias para generateCardsHTML
+                myTeam = gymTeam.map(poke => ({
+                    ...poke,
+                    jugador: p,
+                    estado: 'Vivo'
+                }));
+                myBox = []; // No mostrar mochila cuando se ve equipo de gimnasio
             } else {
-                // Equipo actual normal
-                myTeam = myActive.filter(x => x.inTeam);
-                myBox = myActive.filter(x => !x.inTeam);
+                myTeam = [];
+                myBox = [];
             }
 
             const myDead = globalData.filter(x => x.jugador === p && x.estado === 'Muerto');
@@ -1644,9 +1456,12 @@
             // Filtrar Pokémon bloqueados por otros jugadores (que están en vivos pero tienen baneos)
             const myBlocked = myActive.filter(x => x.baneos && Object.keys(x.baneos).length > 0);
 
-            const teamTitle = selectedGym ? `⚔️ Equipo ${selectedGym === 'league' ? 'Liga' : 'Gimnasio ' + selectedGym}` : '⚔️ Equipo Actual';
+            const teamTitle = `⚔️ Equipo ${selectedGym === 'league' ? 'Liga' : 'Gimnasio ' + selectedGym}`;
 
-            document.getElementById('grid-profile').innerHTML = `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase">${teamTitle}</h3></div>` + generateCardsHTML(myTeam, false, false, true, false, true, true, false) + (selectedGym ? '' : `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">🌟 Mochila (PC)</h3></div>` + generateCardsHTML(myBox, true, false, false, false, true, true, false)) + `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">🪦 Cementerio</h3></div>` + generateCardsHTML(myDead, false, true, false, false, true, false, false, false, true) + (myBlocked.length > 0 ? `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">🔒 Bloqueados</h3></div>` + generateCardsHTML(myBlocked, false, false, false, false, false, false, true) : '') + `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">⛔ Baneados</h3></div>` + generateCardsHTML(myBanned, false, false, false, true, true, false, false);        };
+            // Determinar si se permite matar Pokémon (no en gimnasio 1 o 2)
+            const allowKill = selectedGym !== '1' && selectedGym !== '2';
+
+            document.getElementById('grid-profile').innerHTML = `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase">${teamTitle}</h3></div>` + generateCardsHTML(myTeam, false, false, true, false, true, true, false, false, false, allowKill) + `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">🪦 Cementerio</h3></div>` + generateCardsHTML(myDead, false, true, false, false, true, false, false, false, true) + (myBlocked.length > 0 ? `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">🔒 Bloqueados</h3></div>` + generateCardsHTML(myBlocked, false, false, false, false, false, false, true) : '') + `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">⛔ Baneados</h3></div>` + generateCardsHTML(myBanned, false, false, false, true, true, false, false);        };
 
         // Variable temporal para el teambuilder de gimnasio
         let gymTeamSelection = [];
@@ -1682,7 +1497,7 @@
                 gymTeamSelection = savedTeam.map(poke => poke.id);
             }
 
-            document.getElementById('grid-teambuilder').innerHTML = `<div class="col-span-full text-center title-font text-2xl text-gray-700 mb-2">Miembros actuales: ${gymTeamSelection.length}/6</div>` + myActive.map(data => {
+            document.getElementById('grid-teambuilder').innerHTML = `<div class="col-span-full text-center title-font text-2xl text-gray-700 mb-2">Miembros actuales: ${gymTeamSelection.length}/6 (puede estar vacío)</div>` + myActive.map(data => {
                 const isSelected = gymTeamSelection.includes(data.id);
                 const isOriginallyDead = data._originalEstado === 'Muerto';
                 return `
@@ -1763,8 +1578,6 @@
 
             if(!gymNumber) return alert("❌ Debes seleccionar un gimnasio o la liga para guardar el equipo.");
 
-            if(gymTeamSelection.length === 0) return alert("❌ No tienes Pokémon seleccionados para el equipo.");
-
             // Obtener los datos completos de los Pokémon seleccionados
             // Para gimnasio 1 y 2, permitir también muertos
             const selectedPokemon = gymTeamSelection.map(id => {
@@ -1797,7 +1610,7 @@
             if(db) {
                 set(ref(db, `usuarios/${p}/equipos/${gymNumber}`), teamData)
                     .then(() => {
-                        alert(`✅ Equipo guardado para ${gymNumber === 'league' ? 'Liga' : 'Gimnasio ' + gymNumber}`);
+                        alert(`✅ Equipo guardado para ${gymNumber === 'league' ? 'Liga' : 'Gimnasio ' + gymNumber} (${teamData.length === 0 ? 'vacío' : teamData.length + ' Pokémon'})`);
                         gymTeamSelection = []; // Limpiar selección después de guardar
                     })
                     .catch((error) => {
@@ -2092,6 +1905,18 @@
                     if(dedicatoria) copyData.dedicatoria = dedicatoria;
                     set(ref(db, `usuarios/${p}/pokemon/muertos/${id}`), copyData).then(() => {
                         remove(ref(db, `usuarios/${p}/pokemon/vivos/${id}`));
+
+                        // Eliminar el Pokémon de los equipos de gimnasio (excepto 1 y 2)
+                        const gymTeamsToRemoveFrom = ['3', '4', '5', '6', '7', '8', 'league'];
+                        gymTeamsToRemoveFrom.forEach(gymNum => {
+                            const gymTeam = globalEquiposGimnasio[p]?.[gymNum] || [];
+                            const filteredTeam = gymTeam.filter(poke => poke.id !== id);
+                            if(filteredTeam.length !== gymTeam.length) {
+                                // El Pokémon estaba en este equipo, actualizarlo
+                                set(ref(db, `usuarios/${p}/equipos/${gymNum}`), filteredTeam);
+                            }
+                        });
+
                         writeLog(p, `¡BAJA! ${pokeData.mote} (${pokeData.especie}) ha muerto.`); addPoints(p, -10);
                         document.getElementById('modal-dedicatoria').style.display = 'none';
                         alert(`💀 ${pokeData.mote} ha pasado al cementerio.`);
@@ -2126,7 +1951,7 @@
             }
         });
 
-        function generateCardsHTML(list, isInteractive = false, isDead = false, isViewMode = false, isBanned = false, canEditCapture = false, showBBC = false, isPublicView = false, showUnban = false, showEditDedicatoria = false) {
+        function generateCardsHTML(list, isInteractive = false, isDead = false, isViewMode = false, isBanned = false, canEditCapture = false, showBBC = false, isPublicView = false, showUnban = false, showEditDedicatoria = false, allowKill = false) {
             if (list.length === 0) return `<div class="col-span-full cartoon-panel p-6 text-center font-bold">No hay registros.</div>`;
             return `<div class="col-span-full grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">` + list.map(data => `
                 <div class="poke-card cartoon-panel flex flex-col items-center text-center relative border-4 ${isDead ? 'grayscale-dead' : (data.shiny ? 'shiny-bg' : 'bg-white')}" data-search="${data.ruta} ${data.especie} ${data.mote}">
@@ -2141,7 +1966,7 @@
                         ${showBBC && !isDead && !isBanned && !isPublicView ? `<button onclick="window.deevolve('${data.id}')" class="cartoon-btn-sm profile-edit-btn bg-purple-100 border-purple-700 text-purple-900">🔄 BBC</button>` : ''}
                         ${showUnban && !isPublicView ? `<button onclick="window.unbanPokemon('${data.id}')" class="cartoon-btn-sm profile-edit-btn bg-green-100 border-green-700 text-green-900">🔓 Desbloquear</button>` : ''}
                         ${isPublicView && (isBanned || data.baneadoPor || Object.keys(data.baneos || {}).length > 0 || data.revividoPor) ? `<div class="w-full rounded-xl border-2 border-amber-300 bg-amber-50 p-2 text-left text-xs font-bold text-gray-800">${isBanned || data.baneadoPor || Object.keys(data.baneos || {}).length > 0 ? `<p>🚫 Tarjeta Roja: ${data.baneadoPor || Object.keys(data.baneos || {}).join(', ')}</p>` : ''}${data.revividoPor ? '<p>💚 Revivido: Sí</p>' : ''}</div>` : ''}
-                        ${isBanned ? `<div class="bg-red-800 text-white text-sm font-bold py-2 rounded-xl w-full">⛔ BANEADO${data.baneadoPor ? ` POR ${data.baneadoPor.toUpperCase()}` : ''}</div>` : (isInteractive ? `<button onclick="window.evolve('${data.id}', this)" class="cartoon-btn-sm bg-blue-100 border-blue-800 text-blue-800">🌟 Evolucionar</button><button onclick="window.kill('${data.id}')" class="cartoon-btn-sm bg-red-100 border-red-800 text-red-800">💀 Ha muerto</button>` : (isDead ? `<div class="bg-gray-800 text-white text-sm font-bold py-1 rounded-full w-full">DEBILITADO</div>` : ''))}
+                        ${isBanned ? `<div class="bg-red-800 text-white text-sm font-bold py-2 rounded-xl w-full">⛔ BANEADO${data.baneadoPor ? ` POR ${data.baneadoPor.toUpperCase()}` : ''}</div>` : (isInteractive ? `<button onclick="window.evolve('${data.id}', this)" class="cartoon-btn-sm bg-blue-100 border-blue-800 text-blue-800">🌟 Evolucionar</button><button onclick="window.kill('${data.id}')" class="cartoon-btn-sm bg-red-100 border-red-800 text-red-800">💀 Ha muerto</button>` : (allowKill && !isDead ? `<button onclick="window.kill('${data.id}')" class="cartoon-btn-sm bg-red-100 border-red-800 text-red-800">💀 Ha muerto</button>` : (isDead ? `<div class="bg-gray-800 text-white text-sm font-bold py-1 rounded-full w-full">DEBILITADO</div>` : '')))}
                     </div>
                 </div>`).join('') + `</div>`;
         }
