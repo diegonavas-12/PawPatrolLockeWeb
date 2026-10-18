@@ -1277,9 +1277,9 @@
             modal.className = 'modal-overlay';
             modal.style.display = 'flex';
             modal.innerHTML = `
-                <div class="cartoon-panel modal-content bg-white relative p-6 text-center">
-                    <button type="button" class="absolute top-4 right-4 text-2xl font-black text-gray-500">X</button>
-                    <img src="${imageSrc}" class="max-w-full max-h-[80vh] object-contain mx-auto">
+                <div class="cartoon-panel modal-content bg-white relative p-6 text-center" style="max-width: 800px;">
+                    <button type="button" class="absolute top-4 right-4 text-2xl font-black text-gray-500 cursor-pointer hover:text-red-500">X</button>
+                    <img src="${imageSrc}" class="w-full h-auto object-contain mx-auto" style="max-height: 85vh;">
                 </div>
             `;
             modal.querySelector('button').onclick = () => modal.remove();
@@ -1437,18 +1437,13 @@
 
             // Mostrar SOLO el equipo guardado para el gimnasio
             const gymTeam = globalEquiposGimnasio[p]?.[selectedGym] || [];
-            if(gymTeam.length > 0) {
-                // Añadir propiedades necesarias para generateCardsHTML
-                myTeam = gymTeam.map(poke => ({
-                    ...poke,
-                    jugador: p,
-                    estado: 'Vivo'
-                }));
-                myBox = []; // No mostrar mochila cuando se ve equipo de gimnasio
-            } else {
-                myTeam = [];
-                myBox = [];
-            }
+            // Añadir propiedades necesarias para generateCardsHTML
+            myTeam = gymTeam.map(poke => ({
+                ...poke,
+                jugador: p,
+                estado: 'Vivo'
+            }));
+            myBox = []; // No mostrar mochila cuando se ve equipo de gimnasio
 
             const myDead = globalData.filter(x => x.jugador === p && x.estado === 'Muerto');
             const myBanned = globalData.filter(x => x.jugador === p && x.estado === 'Baneado');
@@ -1461,13 +1456,15 @@
             // Determinar si se permite matar Pokémon (no en gimnasio 1 o 2)
             const allowKill = selectedGym !== '1' && selectedGym !== '2';
 
-            document.getElementById('grid-profile').innerHTML = `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase">${teamTitle}</h3></div>` + generateCardsHTML(myTeam, false, false, true, false, true, true, false, false, false, allowKill) + `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">🪦 Cementerio</h3></div>` + generateCardsHTML(myDead, false, true, false, false, true, false, false, false, true) + (myBlocked.length > 0 ? `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">🔒 Bloqueados</h3></div>` + generateCardsHTML(myBlocked, false, false, false, false, false, false, true) : '') + `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">⛔ Baneados</h3></div>` + generateCardsHTML(myBanned, false, false, false, true, true, false, false);        };
+            document.getElementById('grid-profile').innerHTML = `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase">${teamTitle}</h3></div>` + generateCardsHTML(myTeam, false, false, true, false, true, true, false, false, false, allowKill, 'Equipo vacío. Ve a "Formar Equipo" para asignar Pokémon.') + `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">🪦 Cementerio</h3></div>` + generateCardsHTML(myDead, false, true, false, false, true, false, false, false, true) + (myBlocked.length > 0 ? `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">🔒 Bloqueados</h3></div>` + generateCardsHTML(myBlocked, false, false, false, false, false, false, true) : '') + `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">⛔ Baneados</h3></div>` + generateCardsHTML(myBanned, false, false, false, true, true, false, false);        };
 
         // Variable temporal para el teambuilder de gimnasio
         let gymTeamSelection = [];
+        let gymTeamSelectionLoaded = {}; // Para controlar si ya se cargó el equipo de cada gimnasio
 
         window.onGymSelectorChange = function() {
             gymTeamSelection = []; // Limpiar selección al cambiar de gimnasio
+            gymTeamSelectionLoaded[document.getElementById('teambuilder-gym-selector').value] = false; // Marcar como no cargado
             window.updateTeambuilderView();
         }
 
@@ -1491,15 +1488,17 @@
             // Filtrar por gimnasio
             myActive = myActive.filter(x => isPokemonAllowedForGym(x.ruta, gymNumber));
 
-            // Cargar equipo guardado para este gimnasio si no está cargado
-            const savedTeam = globalEquiposGimnasio[p]?.[gymNumber] || [];
-            if(savedTeam.length > 0 && gymTeamSelection.length === 0) {
+            // Cargar equipo guardado solo la primera vez que se entra al gimnasio
+            if(!gymTeamSelectionLoaded[gymNumber]) {
+                const savedTeam = globalEquiposGimnasio[p]?.[gymNumber] || [];
                 gymTeamSelection = savedTeam.map(poke => poke.id);
+                gymTeamSelectionLoaded[gymNumber] = true;
             }
 
             document.getElementById('grid-teambuilder').innerHTML = `<div class="col-span-full text-center title-font text-2xl text-gray-700 mb-2">Miembros actuales: ${gymTeamSelection.length}/6 (puede estar vacío)</div>` + myActive.map(data => {
                 const isSelected = gymTeamSelection.includes(data.id);
                 const isOriginallyDead = data._originalEstado === 'Muerto';
+                const isGym1Or2 = gymNumber === '1' || gymNumber === '2';
                 return `
                 <div class="poke-card cartoon-panel ${isSelected ? 'in-team-bg bg-blue-50' : 'bg-white'} ${isOriginallyDead ? 'grayscale-dead' : ''} p-4 flex flex-col items-center text-center relative border-[4px]" data-search="${data.ruta} ${data.especie} ${data.mote}">
                     ${isSelected ? '<div class="absolute top-[-15px] left-[-15px] text-3xl">⭐</div>' : ''}
@@ -1510,6 +1509,7 @@
                     <div class="flex flex-col gap-2 w-full mt-auto">
                         <button onclick="window.openViewModal('${data.id}', '${data.jugador}', 'Vivo')" class="cartoon-btn-sm bg-yellow-100 border-yellow-800 text-yellow-800">ℹ️ Ficha</button>
                         ${isSelected ? `<button onclick="window.openEditModal('${data.id}')" class="cartoon-btn-sm teambuilder-action-btn bg-indigo-100 border-indigo-600 text-indigo-700 mb-2">⚙️ Personalizar</button>` : ''}
+                        ${isSelected && !isGym1Or2 ? `<button onclick="window.killFromTeamBuilder('${data.id}')" class="cartoon-btn-sm teambuilder-action-btn bg-red-100 border-red-600 text-red-600 mb-2">💀 Ha muerto</button>` : ''}
                         <button onclick="window.toggleTeam('${data.id}', ${!isSelected})" class="cartoon-btn-sm teambuilder-action-btn ${isSelected ? 'bg-red-100 border-red-600 text-red-600' : 'bg-green-100 border-green-600 text-green-700'}">${isSelected ? '❌ Quitar' : '➕ Añadir'}</button>
                     </div></div>`;
             }).join('');
@@ -1524,6 +1524,17 @@
                 gymTeamSelection = gymTeamSelection.filter(x => x !== id);
             }
             window.updateTeambuilderView();
+        }
+
+        window.killFromTeamBuilder = function(id) {
+            const pokeData = globalData.find(x => x.id === id);
+            if(!pokeData) return;
+
+            document.getElementById('dedicatoria-poke-id').value = id;
+            document.getElementById('dedicatoria-is-new-death').value = 'true';
+            document.getElementById('dedicatoria-pokemon-name').innerText = `"${pokeData.mote}" (${pokeData.especie})`;
+            document.getElementById('dedicatoria-text').value = '';
+            document.getElementById('modal-dedicatoria').style.display = 'flex';
         }
 
         window.unbanPokemon = function(id) {
@@ -1610,8 +1621,14 @@
             if(db) {
                 set(ref(db, `usuarios/${p}/equipos/${gymNumber}`), teamData)
                     .then(() => {
+                        // Actualizar en memoria local
+                        if(!globalEquiposGimnasio[p]) globalEquiposGimnasio[p] = {};
+                        globalEquiposGimnasio[p][gymNumber] = teamData;
+                        gymTeamSelectionLoaded[gymNumber] = true; // Marcar como cargado
                         alert(`✅ Equipo guardado para ${gymNumber === 'league' ? 'Liga' : 'Gimnasio ' + gymNumber} (${teamData.length === 0 ? 'vacío' : teamData.length + ' Pokémon'})`);
                         gymTeamSelection = []; // Limpiar selección después de guardar
+                        window.updateTeambuilderView(); // Actualizar vista del teambuilder
+                        window.updateProfileView(); // Actualizar vista del perfil también
                     })
                     .catch((error) => {
                         console.error('Error al guardar equipo:', error);
@@ -1914,12 +1931,21 @@
                             if(filteredTeam.length !== gymTeam.length) {
                                 // El Pokémon estaba en este equipo, actualizarlo
                                 set(ref(db, `usuarios/${p}/equipos/${gymNum}`), filteredTeam);
+                                // Actualizar también en memoria local para que la vista se actualice inmediatamente
+                                if(globalEquiposGimnasio[p]) {
+                                    globalEquiposGimnasio[p][gymNum] = filteredTeam;
+                                }
                             }
                         });
+
+                        // Eliminar también de la selección actual del teambuilder
+                        gymTeamSelection = gymTeamSelection.filter(x => x !== id);
 
                         writeLog(p, `¡BAJA! ${pokeData.mote} (${pokeData.especie}) ha muerto.`); addPoints(p, -10);
                         document.getElementById('modal-dedicatoria').style.display = 'none';
                         alert(`💀 ${pokeData.mote} ha pasado al cementerio.`);
+                        window.updateProfileView();
+                        window.updateTeambuilderView();
                     });
                 } else {
                     // Es edición de dedicatoria existente
@@ -1951,8 +1977,8 @@
             }
         });
 
-        function generateCardsHTML(list, isInteractive = false, isDead = false, isViewMode = false, isBanned = false, canEditCapture = false, showBBC = false, isPublicView = false, showUnban = false, showEditDedicatoria = false, allowKill = false) {
-            if (list.length === 0) return `<div class="col-span-full cartoon-panel p-6 text-center font-bold">No hay registros.</div>`;
+        function generateCardsHTML(list, isInteractive = false, isDead = false, isViewMode = false, isBanned = false, canEditCapture = false, showBBC = false, isPublicView = false, showUnban = false, showEditDedicatoria = false, allowKill = false, emptyMessage = null) {
+            if (list.length === 0) return `<div class="col-span-full cartoon-panel p-6 text-center font-bold">${emptyMessage || 'No hay registros.'}</div>`;
             return `<div class="col-span-full grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">` + list.map(data => `
                 <div class="poke-card cartoon-panel flex flex-col items-center text-center relative border-4 ${isDead ? 'grayscale-dead' : (data.shiny ? 'shiny-bg' : 'bg-white')}" data-search="${data.ruta} ${data.especie} ${data.mote}">
                     <h3 class="font-bold text-lg uppercase truncate w-full mb-1">"${data.mote}" ${data.shiny ? '✨' : ''}</h3><p class="text-sm font-bold text-gray-500 mb-2">${data.especie}</p>
