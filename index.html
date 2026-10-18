@@ -1335,7 +1335,10 @@
             // Obtener equipo guardado para el gimnasio
             const gymTeam = globalEquiposGimnasio[p]?.[gymNumber] || [];
 
-            if(gymTeam.length === 0) return alert(`❌ No tienes un equipo asignado al ${gymNumber === 'league' ? 'Liga' : 'Gimnasio ' + gymNumber}. Ve a 'Formar Equipo' y asigna uno antes de recibir la medalla.`);
+            // Validar que haya un equipo asignado y no esté vacío
+            if(!gymTeam || gymTeam.length === 0) {
+                return alert(`❌ No tienes un equipo asignado al ${gymNumber === 'league' ? 'Liga' : 'Gimnasio ' + gymNumber}. Ve a 'Formar Equipo' y asigna uno antes de recibir la medalla.`);
+            }
 
             const teamData = gymTeam.map(poke => ({ especie: poke.especie, mote: poke.mote, shiny: poke.shiny }));
 
