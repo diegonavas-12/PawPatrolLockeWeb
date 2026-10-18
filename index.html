@@ -1545,7 +1545,7 @@
                     <img onclick="window.openViewModal('${data.id}', '${data.jugador}', 'Vivo')" src="https://play.pokemonshowdown.com/sprites/${data.shiny ? 'gen5-shiny' : 'gen5'}/${getPokemonSpriteId(data.especie)}.png" class="pixel-art scale-[1.5] h-16 mb-4 cursor-pointer" onerror="this.src='https://play.pokemonshowdown.com/sprites/itemicons/pokeball.png';">
                     <div class="flex flex-col gap-2 w-full mt-auto">
                         <button onclick="window.openViewModal('${data.id}', '${data.jugador}', 'Vivo')" class="cartoon-btn-sm bg-yellow-100 border-yellow-800 text-yellow-800">ℹ️ Ficha</button>
-                        ${isSelected ? `<button onclick="window.openEditModal('${data.id}')" class="cartoon-btn-sm teambuilder-action-btn bg-indigo-100 border-indigo-600 text-indigo-700 mb-2">⚙️ Personalizar</button>` : ''}
+                        ${isSelected ? `<button onclick="window.openEditModal('${data.id}', true)" class="cartoon-btn-sm teambuilder-action-btn bg-indigo-100 border-indigo-600 text-indigo-700 mb-2">⚙️ Personalizar</button>` : ''}
                         ${isSelected ? `<button onclick="window.killFromTeamBuilder('${data.id}', ${isGym1Or2})" class="cartoon-btn-sm teambuilder-action-btn bg-red-100 border-red-600 text-red-600 mb-2">💀 Ha muerto</button>` : ''}
                         <button onclick="window.toggleTeam('${data.id}', ${!isSelected})" class="cartoon-btn-sm teambuilder-action-btn ${isSelected ? 'bg-red-100 border-red-600 text-red-600' : 'bg-green-100 border-green-600 text-green-700'}">${isSelected ? '❌ Quitar' : '➕ Añadir'}</button>
                     </div></div>`;
@@ -1688,7 +1688,7 @@
                         globalEquiposGimnasio[p][gymNumber] = teamData;
                         gymTeamSelectionLoaded[gymNumber] = true; // Marcar como cargado
                         alert(`✅ Equipo guardado para ${gymNumber === 'league' ? 'Liga' : 'Gimnasio ' + gymNumber} (${teamData.length === 0 ? 'vacío' : teamData.length + ' Pokémon'})`);
-                        gymTeamSelection[gymNumber] = []; // Limpiar selección después de guardar
+                        // NO limpiar la selección para que los Pokémon sigan marcados
                         window.updateTeambuilderView(); // Actualizar vista del teambuilder
                         window.updateProfileView(); // Actualizar vista del perfil también
                     })
@@ -1724,26 +1724,41 @@
             });
         }
 
-        window.openEditModal = function(id) {
+        window.openEditModal = function(id, isGymEdit = false) {
             const p = globalData.find(x => x.id === id); document.getElementById('edit-poke-id').value = id;
             if(!p || p.jugador !== getMyPlayer()) return alert('Solo puedes editar Pokémon de tu perfil.');
             ensureCaptureEditFields();
-            document.getElementById('modal-pokemon-name').innerText = `"${p.mote}" (${p.especie})`;
-            document.getElementById('edit-capture-mote-full').value = p.mote || '';
-            document.getElementById('edit-capture-route-full').value = p.ruta || '';
-            document.getElementById('edit-gender').value = p.gender || '';
-            document.getElementById('edit-item').value = p.item || '';
-            document.getElementById('edit-ability').value = p.ability || '';
-            const moves = p.moves || ['', '', '', ''];
+
+            // Si estamos editando para un gimnasio específico, usar los datos del equipo guardado
+            let pokemonData = p;
+            if(isGymEdit) {
+                const gymNumber = document.getElementById('teambuilder-gym-selector').value;
+                const gymTeam = globalEquiposGimnasio[p.jugador]?.[gymNumber] || [];
+                const gymPokemon = gymTeam.find(poke => poke.id === id);
+                if(gymPokemon) {
+                    pokemonData = { ...p, ...gymPokemon };
+                }
+            }
+
+            document.getElementById('modal-pokemon-name').innerText = `"${pokemonData.mote}" (${pokemonData.especie})`;
+            document.getElementById('edit-capture-mote-full').value = pokemonData.mote || '';
+            document.getElementById('edit-capture-route-full').value = pokemonData.ruta || '';
+            document.getElementById('edit-gender').value = pokemonData.gender || '';
+            document.getElementById('edit-item').value = pokemonData.item || '';
+            document.getElementById('edit-ability').value = pokemonData.ability || '';
+            const moves = pokemonData.moves || ['', '', '', ''];
             document.getElementById('edit-m1').value = moves[0] || '';
             document.getElementById('edit-m2').value = moves[1] || '';
             document.getElementById('edit-m3').value = moves[2] || '';
             document.getElementById('edit-m4').value = moves[3] || '';
+            // Guardar si es edición de gimnasio
+            document.getElementById('edit-poke-id').dataset.isGymEdit = isGymEdit;
             document.getElementById('modal-edit-pokemon').style.display = 'flex';
         };
 
         document.getElementById('editPokeForm').addEventListener('submit', async (e) => {
             e.preventDefault(); const id = document.getElementById('edit-poke-id').value; const player = getMyPlayer();
+            const isGymEdit = document.getElementById('edit-poke-id').dataset.isGymEdit === 'true';
             try {
                 const updateData = {
                     mote: document.getElementById('edit-capture-mote-full').value.trim(),
@@ -1759,6 +1774,39 @@
                     ]
                 };
                 if(!player || !db || !updateData.mote || !updateData.ruta) return alert('El mote y la ruta son obligatorios.');
+
+                // Si es edición de gimnasio, actualizar solo el equipo del gimnasio
+                if(isGymEdit) {
+                    const gymNumber = document.getElementById('teambuilder-gym-selector').value;
+                    const gymTeam = globalEquiposGimnasio[player]?.[gymNumber] || [];
+                    const pokemonIndex = gymTeam.findIndex(poke => poke.id === id);
+
+                    if(pokemonIndex === -1) {
+                        alert("❌ El Pokémon no está en el equipo actual del gimnasio.");
+                        return;
+                    }
+
+                    // Actualizar solo los datos del Pokémon en el equipo del gimnasio
+                    gymTeam[pokemonIndex] = {
+                        ...gymTeam[pokemonIndex],
+                        item: updateData.item,
+                        ability: updateData.ability,
+                        moves: updateData.moves
+                    };
+
+                    // Guardar en Firebase
+                    await set(ref(db, `usuarios/${player}/equipos/${gymNumber}`), gymTeam);
+                    // Actualizar en memoria local
+                    if(!globalEquiposGimnasio[player]) globalEquiposGimnasio[player] = {};
+                    globalEquiposGimnasio[player][gymNumber] = gymTeam;
+
+                    document.getElementById('modal-edit-pokemon').style.display = 'none';
+                    alert("✅ Datos del equipo del gimnasio actualizados.");
+                    window.updateTeambuilderView();
+                    return;
+                }
+
+                // Si no es edición de gimnasio, actualizar los datos globales del Pokémon
                 const result = await runTransaction(ref(db, `usuarios/${player}/pokemon`), (pokemon) => {
                     if(!pokemon) return;
                     for(const collection of ['vivos', 'muertos', 'baneados']) {
@@ -1861,9 +1909,25 @@
 
             const targetLevel = gymLevels[gymNumber];
 
-            // Obtener equipo del gimnasio seleccionado
-            const teamIds = gymTeamSelection;
-            const team = teamIds.map(id => globalData.find(poke => poke.id === id && poke.jugador === p)).filter(x => x);
+            // Obtener equipo del gimnasio seleccionado (usar datos guardados específicos del gimnasio)
+            const savedTeam = globalEquiposGimnasio[p]?.[gymNumber] || [];
+            const teamIds = gymTeamSelection[gymNumber] || [];
+
+            // Combinar datos globales con datos específicos del gimnasio
+            const team = teamIds.map(id => {
+                const globalPoke = globalData.find(poke => poke.id === id && poke.jugador === p);
+                const gymPoke = savedTeam.find(poke => poke.id === id);
+                if(gymPoke && globalPoke) {
+                    // Usar datos específicos del gimnasio para item, ability y moves
+                    return {
+                        ...globalPoke,
+                        item: gymPoke.item || globalPoke.item,
+                        ability: gymPoke.ability || globalPoke.ability,
+                        moves: gymPoke.moves || globalPoke.moves
+                    };
+                }
+                return globalPoke;
+            }).filter(x => x);
 
             if(team.length === 0) return alert("❌ No tienes Pokémon seleccionados para el equipo.");
 
