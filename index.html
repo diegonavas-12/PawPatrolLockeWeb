@@ -1455,9 +1455,8 @@
                 jugador: p,
                 estado: 'Vivo'
             }));
-            // Mostrar también la mochila (Pokémon vivos que no están en el equipo)
-            const gymTeamIds = gymTeam.map(poke => poke.id);
-            myBox = myActive.filter(x => !gymTeamIds.includes(x.id));
+            // Mostrar TODOS los Pokémon vivos en la mochila (independientemente de si están en el equipo)
+            myBox = myActive;
 
             const myDead = globalData.filter(x => x.jugador === p && x.estado === 'Muerto');
             const myBanned = globalData.filter(x => x.jugador === p && x.estado === 'Baneado');
