@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tracker PawPatrolLocke</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Chewy&family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Chewy&family=Fredoka:wght@400;600;700&family=Permanent+Marker&family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Fredoka', sans-serif;
@@ -119,6 +119,7 @@
         }
 
         .player-banner { border: 4px solid white; border-radius: 9999px; box-shadow: 4px 4px 0 rgba(0,0,0,0.8); color: white; text-shadow: 2px 2px 0 #000; }
+        .player-banner .banner-name { color: #fff; text-shadow: 1px 1px 2px #000, 0 0 4px #000; }
 
         body.theme-v2 { color: #1e293b; }
         body.theme-v2::before {
@@ -136,7 +137,7 @@
             color: #1f2937;
             border: 4px solid #1e293b;
             border-radius: 24px;
-            box-shadow: 5px 5px 0 #f97316, 9px 9px 0 #1e293b;
+            box-shadow: 5px 5px 0 #22d3ee, 9px 9px 0 #1e293b;
             backdrop-filter: blur(3px);
         }
         body.theme-v2 .cartoon-panel .text-gray-800, body.theme-v2 .cartoon-panel .text-gray-700 { color: #1f2937; }
@@ -154,16 +155,53 @@
         body.theme-v2 .cartoon-btn {
             border: 4px solid #1e293b;
             border-radius: 20px;
-            box-shadow: 4px 4px 0 #f97316, 7px 7px 0 rgba(30, 41, 59, 0.88);
+            --menu-highlight: #22d3ee;
+            box-shadow: 4px 4px 0 var(--menu-highlight), 7px 7px 0 rgba(30, 41, 59, 0.88);
         }
-        body.theme-v2 .cartoon-btn:hover:not(:disabled) { filter: brightness(1.08) saturate(1.15); box-shadow: 4px 4px 0 #d946ef, 7px 7px 0 rgba(30, 41, 59, 0.88); }
+        body.theme-v2 #screen-menu .cartoon-btn,
+        body.theme-v2 #screen-locke-select .cartoon-btn {
+            box-shadow: 4px 4px 0 var(--menu-highlight, #22d3ee), 7px 7px 0 rgba(30, 41, 59, 0.88);
+        }
+        body.theme-v2 .cartoon-btn[class*="bg-blue-"], body.theme-v2 .cartoon-btn-sm[class*="bg-blue-"] { --menu-highlight: #3b82f6; }
+        body.theme-v2 .cartoon-btn[class*="bg-green-"], body.theme-v2 .cartoon-btn-sm[class*="bg-green-"],
+        body.theme-v2 .cartoon-btn[class*="bg-emerald-"], body.theme-v2 .cartoon-btn-sm[class*="bg-emerald-"] { --menu-highlight: #22c55e; }
+        body.theme-v2 .cartoon-btn[class*="bg-orange-"], body.theme-v2 .cartoon-btn-sm[class*="bg-orange-"] { --menu-highlight: #fb923c; }
+        body.theme-v2 .cartoon-btn[class*="bg-gray-"], body.theme-v2 .cartoon-btn-sm[class*="bg-gray-"],
+        body.theme-v2 .cartoon-btn[class*="bg-slate-"], body.theme-v2 .cartoon-btn-sm[class*="bg-slate-"] { --menu-highlight: #64748b; }
+        body.theme-v2 .cartoon-btn[class*="bg-purple-"], body.theme-v2 .cartoon-btn-sm[class*="bg-purple-"],
+        body.theme-v2 .cartoon-btn[class*="bg-violet-"], body.theme-v2 .cartoon-btn-sm[class*="bg-violet-"],
+        body.theme-v2 .cartoon-btn[class*="bg-indigo-"], body.theme-v2 .cartoon-btn-sm[class*="bg-indigo-"] { --menu-highlight: #a855f7; }
+        body.theme-v2 .cartoon-btn[class*="bg-yellow-"], body.theme-v2 .cartoon-btn-sm[class*="bg-yellow-"],
+        body.theme-v2 .cartoon-btn[class*="bg-amber-"], body.theme-v2 .cartoon-btn-sm[class*="bg-amber-"] { --menu-highlight: #eab308; }
+        body.theme-v2 .cartoon-btn[class*="bg-pink-"], body.theme-v2 .cartoon-btn-sm[class*="bg-pink-"],
+        body.theme-v2 .cartoon-btn[class*="bg-rose-"], body.theme-v2 .cartoon-btn-sm[class*="bg-rose-"],
+        body.theme-v2 .cartoon-btn[class*="bg-fuchsia-"], body.theme-v2 .cartoon-btn-sm[class*="bg-fuchsia-"] { --menu-highlight: #ec4899; }
+        body.theme-v2 .cartoon-btn[class*="bg-teal-"], body.theme-v2 .cartoon-btn-sm[class*="bg-teal-"] { --menu-highlight: #14b8a6; }
+        body.theme-v2 .cartoon-btn[class*="bg-cyan-"], body.theme-v2 .cartoon-btn-sm[class*="bg-cyan-"],
+        body.theme-v2 .cartoon-btn[class*="bg-sky-"], body.theme-v2 .cartoon-btn-sm[class*="bg-sky-"] { --menu-highlight: #0891b2; }
+        body.theme-v2 .cartoon-btn[class*="from-pink-"], body.theme-v2 .cartoon-btn-sm[class*="from-pink-"] { --menu-highlight: #ec4899; }
+        body.theme-v2 .cartoon-btn[class*="from-indigo-"], body.theme-v2 .cartoon-btn-sm[class*="from-indigo-"] { --menu-highlight: #8b5cf6; }
+        body.theme-v2 #profile-locke-switch { --menu-highlight: #c026d3; }
+        body.theme-v2 #signout-button { --menu-highlight: #ef4444; }
+        body.theme-v2 #btn-formar-equipo { --menu-highlight: #eab308; }
+        body.theme-v2 #screen-locke-select .cartoon-btn:first-of-type { --menu-highlight: #ef4444; }
+        body.theme-v2 #screen-locke-select .cartoon-btn:last-of-type { --menu-highlight: #8b5cf6; }
+        body.theme-v2 #screen-menu .cartoon-btn:hover:not(:disabled),
+        body.theme-v2 #screen-locke-select .cartoon-btn:hover:not(:disabled) {
+            box-shadow: 4px 4px 0 var(--menu-highlight, #22d3ee), 7px 7px 0 rgba(30, 41, 59, 0.88);
+        }
+        body.theme-v2 .cartoon-btn:hover:not(:disabled) { filter: brightness(1.08) saturate(1.15); box-shadow: 4px 4px 0 var(--menu-highlight, #22d3ee), 7px 7px 0 rgba(30, 41, 59, 0.88); }
         body.theme-v2 .cartoon-btn:active:not(:disabled) { box-shadow: none; transform: translate(4px, 4px) scale(0.98); }
         body.theme-v2 .cartoon-btn-sm {
             background-color: #f8fafc;
             color: #1e293b;
             border: 2px solid #1e293b;
             border-radius: 14px;
-            box-shadow: 3px 3px 0 #22d3ee, 5px 5px 0 rgba(30, 41, 59, 0.85);
+            --menu-highlight: #22d3ee;
+            box-shadow: 3px 3px 0 var(--menu-highlight), 5px 5px 0 rgba(30, 41, 59, 0.85);
+        }
+        body.theme-v2 .cartoon-btn-sm:hover:not(:disabled) {
+            box-shadow: 3px 3px 0 var(--menu-highlight, #22d3ee), 5px 5px 0 rgba(30, 41, 59, 0.85);
         }
         body.theme-v2 .cartoon-input {
             border: 3px solid #1e293b;
@@ -179,50 +217,372 @@
         }
         body.theme-v2 .player-banner { border: 3px solid white; box-shadow: 3px 3px 0 #1e293b; }
 
+        body.theme-v2 { font-family: 'Fredoka', sans-serif; }
+        body.theme-v2 .title-font { font-family: 'Bangers', 'Chewy', cursive; letter-spacing: 2px; }
+        body.theme-v2::before {
+            background:
+                radial-gradient(ellipse at 12% 18%, rgba(251, 146, 60, 0.42), transparent 25%),
+                radial-gradient(ellipse at 84% 16%, rgba(217, 70, 239, 0.38), transparent 28%),
+                radial-gradient(ellipse at 76% 82%, rgba(34, 211, 238, 0.36), transparent 31%),
+                radial-gradient(circle, rgba(30, 41, 59, 0.22) 1px, transparent 2px) 0 0 / 16px 16px,
+                rgba(15, 23, 42, 0.5);
+        }
+        body.theme-v2 .cartoon-panel {
+            border-color: #172033;
+            box-shadow: 5px 5px 0 #22d3ee, 9px 9px 0 #172033, 0 0 24px rgba(34, 211, 238, 0.16);
+        }
+        body.theme-v2 .cartoon-btn {
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        body.theme-v2 #screen-menu > h1, body.theme-v2 #screen-landing > p,
+        body.theme-v2 #screen-profile h2, body.theme-v2 #screen-teambuilder h2 {
+            font-family: 'Permanent Marker', 'Bangers', cursive;
+        }
+
+        body.theme-og {
+            color: #d7ffe1;
+            font-family: 'VT323', monospace;
+            font-size: 21px;
+            background-color: #07101f;
+            background-image: linear-gradient(180deg, rgba(5, 12, 26, 0.82), rgba(7, 16, 31, 0.9)), url('fondo.jpg');
+            background-blend-mode: normal;
+        }
         body.theme-og::before {
-            background: rgba(235, 225, 199, 0.48);
-            backdrop-filter: grayscale(0.78) sepia(0.58) contrast(0.92);
+            background:
+                linear-gradient(rgba(7, 16, 31, 0.3), rgba(7, 16, 31, 0.58)),
+                repeating-linear-gradient(0deg, rgba(51, 255, 153, 0.035) 0 1px, transparent 1px 4px);
+            backdrop-filter: grayscale(1) contrast(1.15);
+        }
+        body.theme-og::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: 2;
+            pointer-events: none;
+            opacity: 0.18;
+            background: repeating-linear-gradient(0deg, transparent 0 3px, rgba(0, 0, 0, 0.55) 3px 4px);
+        }
+        body.theme-og .title-font {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            letter-spacing: 0;
         }
         body.theme-og .cartoon-panel {
-            background: rgba(248, 245, 233, 0.96);
-            color: #433b2d;
-            border: 3px solid #9b8963;
-            border-radius: 16px;
-            box-shadow: 5px 5px 0 rgba(76, 62, 39, 0.46);
-            backdrop-filter: blur(5px);
+            background:
+                linear-gradient(135deg, rgba(22, 38, 58, 0.98), rgba(10, 22, 39, 0.98));
+            color: #d7ffe1;
+            border: 3px solid #42f58d;
+            border-radius: 3px;
+            box-shadow: 5px 5px 0 #030811, 0 0 16px rgba(66, 245, 141, 0.18);
+            backdrop-filter: none;
         }
         body.theme-og .cartoon-panel .text-gray-800, body.theme-og .cartoon-panel .text-gray-700,
-        body.theme-og .cartoon-panel .text-gray-600, body.theme-og .cartoon-panel .text-gray-500 { color: #5b5140; }
-        body.theme-og .cartoon-panel .text-blue-900, body.theme-og .cartoon-panel .text-blue-800 { color: #665538; }
-        body.theme-og .cartoon-panel .text-slate-300, body.theme-og .cartoon-panel .text-slate-200 { color: #665538; }
-        body.theme-og .cartoon-btn {
-            color: #4a3e2d;
-            background: linear-gradient(145deg, #f8f2e3, #e8dcc0);
-            border: 3px solid #8e7a54;
-            border-radius: 12px;
-            box-shadow: 4px 4px 0 rgba(76, 62, 39, 0.42);
+        body.theme-og .cartoon-panel .text-gray-600, body.theme-og .cartoon-panel .text-gray-500,
+        body.theme-og .cartoon-panel .text-slate-300, body.theme-og .cartoon-panel .text-slate-200 { color: #b7d5c2; }
+        body.theme-og .cartoon-panel .text-blue-900, body.theme-og .cartoon-panel .text-blue-800,
+        body.theme-og .cartoon-panel .text-blue-600 { color: #68d9ff; }
+        body.theme-og .cartoon-btn, body.theme-og .cartoon-btn-sm {
+            color: #dbffe5;
+            background: linear-gradient(180deg, #244a45, #122e36);
+            border: 2px solid #54f39a;
+            border-radius: 2px;
+            box-shadow: 4px 4px 0 #030811;
+            text-shadow: 2px 2px 0 #030811;
+            font-family: 'VT323', monospace;
+            font-size: 1.15em;
         }
-        body.theme-og .cartoon-btn:hover:not(:disabled) { box-shadow: 4px 4px 0 rgba(76, 62, 39, 0.42); }
-        body.theme-og .cartoon-btn:active:not(:disabled) { box-shadow: none; transform: translate(4px, 4px) scale(0.98); }
-        body.theme-og .cartoon-btn-sm {
-            background-color: #f3ead5;
-            color: #4a3e2d;
-            border: 2px solid #9b8963;
-            border-radius: 10px;
-            box-shadow: 2px 2px 0 rgba(76, 62, 39, 0.4);
+        body.theme-og #screen-menu .cartoon-btn {
+            --menu-highlight: #54f39a;
+            border-color: var(--menu-highlight);
+            box-shadow: 4px 4px 0 #030811, 0 0 0 2px var(--menu-highlight);
+        }
+        body.theme-og #screen-menu .cartoon-btn.bg-blue-500 { --menu-highlight: #60a5fa; background: #2563eb; }
+        body.theme-og #screen-menu .cartoon-btn.bg-green-500 { --menu-highlight: #4ade80; background: #16a34a; }
+        body.theme-og #screen-menu .cartoon-btn.bg-orange-400 { --menu-highlight: #fb923c; background: #ea580c; }
+        body.theme-og #screen-menu .cartoon-btn.bg-gray-700 { --menu-highlight: #94a3b8; background: #475569; }
+        body.theme-og #screen-menu .cartoon-btn.bg-purple-500 { --menu-highlight: #c084fc; background: #9333ea; }
+        body.theme-og #screen-menu .cartoon-btn.bg-yellow-500 { --menu-highlight: #facc15; background: #ca8a04; }
+        body.theme-og #screen-menu .cartoon-btn.from-pink-500 { --menu-highlight: #f472b6; background: linear-gradient(90deg, #db2777, #e11d48); }
+        body.theme-og #screen-menu .cartoon-btn.bg-teal-500 { --menu-highlight: #2dd4bf; background: #0f766e; }
+        body.theme-og #screen-menu .cartoon-btn.bg-cyan-600 { --menu-highlight: #22d3ee; background: #0e7490; }
+        body.theme-og #screen-menu .cartoon-btn.bg-fuchsia-600 { --menu-highlight: #e879f9; background: #a21caf; }
+        body.theme-og #screen-menu .cartoon-btn:hover:not(:disabled) {
+            border-color: var(--menu-highlight);
+            box-shadow: 4px 4px 0 #030811, 0 0 12px var(--menu-highlight);
+        }
+        body.theme-og #screen-locke-select .cartoon-btn {
+            border-color: var(--menu-highlight);
+            box-shadow: 4px 4px 0 #030811, 0 0 0 2px var(--menu-highlight);
+        }
+        body.theme-og #screen-locke-select .cartoon-btn:first-of-type {
+            --menu-highlight: #fb7185;
+            background: linear-gradient(90deg, #7f1d1d, #dc2626);
+        }
+        body.theme-og #screen-locke-select .cartoon-btn:last-of-type {
+            --menu-highlight: #a78bfa;
+            background: linear-gradient(90deg, #312e81, #7c3aed);
+        }
+        body.theme-og .cartoon-btn { overflow-wrap: anywhere; line-height: 1.15; }
+        body.theme-og .cartoon-btn:hover:not(:disabled), body.theme-og .cartoon-btn-sm:hover:not(:disabled) {
+            background: linear-gradient(180deg, #326459, #173d48);
+            box-shadow: 4px 4px 0 #030811, 0 0 12px rgba(84, 243, 154, 0.45);
+        }
+        body.theme-og .cartoon-btn:active:not(:disabled), body.theme-og .cartoon-btn-sm:active:not(:disabled) {
+            box-shadow: none;
+            transform: translate(4px, 4px);
         }
         body.theme-og .cartoon-input {
-            border: 2px solid #9b8963;
-            border-radius: 10px;
-            background-color: #f8f3e5;
-            color: #433b2d;
+            border: 2px solid #68d9ff;
+            border-radius: 2px;
+            background-color: #071323;
+            color: #e2ffe9;
+            font-family: 'VT323', monospace;
+            font-size: 1.2em;
         }
-        body.theme-og .cartoon-input::placeholder { color: #84785f; }
-        body.theme-og .cartoon-input:focus { border-color: #8e7a54; box-shadow: 0 0 0 3px rgba(142, 122, 84, 0.2); }
-        body.theme-og .text-shadow-hard { text-shadow: 2px 2px 0 rgba(76, 62, 39, 0.7); }
-        body.theme-og .text-white { color: #4a3e2d; }
+        body.theme-og .cartoon-input::placeholder { color: #8aa7b0; }
+        body.theme-og .cartoon-input:focus { border-color: #54f39a; box-shadow: 0 0 0 3px rgba(84, 243, 154, 0.2); }
+        body.theme-og .text-shadow-hard { text-shadow: 3px 3px 0 #030811, 0 0 8px rgba(84, 243, 154, 0.5); }
+        body.theme-og .text-white { color: #d7ffe1; }
         body.theme-og .player-banner.text-white { color: white; }
-        body.theme-og .text-yellow-400 { color: #81663e; }
+        body.theme-og .bg-white, body.theme-og .bg-gray-50, body.theme-og .bg-gray-100,
+        body.theme-og .bg-yellow-50, body.theme-og .bg-pink-50, body.theme-og .bg-blue-50 {
+            background-color: #13253a;
+        }
+        body.theme-og button:not(.cartoon-btn):not(.cartoon-btn-sm) {
+            color: #d7ffe1;
+            border-radius: 2px;
+            font-family: 'VT323', monospace;
+            text-shadow: 1px 1px 0 #030811;
+        }
+        body.theme-og .poke-card { background: linear-gradient(145deg, #1a2c40, #0d1b2d); border-color: #68d9ff; }
+        body.theme-og .shiny-bg { background: linear-gradient(145deg, #554b19, #302a12); }
+        body.theme-og .grayscale-dead { background-color: #1b2430; }
+        body.theme-og .badge-slot {
+            border-radius: 2px;
+            border: 4px solid #68d9ff;
+            background: #102135;
+            box-shadow: inset 0 0 0 4px #07101f, 4px 4px 0 #030811;
+        }
+        body.theme-og .badge-slot.unlocked {
+            background: #274c37;
+            border-color: #54f39a;
+            box-shadow: inset 0 0 0 4px #07101f, 0 0 14px rgba(84, 243, 154, 0.6);
+        }
+        body.theme-og #pawcoin-display {
+            color: #1b1908;
+            background: #f5d547;
+            border: 3px solid #fff1a3;
+            border-radius: 3px;
+            box-shadow: 4px 4px 0 #030811;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 10px;
+        }
+        body.theme-og #gacha-machine {
+            border: 6px solid #54f39a;
+            border-radius: 3px;
+            background: repeating-linear-gradient(45deg, #12263d 0 8px, #1a3550 8px 16px);
+            box-shadow: inset 0 0 0 5px #07101f, 5px 5px 0 #030811;
+        }
+        body.theme-og #gacha-result {
+            background: #102135;
+            border-radius: 2px;
+            border-color: #f5d547;
+        }
+        body.theme-og .player-banner { border-radius: 2px; border-color: #54f39a; }
+        body.theme-og .player-banner .banner-name { color: #fff; }
+        body.theme-og .modal-overlay { background: rgba(2, 8, 18, 0.9); }
+        #landing-pokeball { background-color: #fff; }
+        body.theme-og #landing-pokeball {
+            border-radius: 18%;
+            border-color: #07101f;
+            box-shadow: 8px 8px 0 #030811;
+            image-rendering: pixelated;
+        }
+        body.theme-og #landing-pokeball .pokeball-top {
+            background-color: #d62828;
+            border-color: #07101f;
+        }
+        body.theme-og #locke-title-arc { display: none; }
+        body.theme-og #og-glitch-title {
+            display: block;
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            z-index: 50;
+            width: max-content;
+            max-width: calc(100vw - 16px);
+            transform: translateX(-50%);
+            color: #f8ff66;
+            font-size: clamp(0.75rem, 5vw, 1.6rem);
+            line-height: 1.8;
+            white-space: nowrap;
+            text-shadow: 2px 2px #14141e, 0 0 8px rgba(248, 255, 102, 0.8);
+            animation: og-glitch 2.6s steps(1, end) infinite;
+        }
+        body.theme-og #og-glitch-title::before, body.theme-og #og-glitch-title::after {
+            content: attr(data-text);
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        body.theme-og #og-glitch-title::before {
+            color: #ff3caa;
+            transform: translateX(-2px);
+            clip-path: inset(14% 0 62% 0);
+            animation: og-glitch-before 2.6s steps(1, end) infinite;
+        }
+        body.theme-og #og-glitch-title::after {
+            color: #41eaff;
+            transform: translateX(2px);
+            clip-path: inset(64% 0 12% 0);
+            animation: og-glitch-after 2.6s steps(1, end) infinite;
+        }
+        @keyframes og-glitch {
+            0%, 92%, 100% { transform: translateX(-50%); }
+            93% { transform: translateX(calc(-50% - 3px)) skewX(-5deg); }
+            95% { transform: translateX(calc(-50% + 2px)) skewX(4deg); }
+            97% { transform: translateX(-50%); }
+        }
+        @keyframes og-glitch-before {
+            0%, 90%, 100% { clip-path: inset(14% 0 62% 0); }
+            91% { clip-path: inset(0 0 78% 0); transform: translateX(-5px); }
+            94% { clip-path: inset(48% 0 38% 0); transform: translateX(4px); }
+            97% { clip-path: inset(14% 0 62% 0); }
+        }
+        @keyframes og-glitch-after {
+            0%, 92%, 100% { clip-path: inset(64% 0 12% 0); }
+            93% { clip-path: inset(70% 0 2% 0); transform: translateX(5px); }
+            96% { clip-path: inset(28% 0 54% 0); transform: translateX(-4px); }
+            98% { clip-path: inset(64% 0 12% 0); }
+        }
+        #capture-animation {
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        #capture-animation[hidden] { display: none; }
+        .capture-animation-content {
+            position: relative;
+            z-index: 1;
+            width: min(100%, 420px);
+            padding: 2rem;
+            text-align: center;
+        }
+        .capture-animation-ball {
+            position: relative;
+            width: 112px;
+            height: 112px;
+            margin: 0 auto 1.25rem;
+            overflow: hidden;
+            border: 8px solid #172033;
+            border-radius: 50%;
+            background: linear-gradient(to bottom, #ef4444 0 46%, #172033 46% 54%, #fff 54% 100%);
+        }
+        .capture-animation-ball::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 34px;
+            height: 34px;
+            transform: translate(-50%, -50%);
+            border: 7px solid #172033;
+            border-radius: 50%;
+            background: #fff;
+        }
+        #capture-animation-title { margin-bottom: 0.5rem; font-size: 2rem; }
+        #capture-animation-name { font-size: 1.25rem; font-weight: 700; }
+        body.theme-v2 #capture-animation {
+            overflow: hidden;
+            background: rgba(15, 23, 42, 0.92);
+        }
+        body.theme-v2 #capture-animation::before {
+            content: "";
+            position: absolute;
+            inset: -20%;
+            background:
+                radial-gradient(circle at 30% 35%, rgba(236, 72, 153, 0.8) 0 7%, transparent 7.5%),
+                radial-gradient(circle at 68% 30%, rgba(34, 211, 238, 0.8) 0 9%, transparent 9.5%),
+                radial-gradient(circle at 54% 70%, rgba(250, 204, 21, 0.75) 0 8%, transparent 8.5%);
+            animation: capture-graffiti-burst 1.9s ease-out both;
+        }
+        body.theme-v2 .capture-animation-content {
+            border: 5px solid #172033;
+            border-radius: 26px;
+            background: #fff;
+            box-shadow: 7px 7px 0 #d946ef, 13px 13px 0 #22d3ee;
+            transform: rotate(-2deg);
+        }
+        body.theme-v2 .capture-animation-ball { animation: capture-ball-v2 1.9s cubic-bezier(.2,.8,.2,1) both; }
+        body.theme-v2 #capture-animation-title {
+            color: #db2777;
+            font-family: 'Permanent Marker', 'Bangers', cursive;
+            text-shadow: 2px 2px #facc15;
+        }
+        body.theme-v2 #capture-animation-name { color: #1e293b; }
+        body.theme-v2 .capture-animation-hint { color: #0891b2; font-weight: 700; }
+        body.theme-og #capture-animation {
+            overflow: hidden;
+            background:
+                repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.28) 0 2px, transparent 2px 5px),
+                rgba(3, 8, 17, 0.96);
+        }
+        body.theme-og .capture-animation-content {
+            border: 4px solid #42f58d;
+            border-radius: 2px;
+            background: #0c1a2a;
+            box-shadow: 6px 6px 0 #030811, inset 0 0 0 4px #07101f;
+        }
+        body.theme-og .capture-animation-ball {
+            border-color: #07101f;
+            border-radius: 14%;
+            image-rendering: pixelated;
+            animation: capture-ball-og 1.9s steps(7, end) both;
+        }
+        body.theme-og .capture-animation-ball::after { border-color: #07101f; border-radius: 2px; }
+        body.theme-og #capture-animation-title {
+            color: #f5d547;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 1rem;
+            line-height: 1.8;
+            text-shadow: 2px 2px #030811;
+        }
+        body.theme-og #capture-animation-name,
+        body.theme-og .capture-animation-hint { color: #b7ffc9; }
+        @keyframes capture-ball-v2 {
+            0% { opacity: 0; transform: translateY(-180px) rotate(25deg) scale(0.55); }
+            32% { opacity: 1; transform: translateY(0) rotate(-8deg) scale(1.08); }
+            43% { transform: translateX(-9px) rotate(-12deg); }
+            54% { transform: translateX(9px) rotate(10deg); }
+            65% { transform: translateX(-6px) rotate(-6deg); }
+            76%, 100% { transform: translate(0) rotate(0) scale(1); }
+        }
+        @keyframes capture-graffiti-burst {
+            0% { opacity: 0; transform: scale(0.35) rotate(-12deg); }
+            30% { opacity: 1; transform: scale(1.05) rotate(4deg); }
+            70% { opacity: 0.85; transform: scale(1) rotate(0); }
+            100% { opacity: 0.45; transform: scale(1.12) rotate(4deg); }
+        }
+        @keyframes capture-ball-og {
+            0% { opacity: 0; transform: translateY(-120px) scale(0.5); }
+            28% { opacity: 1; transform: translateY(0) scale(1.08); }
+            42%, 58% { transform: translateX(-7px); }
+            50%, 66% { transform: translateX(7px); }
+            80%, 100% { transform: translateX(0) scale(1); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            #capture-animation *, #capture-animation::before {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+            }
+        }
     </style>
 </head>
 <body class="theme-v2 flex flex-col items-center p-4">
@@ -233,8 +593,6 @@
         <div id="pawcoin-display" class="hidden text-lg font-black px-4 py-2 bg-yellow-400 text-yellow-900 border-4 border-yellow-800 rounded-full shadow-[4px_4px_0_0_rgba(0,0,0,1)] flex items-center gap-2">
             <span>🪙</span> <span id="pawcoin-amount">0</span>
         </div>
-        <button id="locke-badge" onclick="window.showLockeSelector()" class="hidden text-sm font-black px-4 py-2 bg-slate-950/90 text-cyan-100 border border-cyan-400 rounded-full shadow-lg"></button>
-        <button id="signout-button" onclick="window.logout()" class="hidden cartoon-btn-sm text-xs">CERRAR SESIÓN</button>
     </div>
     <!-- ACCESO Y REGISTRO -->
     <div id="screen-auth" class="w-full max-w-lg flex flex-col items-center justify-center min-h-[80vh]">
@@ -261,42 +619,35 @@
                     <option value="" selected>Selecciona tu entrenador...</option>
                 </select>
                 <button id="link-account-button" type="button" class="cartoon-btn-sm bg-cyan-700 text-white text-lg py-3 px-4 w-full">Vincular entrenador</button>
+                <button type="button" onclick="window.nav('profile')" class="cartoon-btn-sm w-full mt-2">👤 MI PERFIL</button>
             </div>
         </div>
     </div>
-    <!-- PANTALLA 0: SELECCIÓN DE LOCKE -->
     <div id="screen-locke-select" class="w-full max-w-lg hidden flex-col items-center justify-center min-h-[80vh]">
         <div class="cartoon-panel p-8 w-full text-center">
             <p id="locke-select-player" class="font-bold uppercase tracking-[0.3em] text-cyan-300 text-xs mb-3"></p>
-            <h1 class="title-font text-4xl md:text-5xl mb-3 text-white">Selecciona tu Locke</h1>
-            <p class="text-slate-300 mb-6">Cada aventura conserva sus propios datos.</p>
+            <h1 class="title-font text-4xl md:text-5xl mb-3 text-white">Elige tu aventura</h1>
+            <p class="text-slate-300 mb-6">Selecciona la versión a la que quieres entrar. Cada una conserva sus propios datos.</p>
             <div class="flex flex-col gap-4">
-                <button onclick="window.selectLocke('PawPatrolOG')" class="cartoon-btn bg-gradient-to-r from-rose-900 to-red-700 text-white text-2xl py-4">PawPatrolOG</button>
-                <button onclick="window.selectLocke('PawPatrolV2')" class="cartoon-btn bg-gradient-to-r from-indigo-900 to-violet-700 text-white text-2xl py-4">PawPatrolV2</button>
+            <button onclick="window.selectLocke('PawPatrolOG')" class="cartoon-btn bg-gradient-to-r from-rose-900 to-red-700 text-white text-2xl py-4">PawPatrol OG</button>
+            <button onclick="window.selectLocke('PawPatrolV2')" class="cartoon-btn bg-gradient-to-r from-indigo-900 to-violet-700 text-white text-2xl py-4">PawPatrol V2</button>
             </div>
         </div>
     </div>
-
     <!-- PANTALLA 1: LANDING -->
     <div id="screen-landing" class="w-full flex-grow hidden flex-col items-center justify-center transition-all duration-500 min-h-[80vh]">
         <div class="relative w-[320px] h-[320px] flex items-center justify-center">
-            <svg viewBox="0 0 250 250" class="absolute w-full h-full spin-slow pointer-events-none z-10">
+            <svg id="locke-title-arc" viewBox="0 0 250 250" class="absolute w-full h-full spin-slow pointer-events-none z-10">
                 <path id="curve" d="M 25,125 A 100,100 0 0,1 225,125" fill="transparent" />
                 <text><textPath id="locke-title" href="#curve" startOffset="50%" text-anchor="middle" class="title-font text-[28px] fill-yellow-400" style="stroke: black; stroke-width: 2px;">PAWPATROLLOCKE</textPath></text>
             </svg>
+            <h1 id="og-glitch-title" data-text="PAWPATROLLOCKEOG" class="hidden title-font text-center">PAWPATROLLOCKEOG</h1>
             <div class="relative w-56 h-56 z-40">
-                <div onclick="nav('menu')" class="absolute inset-0 rounded-full border-[10px] border-[#1e293b] bg-white overflow-hidden shadow-[8px_8px_0_0_rgba(0,0,0,0.8)] transition-transform hover:scale-105 cursor-pointer">
-                <div class="pokeball-top absolute top-0 left-0 w-full h-1/2 bg-[#eadfc5] border-b-[10px] border-[#1e293b] pointer-events-none"></div>
-                <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-white rounded-full border-[10px] border-[#1e293b] flex items-center justify-center pointer-events-none">
-                    <div class="w-5 h-5 bg-gray-300 rounded-full"></div>
-                </div>
-                <svg aria-hidden="true" viewBox="0 0 100 30" class="absolute left-1/2 top-[64%] -translate-x-1/2 -translate-y-1/2 w-[36%] pointer-events-none drop-shadow-[1px_2px_0_rgba(255,255,255,0.8)]">
-                    <path d="M50 10c-7-8-16-9-24-3-7 5-13 4-20 1 4 8 11 13 19 13 10 0 16-5 25-8 9 3 15 8 25 8 8 0 15-5 19-13-7 3-13 4-20-1-8-6-17-5-24 3Z" fill="#25221d" stroke="#f8f2e3" stroke-width="2.5" stroke-linejoin="round"/>
-                </svg>
-                </div>
-                <div aria-hidden="true" class="absolute left-1/2 -top-5 z-10 -translate-x-1/2 pointer-events-none">
-                    <div class="mx-auto h-10 w-14 rounded-t-[22px] border-[5px] border-b-0 border-[#26231f] bg-[#33302b]"></div>
-                    <div class="h-3 w-24 rounded-[50%] border-[4px] border-[#26231f] bg-[#4a453d]"></div>
+                <div id="landing-pokeball" onclick="nav('menu')" class="absolute inset-0 rounded-full border-[10px] border-[#1e293b] bg-white overflow-hidden shadow-[8px_8px_0_0_rgba(0,0,0,0.8)] transition-transform hover:scale-105 cursor-pointer">
+                    <div class="pokeball-top absolute top-0 left-0 w-full h-1/2 bg-red-600 border-b-[10px] border-[#1e293b] pointer-events-none"></div>
+                    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-white rounded-full border-[10px] border-[#1e293b] flex items-center justify-center pointer-events-none">
+                        <div class="w-5 h-5 bg-gray-300 rounded-full"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -539,10 +890,14 @@
         <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
             <button onclick="nav('menu')" class="cartoon-btn-sm">⬅ VOLVER</button>
             <h2 class="title-font text-3xl md:text-4xl text-white text-shadow-hard uppercase">👤 MI PERFIL</h2>
-            <button id="btn-formar-equipo" onclick="nav('teambuilder')" class="cartoon-btn-sm bg-yellow-400 text-yellow-900 border-yellow-700 hidden">⚔️ FORMAR EQUIPO</button>
+            <div class="flex flex-wrap gap-2 justify-end">
+                <button id="profile-locke-switch" onclick="window.switchLocke()" class="cartoon-btn-sm hidden"></button>
+                <button id="signout-button" onclick="window.logout()" class="cartoon-btn-sm hidden">🚪 CERRAR SESIÓN</button>
+                <button id="btn-formar-equipo" onclick="nav('teambuilder')" class="cartoon-btn-sm bg-yellow-400 text-yellow-900 border-yellow-700 hidden">⚔️ FORMAR EQUIPO</button>
+            </div>
         </div>
         <div id="profile-locked-area" class="cartoon-panel p-6 mb-4 text-center hidden relative">
-            <p class="text-cyan-200 font-bold">Cuenta vinculada</p>
+            <p class="text-cyan-200 font-bold">Cuenta</p>
             <p id="profile-account-email" class="text-sm text-slate-400 mt-1"></p>
             <div id="profile-my-banner" class="mt-4 mx-auto w-fit px-8 py-3 player-banner flex items-center justify-center gap-4 text-2xl md:text-4xl title-font uppercase">
                 <img id="profile-my-skin" src="" class="h-16 pixel-art hidden">
@@ -686,7 +1041,15 @@
     <!-- MODALES Y DATALISTS POKÉMON -->
     <datalist id="all-moves-list"></datalist><datalist id="valid-abilities-list"></datalist><datalist id="valid-items-list"></datalist><datalist id="valid-natures-list"></datalist>
     <div id="modal-edit-pokemon" class="modal-overlay"><div class="cartoon-panel modal-content bg-white relative"><button onclick="document.getElementById('modal-edit-pokemon').style.display='none'" class="absolute top-4 right-4 text-2xl font-black text-gray-500">X</button><h2 id="edit-modal-title" class="title-font text-3xl text-center text-blue-600 mb-2">⚙️ PERSONALIZAR</h2><p id="modal-pokemon-name" class="text-center font-bold text-gray-500 mb-4 uppercase"></p><form id="editPokeForm" class="space-y-3"><input type="hidden" id="edit-poke-id"><input type="hidden" id="edit-mode" value="gym"><div id="edit-mode-profile" class="hidden"><div><label class="block font-bold text-sm">MOTE:</label><input type="text" id="edit-mote" maxlength="40" class="cartoon-input w-full p-2"></div><div><label class="block font-bold text-sm">RUTA/ZONA:</label><input type="text" id="edit-route" maxlength="80" class="cartoon-input w-full p-2"></div></div><div id="edit-mode-gym"><div class="grid grid-cols-1 md:grid-cols-2 gap-3"><div><label class="block font-bold text-sm">Objeto (@):</label><input type="text" id="edit-item" list="valid-items-list" autocomplete="off" class="cartoon-input w-full p-2"></div><div><label class="block font-bold text-sm">Habilidad:</label><input type="text" id="edit-ability" list="valid-abilities-list" autocomplete="off" class="cartoon-input w-full p-2"></div></div><div class="pt-2 border-t-2 border-gray-200 mt-2"><label class="block font-bold text-sm text-center mb-1 text-red-600">Ataques Randomlocke</label><div class="grid grid-cols-1 md:grid-cols-2 gap-2"><input type="text" id="edit-m1" list="all-moves-list" autocomplete="off" class="cartoon-input w-full p-2"><input type="text" id="edit-m2" list="all-moves-list" autocomplete="off" class="cartoon-input w-full p-2"><input type="text" id="edit-m3" list="all-moves-list" autocomplete="off" class="cartoon-input w-full p-2"><input type="text" id="edit-m4" list="all-moves-list" autocomplete="off" class="cartoon-input w-full p-2"></div></div></div><button type="submit" id="btn-save-edit" class="cartoon-btn w-full bg-blue-500 text-white text-xl py-3 mt-4">💾 GUARDAR</button></form></div></div>
-    <div id="modal-view-pokemon" class="modal-overlay"><div class="cartoon-panel modal-content bg-white relative text-center"><button onclick="document.getElementById('modal-view-pokemon').style.display='none'" class="absolute top-4 right-4 text-2xl font-black text-gray-500">X</button><h2 class="title-font text-3xl text-blue-600 mb-1" id="view-mote"></h2><p class="font-bold text-gray-500 mb-4" id="view-especie-ruta"></p><div class="flex justify-center mb-4"><img id="view-sprite" src="" class="pixel-art scale-[2] h-24"></div><div class="grid grid-cols-2 gap-2 text-left bg-gray-100 p-4 rounded-xl border-4 border-gray-200 font-bold text-sm"><p>Nivel: <span id="view-level" class="text-blue-600"></span></p><p>Género: <span id="view-gender" class="text-blue-600"></span></p><p>Objeto: <span id="view-item" class="text-blue-600"></span></p><p>Habilidad: <span id="view-ability" class="text-blue-600"></span></p><p class="col-span-2">Naturaleza: <span id="view-nature" class="text-blue-600"></span></p><div class="col-span-2 mt-2 pt-2 border-t-2 border-gray-300"><p class="mb-1 text-center">Ataques:</p><ul class="list-disc pl-5 text-red-600" id="view-moves"></ul></div></div></div></div>
+    <div id="modal-view-pokemon" class="modal-overlay"><div class="cartoon-panel modal-content bg-white relative text-center"><button onclick="document.getElementById('modal-view-pokemon').style.display='none'" class="absolute top-4 right-4 text-2xl font-black text-gray-500">X</button><h2 class="title-font text-3xl text-blue-600 mb-1" id="view-mote"></h2><p class="font-bold text-gray-500 mb-1" id="view-especie-ruta"></p><p id="view-gym-context" class="hidden text-sm font-black text-fuchsia-600 mb-3"></p><div class="flex justify-center mb-4"><img id="view-sprite" src="" class="pixel-art scale-[2] h-24"></div><div class="grid grid-cols-2 gap-2 text-left bg-gray-100 p-4 rounded-xl border-4 border-gray-200 font-bold text-sm"><p>Nivel: <span id="view-level" class="text-blue-600"></span></p><p>Género: <span id="view-gender" class="text-blue-600"></span></p><p>Objeto: <span id="view-item" class="text-blue-600"></span></p><p>Habilidad: <span id="view-ability" class="text-blue-600"></span></p><p class="col-span-2">Naturaleza: <span id="view-nature" class="text-blue-600"></span></p><div class="col-span-2 mt-2 pt-2 border-t-2 border-gray-300"><p class="mb-1 text-center">Ataques:</p><ul class="list-disc pl-5 text-red-600" id="view-moves"></ul></div></div></div></div>
+    <div id="capture-animation" role="status" aria-live="assertive" hidden>
+        <div class="capture-animation-content">
+            <div class="capture-animation-ball" aria-hidden="true"></div>
+            <p id="capture-animation-title">¡CAPTURA!</p>
+            <p id="capture-animation-name"></p>
+            <p class="capture-animation-hint">¡Pokémon capturado!</p>
+        </div>
+    </div>
     <textarea id="copy-clipboard-area" style="position: absolute; top: -9999px; left: -9999px;"></textarea>
 
     <!-- MODAL DEDICATORIA -->
@@ -875,6 +1238,36 @@
             'bg-gradient-to-r from-gray-900 to-blue-800',
             'bg-gradient-to-r from-zinc-800 to-stone-600'
         ];
+        const G_BANNER_NAMES = [
+            'Rojo difuminado',
+            'Azul eléctrico',
+            'Verde lima',
+            'Morado rosado',
+            'Amarillo dorado',
+            'Gris humo',
+            'Verde esmeralda',
+            'Azul cian',
+            'Celeste índigo',
+            'Violeta fucsia',
+            'Rosa morado',
+            'Rojo carmesí',
+            'Naranja ámbar',
+            'Ámbar lima',
+            'Lima esmeralda',
+            'Turquesa',
+            'Azul índigo',
+            'Azul violeta',
+            'Fucsia rosa',
+            'Rojo dorado',
+            'Amarillo anaranjado',
+            'Gris pizarra',
+            'Azul noche',
+            'Gris piedra'
+        ];
+        function getBannerName(banner) {
+            const index = G_BANNERS.indexOf(banner);
+            return index < 0 ? 'Banner clásico' : G_BANNER_NAMES[index];
+        }
         const G_CONSUMABLES = {
             'revivir': { name: 'Revivir Máximo (Revive a un muerto)', icon: 'max-revive' },
             'ban': { name: 'Tarjeta Roja (Banear rival)', icon: 'eject-button' },
@@ -1053,6 +1446,20 @@
                 screen.classList.add('flex');
             }
             currentScreen = name;
+            updateProfileActions();
+        }
+
+        function updateProfileActions() {
+            const inProfile = currentScreen === 'profile' && !!auth?.currentUser;
+            const canSwitchLocke = inProfile && PLAYERS_WITH_LOCKE_CHOICES.includes(currentPlayer);
+            const signoutButton = document.getElementById('signout-button');
+            const switchButton = document.getElementById('profile-locke-switch');
+            signoutButton.classList.toggle('hidden', !inProfile);
+            switchButton.classList.toggle('hidden', !canSwitchLocke);
+            if(canSwitchLocke) {
+                const nextLocke = currentLocke === 'PawPatrolOG' ? 'PawPatrolV2' : 'PawPatrolOG';
+                switchButton.innerText = `🔁 CAMBIAR A ${nextLocke}`;
+            }
         }
 
         function showAccountLink(user) {
@@ -1064,11 +1471,9 @@
             document.body.classList.remove('theme-og');
             document.body.classList.add('theme-v2');
             document.getElementById('locke-title').textContent = 'PAWPATROLV2';
-            document.getElementById('locke-badge').classList.add('hidden');
             updateCoinDisplay();
             document.getElementById('auth-form').classList.add('hidden');
             document.getElementById('auth-link-form').classList.remove('hidden');
-            document.getElementById('signout-button').classList.remove('hidden');
             setAuthMessage('Sesión iniciada. Completa la vinculación de tu entrenador.');
             showOnlyScreen('auth');
         }
@@ -1082,10 +1487,8 @@
             currentAccountEmail = user.email || '';
             document.getElementById('auth-form').classList.remove('hidden');
             document.getElementById('auth-link-form').classList.add('hidden');
-            document.getElementById('signout-button').classList.remove('hidden');
             updateCoinDisplay();
             if(PLAYERS_WITH_LOCKE_CHOICES.includes(player)) {
-                document.getElementById('locke-badge').classList.remove('hidden');
                 document.getElementById('locke-select-player').innerText = `PERFIL: ${player.toUpperCase()}`;
                 showOnlyScreen('locke-select');
                 return;
@@ -1098,15 +1501,13 @@
                 ? ['PawPatrolOG', 'PawPatrolV2']
                 : ['PawPatrolV2'];
             if(!currentPlayer || !allowedLockes.includes(locke)) return;
+            gymTeamSelection = {};
+            gymTeamSelectionLoaded = {};
             currentLocke = locke;
             document.body.classList.toggle('theme-og', locke === 'PawPatrolOG');
             document.body.classList.toggle('theme-v2', locke === 'PawPatrolV2');
             document.getElementById('locke-title').textContent = locke.toUpperCase();
-            const badge = document.getElementById('locke-badge');
-            const canSwitchLocke = PLAYERS_WITH_LOCKE_CHOICES.includes(currentPlayer);
-            badge.innerText = canSwitchLocke ? `${currentPlayer} · ${locke} · CAMBIAR` : `${currentPlayer} · ${locke}`;
-            badge.disabled = !canSwitchLocke;
-            badge.classList.remove('hidden');
+            updateProfileActions();
             try {
                 if(locke === 'PawPatrolV2') await migrateLegacyV2Data();
                 if(currentLocke !== locke) return;
@@ -1115,17 +1516,23 @@
             } catch(error) {
                 console.error(`Error preparando los datos de ${locke}:`, error);
                 alert(`❌ No se pudieron preparar los datos de ${locke}: ${error.message}\nRevisa las reglas de acceso de Firebase e inténtalo de nuevo.`);
-                if(PLAYERS_WITH_LOCKE_CHOICES.includes(currentPlayer)) showOnlyScreen('locke-select');
-                else {
+                if(PLAYERS_WITH_LOCKE_CHOICES.includes(currentPlayer)) {
+                    document.getElementById('locke-select-player').innerText = `PERFIL: ${currentPlayer.toUpperCase()}`;
+                    showOnlyScreen('locke-select');
+                } else {
                     showOnlyScreen('auth');
                     setAuthMessage(`No se pudieron cargar los datos de ${locke}: ${error.message}`, true);
                 }
             }
         }
 
-        window.selectLocke = function(locke) { openLocke(locke); };
-        window.showLockeSelector = function() {
-            if(PLAYERS_WITH_LOCKE_CHOICES.includes(currentPlayer)) showOnlyScreen('locke-select');
+        window.selectLocke = function(locke) {
+            if(currentScreen !== 'locke-select' || !PLAYERS_WITH_LOCKE_CHOICES.includes(currentPlayer)) return;
+            openLocke(locke);
+        };
+        window.switchLocke = function() {
+            if(currentScreen !== 'profile' || !PLAYERS_WITH_LOCKE_CHOICES.includes(currentPlayer)) return;
+            openLocke(currentLocke === 'PawPatrolOG' ? 'PawPatrolV2' : 'PawPatrolOG');
         };
         window.logout = async function() {
             if(!auth) return;
@@ -1136,6 +1543,15 @@
                 alert(`❌ No se pudo cerrar sesión: ${error.message}`);
             }
         };
+
+        async function playCaptureAnimation(species, nickname) {
+            const overlay = document.getElementById('capture-animation');
+            document.getElementById('capture-animation-name').textContent = `"${nickname}" · ${species}`;
+            overlay.hidden = false;
+            const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            await new Promise(resolve => setTimeout(resolve, reducedMotion ? 450 : 2000));
+            overlay.hidden = true;
+        }
 
         async function saveAccountProfile(user, player) {
             if(!PLAYERS.includes(player)) throw new Error('Selecciona un entrenador válido.');
@@ -1174,7 +1590,6 @@
                 setAuthMessage('');
             } catch(error) {
                 console.error('Error al iniciar sesión:', error);
-                if(auth.currentUser) document.getElementById('signout-button').classList.remove('hidden');
                 setAuthMessage(authErrorMessage(error), true);
             } finally {
                 handlingAuthAction = false;
@@ -1241,7 +1656,7 @@
         });
 
         window.nav = function(targetScreen) {
-            if(!auth || !auth.currentUser || !getMyPlayer()) {
+            if(!auth || !auth.currentUser || (!getMyPlayer() && targetScreen !== 'profile')) {
                 if(targetScreen !== 'auth') showOnlyScreen('auth');
                 return;
             }
@@ -1253,6 +1668,7 @@
             document.querySelectorAll('[id^="screen-"]').forEach(s => { s.classList.add('hidden'); s.classList.remove('flex'); });
             const target = document.getElementById('screen-' + targetScreen);
             if(target) { target.classList.remove('hidden'); target.classList.add('flex'); }
+            updateProfileActions();
             if(targetScreen === 'add') document.getElementById('playerInput').value = getMyPlayer();
             if(targetScreen === 'capture-failed') document.getElementById('failedPlayerInput').value = getMyPlayer();
             refreshCurrentScreen();
@@ -1356,8 +1772,6 @@
                         document.getElementById('locke-title').textContent = 'PAWPATROLV2';
                         document.getElementById('auth-form').classList.remove('hidden');
                         document.getElementById('auth-link-form').classList.add('hidden');
-                        document.getElementById('signout-button').classList.add('hidden');
-                        document.getElementById('locke-badge').classList.add('hidden');
                         setAuthMessage('');
                         updateCoinDisplay();
                         showOnlyScreen('auth');
@@ -1379,7 +1793,6 @@
                         }
                     } catch(error) {
                         console.error('Error cargando el perfil de la cuenta:', error);
-                        document.getElementById('signout-button').classList.remove('hidden');
                         showOnlyScreen('auth');
                         setAuthMessage(authErrorMessage(error), true);
                     }
@@ -1424,7 +1837,7 @@
                 else if (r < 2) { type = 'consumible'; id = 'ban'; name = G_CONSUMABLES[id].name; desc = "Mítico (1%). Jode a un rival."; imgUrl = `https://play.pokemonshowdown.com/sprites/itemicons/${G_CONSUMABLES[id].icon}.png`; }
                 else if (r < 3) { type = 'consumible'; id = 'skip'; name = G_CONSUMABLES[id].name; desc = "Mítico (1%). Sáltate tu primer Pokémon de ruta."; imgUrl = `https://play.pokemonshowdown.com/sprites/itemicons/${G_CONSUMABLES[id].icon}.png`; }
                 else if (r < 30) { type = 'skin'; id = G_SKINS[Math.floor(Math.random()*G_SKINS.length)]; name = `Skin: ${id.toUpperCase()}`; desc = "Cosmético Raro (27%)"; imgUrl = `https://play.pokemonshowdown.com/sprites/trainers/${getSkinSpriteId(id)}.png`; }
-                else if (r < 60) { type = 'banner'; id = G_BANNERS[Math.floor(Math.random()*G_BANNERS.length)]; name = `Banner Mágico`; desc = "Cosmético Común (30%)"; }
+                else if (r < 60) { type = 'banner'; id = G_BANNERS[Math.floor(Math.random()*G_BANNERS.length)]; name = `Banner ${getBannerName(id)}`; desc = "Cosmético Común (30%)"; }
                 else { type = 'pepita'; name = "Pepita"; desc = "¡Consolación! (40%). Te devuelven 25 🪙"; imgUrl = `https://play.pokemonshowdown.com/sprites/itemicons/nugget.png`; extraCoins = 25; }
 
                 if (db) {
@@ -1470,7 +1883,7 @@
                 } else {
                     type = 'banner';
                     id = G_BANNERS[Math.floor(Math.random()*G_BANNERS.length)];
-                    name = `Banner Mágico`;
+                    name = `Banner ${getBannerName(id)}`;
                     desc = "Cosmético Común (50%)";
                 }
 
@@ -1550,7 +1963,7 @@
             if(tab === 'banners') {
                 const bArr = inv.banners || [];
                 if(bArr.length === 0) document.getElementById('inv-banners').innerHTML = '<p class="col-span-full font-bold text-gray-500 text-center mt-10">No tienes banners. ¡Tira en el Gacha!</p>';
-                else document.getElementById('inv-banners').innerHTML = bArr.map(b => `<div class="player-banner ${b} p-4 text-center text-xl font-bold flex justify-between items-center ${acts.banner === b ? 'border-green-500 border-8' : ''}"><span class="ml-4 uppercase text-white shadow-black">EJEMPLO</span><button onclick="window.equipItem('banner', '${b}')" class="cartoon-btn-sm bg-white text-black text-sm">${acts.banner === b ? 'Equipado' : 'Equipar'}</button></div>`).join('');
+                else document.getElementById('inv-banners').innerHTML = bArr.map(b => `<div class="player-banner ${b} p-4 text-center text-xl font-bold flex justify-between items-center ${acts.banner === b ? 'border-green-500 border-8' : ''}"><span class="banner-name ml-4 uppercase">${getBannerName(b)}</span><button onclick="window.equipItem('banner', '${b}')" class="cartoon-btn-sm bg-white text-black text-sm">${acts.banner === b ? 'Equipado' : 'Equipar'}</button></div>`).join('');
             }
             if(tab === 'consumables') {
                 const cObj = inv.consumibles || {}; let html = '';
@@ -1892,19 +2305,45 @@
 
             try {
                 const speciesSlug = await resolveSpeciesSlug(speciesRaw);
-                const res = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${speciesSlug}`); if(!res.ok) throw new Error();
+                const res = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${speciesSlug}`);
+                if(!res.ok) {
+                    const error = new Error('La especie no existe.');
+                    error.code = 'species-not-found';
+                    throw error;
+                }
                 const mote = document.getElementById('nicknameInput').value.trim(); const specieFormatted = getSpeciesEnglishName(await res.json());
                 const data = { ruta: routeRaw, especie: specieFormatted, mote: mote, shiny: isShiny, inTeam: false, timestamp: Date.now() };
 
-                if (db) { push(ref(db, userPath(`${p}/pokemon/vivos`)), data); writeLog(p, `Capturado ${mote} (${specieFormatted}) en ${routeRaw}`); addPoints(p, 10); }
+                if(!db) throw new Error('Firebase no está disponible.');
+                await push(ref(db, userPath(`${p}/pokemon/vivos`)), data);
+                writeLog(p, `Capturado ${mote} (${specieFormatted}) en ${routeRaw}`);
+                addPoints(p, 10);
+                await playCaptureAnimation(specieFormatted, mote);
                 alert("✅ ¡Captura registrada! (+10 🪙)"); document.getElementById('trackerForm').reset(); window.nav('menu');
-            } catch (error) { alert(`❌ "${speciesRaw}" no existe.`); } finally { btnSubmit.disabled = false; btnSubmit.innerHTML = "¡CAPTURADO!"; }
+            } catch (error) {
+                console.error('Error registrando la captura:', error);
+                if(error.code === 'species-not-found') alert(`❌ "${speciesRaw}" no existe.`);
+                else alert('❌ No se pudo guardar la captura. Comprueba la conexión e inténtalo de nuevo.');
+            } finally {
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = "¡CAPTURADO!";
+            }
         });
 
         // --- VISTAS PERFIL Y EQUIPO ---
         window.updateProfileView = function() {
             const p = getMyPlayer();
-            if (!p) { document.getElementById('profile-locked-area').classList.add('hidden'); document.getElementById('btn-formar-equipo').classList.add('hidden'); document.getElementById('grid-profile').innerHTML = ''; document.getElementById('profile-failed-routes').classList.add('hidden'); return; }
+            if (!p) {
+                document.getElementById('profile-locked-area').classList.remove('hidden');
+                document.getElementById('btn-formar-equipo').classList.add('hidden');
+                document.getElementById('locked-player-name').innerText = 'Sin entrenador vinculado';
+                document.getElementById('profile-account-email').innerText = currentAccountEmail;
+                document.getElementById('profile-my-skin').classList.add('hidden');
+                document.getElementById('profile-gym-teams').classList.add('hidden');
+                document.getElementById('grid-profile').innerHTML = '';
+                document.getElementById('profile-failed-routes').classList.add('hidden');
+                return;
+            }
             else { document.getElementById('profile-locked-area').classList.remove('hidden'); document.getElementById('btn-formar-equipo').classList.remove('hidden'); document.getElementById('locked-player-name').innerText = p; }
             document.getElementById('profile-account-email').innerText = currentAccountEmail;
 
@@ -1944,7 +2383,8 @@
             myTeam = gymTeam.map(poke => ({
                 ...poke,
                 jugador: p,
-                estado: 'Vivo'
+                estado: 'Vivo',
+                _gymNumber: selectedGym
             }));
             // Mostrar TODOS los Pokémon vivos en la mochila (independientemente de si están en el equipo)
             myBox = myActive;
@@ -2020,9 +2460,9 @@
                     ${isOriginallyDead ? '<div class="absolute top-[-15px] right-[-15px] text-3xl">💀</div>' : ''}
                     <h3 class="font-bold text-xl uppercase truncate w-full mb-1">"${data.mote}"</h3><p class="text-sm font-bold text-gray-500 mb-2">${data.especie}</p>
                     <p class="text-xs text-blue-600 font-bold">📍 ${data.ruta}</p>
-                    <img onclick="window.openViewModal('${data.id}', '${data.jugador}', 'Vivo')" src="https://play.pokemonshowdown.com/sprites/${data.shiny ? 'gen5-shiny' : 'gen5'}/${getPokemonSpriteId(data.especie)}.png" class="pixel-art scale-[1.5] h-16 mb-4 cursor-pointer" onerror="this.src='https://play.pokemonshowdown.com/sprites/itemicons/pokeball.png';">
+                    <img onclick="window.openViewModal('${data.id}', '${data.jugador}', '${data._originalEstado || data.estado || 'Vivo'}', '${gymNumber}')" src="https://play.pokemonshowdown.com/sprites/${data.shiny ? 'gen5-shiny' : 'gen5'}/${getPokemonSpriteId(data.especie)}.png" class="pixel-art scale-[1.5] h-16 mb-4 cursor-pointer" onerror="this.src='https://play.pokemonshowdown.com/sprites/itemicons/pokeball.png';">
                     <div class="flex flex-col gap-2 w-full mt-auto">
-                        <button onclick="window.openViewModal('${data.id}', '${data.jugador}', 'Vivo')" class="cartoon-btn-sm bg-yellow-100 border-yellow-800 text-yellow-800">ℹ️ Ficha</button>
+                        <button onclick="window.openViewModal('${data.id}', '${data.jugador}', '${data._originalEstado || data.estado || 'Vivo'}', '${gymNumber}')" class="cartoon-btn-sm bg-yellow-100 border-yellow-800 text-yellow-800">ℹ️ Ficha</button>
                         ${isSelected ? `<button onclick="window.openEditModal('${data.id}', true)" class="cartoon-btn-sm teambuilder-action-btn bg-indigo-100 border-indigo-600 text-indigo-700 mb-2">⚙️ Personalizar</button>` : ''}
                         ${isSelected ? `<button onclick="window.killFromTeamBuilder('${data.id}', ${isGym1Or2})" class="cartoon-btn-sm teambuilder-action-btn bg-red-100 border-red-600 text-red-600 mb-2">💀 Ha muerto</button>` : ''}
                         <button onclick="window.toggleTeam('${data.id}', ${!isSelected})" class="cartoon-btn-sm teambuilder-action-btn ${isSelected ? 'bg-red-100 border-red-600 text-red-600' : 'bg-green-100 border-green-600 text-green-700'}">${isSelected ? '❌ Quitar' : '➕ Añadir'}</button>
@@ -2161,10 +2601,12 @@
                     ruta: poke.ruta,
                     shiny: poke.shiny,
                     nivel: poke.nivel || '',
-                    item: existingPoke ? (existingPoke.item || poke.item || '') : (poke.item || ''),
-                    ability: existingPoke ? (existingPoke.ability || poke.ability || '') : (poke.ability || ''),
-                    nature: existingPoke ? (existingPoke.nature || poke.nature || '') : (poke.nature || ''),
-                    moves: existingPoke ? (existingPoke.moves || poke.moves || ['', '', '', '']) : (poke.moves || ['', '', '', ''])
+                    item: existingPoke && Object.prototype.hasOwnProperty.call(existingPoke, 'item') ? existingPoke.item : (poke.item || ''),
+                    ability: existingPoke && Object.prototype.hasOwnProperty.call(existingPoke, 'ability') ? existingPoke.ability : (poke.ability || ''),
+                    nature: existingPoke && Object.prototype.hasOwnProperty.call(existingPoke, 'nature') ? existingPoke.nature : (poke.nature || ''),
+                    moves: existingPoke && Array.isArray(existingPoke.moves)
+                        ? [...existingPoke.moves]
+                        : (Array.isArray(poke.moves) ? [...poke.moves] : ['', '', '', ''])
                 };
             });
 
@@ -2274,23 +2716,20 @@
                         return;
                     }
 
-                    // Actualizar solo los datos del Pokémon en el equipo del gimnasio
-                    gymTeam[pokemonIndex] = {
-                        ...gymTeam[pokemonIndex],
-                        item: item,
-                        ability: ability,
-                        moves: moves
-                    };
+                    const updatedGymTeam = gymTeam.map((poke, index) => index === pokemonIndex
+                        ? { ...poke, item, ability, moves: [...moves] }
+                        : poke);
 
                     // Guardar en Firebase
-                    await set(ref(db, userPath(`${player}/equipos/${gymNumber}`)), gymTeam);
+                    await set(ref(db, userPath(`${player}/equipos/${gymNumber}`)), updatedGymTeam);
                     // Actualizar en memoria local
                     if(!globalEquiposGimnasio[player]) globalEquiposGimnasio[player] = {};
-                    globalEquiposGimnasio[player][gymNumber] = gymTeam;
+                    globalEquiposGimnasio[player][gymNumber] = updatedGymTeam;
 
                     document.getElementById('modal-edit-pokemon').style.display = 'none';
                     alert("✅ Datos del equipo del gimnasio actualizados.");
                     window.updateTeambuilderView();
+                    window.updateProfileView();
                 }
             } catch (error) {
                 console.error('Error al editar:', error);
@@ -2298,10 +2737,16 @@
             }
         });
 
-        window.openViewModal = function(id, player, state) {
-            const p = globalData.find(x => x.id === id && (!player || x.jugador === player) && (!state || x.estado === state));
-            if(!p || p.jugador !== getMyPlayer()) return;
+        window.openViewModal = function(id, player, state, gymNumber = '') {
+            const basePokemon = globalData.find(x => x.id === id && (!player || x.jugador === player) && (!state || x.estado === state))
+                || (gymNumber ? globalData.find(x => x.id === id && (!player || x.jugador === player)) : null);
+            if(!basePokemon || basePokemon.jugador !== getMyPlayer()) return;
+            const gymPokemon = gymNumber ? globalEquiposGimnasio[basePokemon.jugador]?.[gymNumber]?.find(poke => poke.id === id) : null;
+            const p = gymPokemon ? { ...basePokemon, ...gymPokemon } : basePokemon;
             document.getElementById('view-mote').innerText = `"${p.mote}" ${p.shiny ? '✨' : ''}`; document.getElementById('view-especie-ruta').innerText = `${p.especie} -📍 ${p.ruta}`;
+            const gymContext = document.getElementById('view-gym-context');
+            gymContext.innerText = gymNumber ? `DATOS DEL ${gymNumber === 'league' ? 'EQUIPO DE LA LIGA' : 'GIMNASIO ' + gymNumber}` : '';
+            gymContext.classList.toggle('hidden', !gymNumber);
             document.getElementById('view-sprite').src = `https://play.pokemonshowdown.com/sprites/${p.shiny ? 'gen5-shiny' : 'gen5'}/${getPokemonSpriteId(p.especie)}.png`;
             document.getElementById('view-level').innerText = p.nivel || '??'; document.getElementById('view-gender').innerText = p.gender || '---';
             document.getElementById('view-item').innerText = p.item || 'Ninguno';
@@ -2396,9 +2841,9 @@
                     // Usar datos específicos del gimnasio para item, ability y moves
                     return {
                         ...globalPoke,
-                        item: gymPoke.item || globalPoke.item,
-                        ability: gymPoke.ability || globalPoke.ability,
-                        moves: gymPoke.moves || globalPoke.moves
+                        item: Object.prototype.hasOwnProperty.call(gymPoke, 'item') ? gymPoke.item : globalPoke.item,
+                        ability: Object.prototype.hasOwnProperty.call(gymPoke, 'ability') ? gymPoke.ability : globalPoke.ability,
+                        moves: Array.isArray(gymPoke.moves) ? [...gymPoke.moves] : globalPoke.moves
                     };
                 }
                 return globalPoke;
@@ -2589,11 +3034,11 @@
             return `<div class="col-span-full grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">` + list.map(data => `
                 <div class="poke-card cartoon-panel flex flex-col items-center text-center relative border-4 ${isDead ? 'grayscale-dead' : (data.shiny ? 'shiny-bg' : 'bg-white')}" data-search="${data.ruta} ${data.especie} ${data.mote}">
                     <h3 class="font-bold text-lg uppercase truncate w-full mb-1">"${data.mote}" ${data.shiny ? '✨' : ''}</h3><p class="text-sm font-bold text-gray-500 mb-2">${data.especie}</p>
-                    <img ${isPublicView ? '' : `onclick="window.openViewModal('${data.id}', '${data.jugador}', '${data.estado}')"`} src="https://play.pokemonshowdown.com/sprites/${data.shiny ? 'gen5-shiny' : 'gen5'}/${getPokemonSpriteId(data.especie)}.png" class="pixel-art scale-[1.5] h-16 mb-2 ${isPublicView ? '' : 'cursor-pointer'}" onerror="this.src='https://play.pokemonshowdown.com/sprites/itemicons/pokeball.png';">
+                    <img ${isPublicView ? '' : `onclick="window.openViewModal('${data.id}', '${data.jugador}', '${data.estado}', '${data._gymNumber || ''}')"`} src="https://play.pokemonshowdown.com/sprites/${data.shiny ? 'gen5-shiny' : 'gen5'}/${getPokemonSpriteId(data.especie)}.png" class="pixel-art scale-[1.5] h-16 mb-2 ${isPublicView ? '' : 'cursor-pointer'}" onerror="this.src='https://play.pokemonshowdown.com/sprites/itemicons/pokeball.png';">
                     <p class="text-[10px] text-gray-400 font-black tracking-wider uppercase mb-2">📍 ${data.ruta}</p>
                     ${isDead && data.dedicatoria ? `<p class="text-xs text-gray-600 italic mb-2 px-2">"${data.dedicatoria}"</p>` : ''}
                     <div class="flex flex-col gap-2 w-full mt-auto">
-                        ${!isPublicView ? `<button onclick="window.openViewModal('${data.id}', '${data.jugador}', '${data.estado}')" class="cartoon-btn-sm bg-yellow-100 border-yellow-800 text-yellow-800">🔍 ${isViewMode ? 'Ver Info' : 'Ficha'}</button>` : ''}
+                        ${!isPublicView ? `<button onclick="window.openViewModal('${data.id}', '${data.jugador}', '${data.estado}', '${data._gymNumber || ''}')" class="cartoon-btn-sm bg-yellow-100 border-yellow-800 text-yellow-800">🔍 ${isViewMode ? 'Ver Info' : 'Ficha'}</button>` : ''}
                         ${canEditCapture && !isPublicView ? `<button onclick="window.openEditModal('${data.id}', false)" class="cartoon-btn-sm profile-edit-btn bg-amber-100 border-amber-700 text-amber-900">✏️ Editar Pokémon</button>` : ''}
                         ${showEditDedicatoria && isDead && !isPublicView ? `<button onclick="window.editDedicatoria('${data.id}')" class="cartoon-btn-sm profile-edit-btn bg-purple-100 border-purple-700 text-purple-900">📝 Editar Dedicatoria</button>` : ''}
                         ${showBBC && !isDead && !isBanned && !isPublicView ? `<button onclick="window.deevolve('${data.id}')" class="cartoon-btn-sm profile-edit-btn bg-purple-100 border-purple-700 text-purple-900">🔄 BBC</button>` : ''}
