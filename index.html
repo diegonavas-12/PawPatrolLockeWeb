@@ -1395,22 +1395,49 @@
         async function migrateLegacyV2Data() {
             const worldRef = ref(db, 'lockes/PawPatrolV2');
             const migration = await get(ref(db, 'lockes/PawPatrolV2/legacyMigrationCompleted'));
-            if(migration.val()) return;
-            const [legacyUsers, legacySuggestions] = await Promise.all([
-                get(ref(db, 'usuarios')),
-                get(ref(db, 'sugerencias'))
-            ]);
-            const users = legacyUsers.val() || {};
-            const suggestions = legacySuggestions.val() || {};
-            const result = await runTransaction(worldRef, current => {
-                const next = current || {};
-                if(next.legacyMigrationCompleted) return next;
-                next.usuarios = { ...users, ...(next.usuarios || {}) };
-                next.sugerencias = { ...suggestions, ...(next.sugerencias || {}) };
-                next.legacyMigrationCompleted = true;
-                return next;
-            }, { applyLocally: false });
-            if(!result.committed) throw new Error('No se pudo completar la migración segura de los datos antiguos a PawPatrolV2.');
+            if(!migration.val()) {
+                const [legacyUsers, legacySuggestions] = await Promise.all([
+                    get(ref(db, 'usuarios')),
+                    get(ref(db, 'sugerencias'))
+                ]);
+                const users = legacyUsers.val() || {};
+                const suggestions = legacySuggestions.val() || {};
+                const result = await runTransaction(worldRef, current => {
+                    const next = current || {};
+                    if(next.legacyMigrationCompleted) return next;
+                    next.usuarios = { ...users, ...(next.usuarios || {}) };
+                    next.sugerencias = { ...suggestions, ...(next.sugerencias || {}) };
+                    next.legacyMigrationCompleted = true;
+                    return next;
+                }, { applyLocally: false });
+                if(!result.committed) throw new Error('No se pudo completar la migración segura de los datos antiguos a PawPatrolV2.');
+            }
+            try {
+                const [legacyUsers, currentUsers, legacySuggestions, currentSuggestions] = await Promise.all([
+                    get(ref(db, 'usuarios')),
+                    get(ref(db, 'lockes/PawPatrolV2/usuarios')),
+                    get(ref(db, 'sugerencias')),
+                    get(ref(db, 'lockes/PawPatrolV2/sugerencias'))
+                ]);
+                const oldUsers = legacyUsers.val() || {};
+                const v2Users = currentUsers.val() || {};
+                const duplicatePlayers = Object.keys(oldUsers).filter(player =>
+                    Object.prototype.hasOwnProperty.call(v2Users, player) &&
+                    JSON.stringify(oldUsers[player]) === JSON.stringify(v2Users[player])
+                );
+                await Promise.all(duplicatePlayers.map(player => remove(ref(db, `usuarios/${player}`))));
+                if(JSON.stringify(legacySuggestions.val() || {}) === JSON.stringify(currentSuggestions.val() || {})) {
+                    await remove(ref(db, 'sugerencias'));
+                } else if(legacySuggestions.exists()) {
+                    console.warn('Se conservaron sugerencias antiguas porque difieren de las de PawPatrolV2.');
+                }
+                const retainedPlayers = Object.keys(oldUsers).filter(player => !duplicatePlayers.includes(player));
+                if(retainedPlayers.length) {
+                    console.warn('Se conservaron usuarios antiguos con datos distintos a PawPatrolV2:', retainedPlayers);
+                }
+            } catch(error) {
+                console.warn('La migración está completa, pero no se pudieron limpiar las copias idénticas antiguas:', error);
+            }
         }
         function writeLog(jugador, logText) { if(db&&jugador) push(ref(db, userPath(`${jugador}/logregister`)), { fecha: new Date().toLocaleDateString('es-ES')+" "+new Date().toLocaleTimeString('es-ES'), detalle: logText }); }
         function addPoints(jugador, amount) {
