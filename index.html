@@ -1145,9 +1145,15 @@
         let gymTeamSelection = {}; // Objeto con selecciones por gimnasio: { '1': [], '2': [], ... }
         let gymTeamSelectionLoaded = {}; // Para controlar si ya se cargó el equipo de cada gimnasio
 
-        const PLAYERS = ["Navas", "Varo", "Camilo", "Sergio", "Rubén", "Samu", "Víctor", "Mario", "David"];
-        const PLAYERS_WITH_LOCKE_CHOICES = ["Navas", "Varo", "Samu", "Sergio", "Rubén", "Camilo"];
-        const PLAYERS_OG_ONLY = ["David"];
+        const PLAYERS_IN_BOTH_LOCKES = ["Navas", "Varo", "Camilo", "Sergio", "Rubén", "Samu"];
+        const LOCKE_PLAYERS = {
+            PawPatrolOG: [...PLAYERS_IN_BOTH_LOCKES, "David"],
+            PawPatrolV2: [...PLAYERS_IN_BOTH_LOCKES, "Víctor", "Mario"]
+        };
+        const PLAYERS = [...new Set(Object.values(LOCKE_PLAYERS).flat())];
+        function getPlayerLockes(player) {
+            return Object.keys(LOCKE_PLAYERS).filter(locke => LOCKE_PLAYERS[locke].includes(player));
+        }
         ['register-player', 'link-player'].forEach(selectId => {
             const select = document.getElementById(selectId);
             PLAYERS.forEach(player => select.add(new Option(player, player)));
@@ -1612,7 +1618,7 @@
 
         function updateProfileActions() {
             const inProfile = currentScreen === 'profile' && !!auth?.currentUser;
-            const canSwitchLocke = inProfile && PLAYERS_WITH_LOCKE_CHOICES.includes(currentPlayer);
+            const canSwitchLocke = inProfile && getPlayerLockes(currentPlayer).length > 1;
             const signoutButton = document.getElementById('signout-button');
             const switchButton = document.getElementById('profile-locke-switch');
             signoutButton.classList.toggle('hidden', !inProfile);
@@ -1649,20 +1655,16 @@
             document.getElementById('auth-form').classList.remove('hidden');
             document.getElementById('auth-link-form').classList.add('hidden');
             updateCoinDisplay();
-            if(PLAYERS_WITH_LOCKE_CHOICES.includes(player)) {
+            if(getPlayerLockes(player).length > 1) {
                 document.getElementById('locke-select-player').innerText = `PERFIL: ${player.toUpperCase()}`;
                 showOnlyScreen('locke-select');
                 return;
             }
-            openLocke(PLAYERS_OG_ONLY.includes(player) ? 'PawPatrolOG' : 'PawPatrolV2');
+            openLocke(getPlayerLockes(player)[0]);
         }
 
         async function openLocke(locke) {
-            const allowedLockes = PLAYERS_OG_ONLY.includes(currentPlayer)
-                ? ['PawPatrolOG']
-                : PLAYERS_WITH_LOCKE_CHOICES.includes(currentPlayer)
-                    ? ['PawPatrolOG', 'PawPatrolV2']
-                    : ['PawPatrolV2'];
+            const allowedLockes = getPlayerLockes(currentPlayer);
             if(!currentPlayer || !allowedLockes.includes(locke)) return;
             gymTeamSelection = {};
             gymTeamSelectionLoaded = {};
@@ -1679,7 +1681,7 @@
             } catch(error) {
                 console.error(`Error preparando los datos de ${locke}:`, error);
                 alert(`❌ No se pudieron preparar los datos de ${locke}: ${error.message}\nRevisa las reglas de acceso de Firebase e inténtalo de nuevo.`);
-                if(PLAYERS_WITH_LOCKE_CHOICES.includes(currentPlayer)) {
+                if(getPlayerLockes(currentPlayer).length > 1) {
                     document.getElementById('locke-select-player').innerText = `PERFIL: ${currentPlayer.toUpperCase()}`;
                     showOnlyScreen('locke-select');
                 } else {
@@ -1690,11 +1692,11 @@
         }
 
         window.selectLocke = function(locke) {
-            if(currentScreen !== 'locke-select' || !PLAYERS_WITH_LOCKE_CHOICES.includes(currentPlayer)) return;
+            if(currentScreen !== 'locke-select' || getPlayerLockes(currentPlayer).length < 2) return;
             openLocke(locke);
         };
         window.switchLocke = function() {
-            if(currentScreen !== 'profile' || !PLAYERS_WITH_LOCKE_CHOICES.includes(currentPlayer)) return;
+            if(currentScreen !== 'profile' || getPlayerLockes(currentPlayer).length < 2) return;
             openLocke(currentLocke === 'PawPatrolOG' ? 'PawPatrolV2' : 'PawPatrolOG');
         };
         window.logout = async function() {
@@ -1940,7 +1942,7 @@
                 const data = snapshot.val() || {};
                 globalData = []; globalBadges = {}; rankingData = {}; globalEco = {}; globalInv = {}; globalActivos = {}; globalRepelentes = []; globalFailedRoutes = {}; globalEquiposGimnasio = {};
 
-                PLAYERS.forEach(player => {
+                (LOCKE_PLAYERS[currentLocke] || []).forEach(player => {
                     const pData = data[player] || {};
                     rankingData[player] = { victorias: pData.ranking?.victorias || 0, derrotas: pData.ranking?.derrotas || 0 };
                     globalBadges[player] = pData.medallas || {};
@@ -3356,7 +3358,7 @@
         }
 
         window.changeRank = function(player, field, amount) {
-            if(!db) return;
+            if(!db || !LOCKE_PLAYERS[currentLocke]?.includes(player) || !['victorias', 'derrotas'].includes(field)) return;
             const current = (rankingData[player] && rankingData[player][field]) ? rankingData[player][field] : 0;
             const newVal = Math.max(0, current + amount);
             update(ref(db, userPath(`${player}/ranking`)), { [field]: newVal });
@@ -3364,7 +3366,7 @@
         }
 
         function renderRanking() {
-            const rankingArray = PLAYERS.map(name => ({ name, victorias: rankingData[name]?.victorias || 0, derrotas: rankingData[name]?.derrotas || 0 })).sort((a, b) => b.victorias - a.victorias || a.derrotas - b.derrotas);
+            const rankingArray = (LOCKE_PLAYERS[currentLocke] || []).map(name => ({ name, victorias: rankingData[name]?.victorias || 0, derrotas: rankingData[name]?.derrotas || 0 })).sort((a, b) => b.victorias - a.victorias || a.derrotas - b.derrotas);
             document.getElementById('ranking-body').innerHTML = rankingArray.map((p, i) => {
                 let medal = i === 0 ? '👑' : i === 1 ? '🔥' : i === 2 ? '⭐' : `${i + 1}`;
                 const acts = globalActivos[p.name] || {};
