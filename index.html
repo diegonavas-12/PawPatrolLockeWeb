@@ -886,7 +886,29 @@
                 </ul>
             </section>
 
-            <section class="mt-8">
+            <section id="rules-table-og" class="mt-8 hidden">
+                <h3 class="font-bold text-2xl mb-4 border-b-4 border-gray-800 pb-2 text-emerald-700">🏟️ Gimnasios y límites de nivel</h3>
+                <div class="overflow-x-auto rounded-xl border-4 border-emerald-800 bg-white">
+                    <table class="w-full min-w-[640px] text-left text-sm font-bold text-gray-800">
+                        <thead class="bg-emerald-100 text-emerald-950">
+                            <tr><th class="p-3">🏅 Gimnasio</th><th class="p-3">👤 Líder (Ciudad)</th><th class="p-3">🛑 Nivel máximo</th></tr>
+                        </thead>
+                        <tbody class="divide-y-2 divide-emerald-100">
+                            <tr><td class="p-3">1.º Gimnasio</td><td class="p-3">Violeta (Ciudad Novarte)</td><td class="p-3">Nivel 12</td></tr>
+                            <tr><td class="p-3">2.º Gimnasio</td><td class="p-3">Lino (Ciudad Relieve)</td><td class="p-3">Nivel 25</td></tr>
+                            <tr><td class="p-3">3.º Gimnasio</td><td class="p-3">Corelia (Ciudad Yantra)</td><td class="p-3">Nivel 32</td></tr>
+                            <tr><td class="p-3">4.º Gimnasio</td><td class="p-3">Amaro (Ciudad Témpera)</td><td class="p-3">Nivel 34</td></tr>
+                            <tr><td class="p-3">5.º Gimnasio</td><td class="p-3">Lem (Ciudad Luminalia)</td><td class="p-3">Nivel 37</td></tr>
+                            <tr><td class="p-3">6.º Gimnasio</td><td class="p-3">Valeria (Ciudad Romantis)</td><td class="p-3">Nivel 42</td></tr>
+                            <tr><td class="p-3">7.º Gimnasio</td><td class="p-3">Ástrid (Ciudad Fluxus)</td><td class="p-3">Nivel 48</td></tr>
+                            <tr><td class="p-3">8.º Gimnasio</td><td class="p-3">Édel (Ciudad Fractal)</td><td class="p-3">Nivel 59</td></tr>
+                            <tr class="bg-amber-50"><td class="p-3">Alto Mando</td><td class="p-3">Malva, Narciso, Tileo y Drácena</td><td class="p-3">Nivel 65</td></tr>
+                            <tr class="bg-amber-50"><td class="p-3">Campeona</td><td class="p-3">Dianta</td><td class="p-3">Nivel 68</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            <section id="rules-table-v2" class="mt-8">
                 <h3 class="font-bold text-2xl mb-4 border-b-4 border-gray-800 pb-2 text-emerald-700">🏟️ Gimnasios y límites de nivel</h3>
                 <div class="overflow-x-auto rounded-xl border-4 border-emerald-800 bg-white">
                     <table class="w-full min-w-[820px] text-left text-sm font-bold text-gray-800">
@@ -1030,7 +1052,7 @@
             <h2 class="title-font text-3xl mb-6 text-center text-green-600">NUEVA CAPTURA</h2>
             <form id="trackerForm" class="space-y-5">
                 <div><label class="block font-bold ml-2 mb-1 text-gray-700">JUGADOR:</label><input type="text" id="playerInput" disabled class="cartoon-input w-full p-3 text-lg"></div>
-                <div><label class="block font-bold ml-2 mb-1 text-gray-700">RUTA/ZONA:</label><input type="text" id="routeInput" required placeholder="Ej: Ruta 19..." class="cartoon-input w-full p-3 text-lg"></div>
+                <div><label class="block font-bold ml-2 mb-1 text-gray-700">RUTA/ZONA:</label><input type="text" id="routeInput" required placeholder="Ej: Ruta 19..." class="cartoon-input w-full p-3 text-lg"><p id="og-route-hint-add" class="hidden mt-1 text-xs font-bold text-emerald-700">Selecciona una ruta o zona de la lista para registrar la captura.</p></div>
                 <div><label class="block font-bold ml-2 mb-1 text-gray-700">POKÉMON:</label><input type="text" id="speciesInput" required placeholder="Ej: Pikachu" class="cartoon-input w-full p-3 text-lg"></div>
                 <div><label class="block font-bold ml-2 mb-1 text-gray-700">MOTE:</label><input type="text" id="nicknameInput" required placeholder="Apodo" class="cartoon-input w-full p-3 text-lg"></div>
                 <div class="flex items-center space-x-3 p-4 bg-yellow-100 border-4 border-yellow-400 rounded-[20px]">
@@ -1073,8 +1095,8 @@
     <div id="screen-suggestions" class="w-full max-w-4xl hidden flex-col mt-4"><div class="flex justify-between items-center mb-4"><button onclick="nav('menu')" class="cartoon-btn-sm">⬅ VOLVER</button><h2 class="title-font text-4xl text-white text-shadow-hard uppercase">💡 SUGERENCIAS</h2></div><div class="cartoon-panel p-6 mb-6"><form id="suggestionForm" class="space-y-4"><textarea id="suggestionInput" required placeholder="Escribe aquí..." class="cartoon-input w-full p-4 h-32 resize-none"></textarea><button type="submit" class="cartoon-btn w-full bg-pink-500 text-white text-xl py-3">Enviar</button></form></div><div id="grid-suggestions" class="space-y-4 w-full"></div></div>
 
     <!-- MODALES Y DATALISTS POKÉMON -->
-    <datalist id="all-moves-list"></datalist><datalist id="valid-abilities-list"></datalist><datalist id="valid-items-list"></datalist><datalist id="valid-natures-list"></datalist>
-    <div id="modal-edit-pokemon" class="modal-overlay"><div class="cartoon-panel modal-content bg-white relative"><button onclick="document.getElementById('modal-edit-pokemon').style.display='none'" class="absolute top-4 right-4 text-2xl font-black text-gray-500">X</button><h2 id="edit-modal-title" class="title-font text-3xl text-center text-blue-600 mb-2">⚙️ PERSONALIZAR</h2><p id="modal-pokemon-name" class="text-center font-bold text-gray-500 mb-4 uppercase"></p><form id="editPokeForm" class="space-y-3"><input type="hidden" id="edit-poke-id"><input type="hidden" id="edit-mode" value="gym"><div id="edit-mode-profile" class="hidden"><div><label class="block font-bold text-sm">MOTE:</label><input type="text" id="edit-mote" maxlength="40" class="cartoon-input w-full p-2"></div><div><label class="block font-bold text-sm">RUTA/ZONA:</label><input type="text" id="edit-route" maxlength="80" class="cartoon-input w-full p-2"></div></div><div id="edit-mode-gym"><div class="grid grid-cols-1 md:grid-cols-2 gap-3"><div><label class="block font-bold text-sm">Objeto (@):</label><input type="text" id="edit-item" list="valid-items-list" autocomplete="off" class="cartoon-input w-full p-2"></div><div><label class="block font-bold text-sm">Habilidad:</label><input type="text" id="edit-ability" list="valid-abilities-list" autocomplete="off" class="cartoon-input w-full p-2"></div></div><div class="pt-2 border-t-2 border-gray-200 mt-2"><label class="block font-bold text-sm text-center mb-1 text-red-600">Ataques Randomlocke</label><div class="grid grid-cols-1 md:grid-cols-2 gap-2"><input type="text" id="edit-m1" list="all-moves-list" autocomplete="off" class="cartoon-input w-full p-2"><input type="text" id="edit-m2" list="all-moves-list" autocomplete="off" class="cartoon-input w-full p-2"><input type="text" id="edit-m3" list="all-moves-list" autocomplete="off" class="cartoon-input w-full p-2"><input type="text" id="edit-m4" list="all-moves-list" autocomplete="off" class="cartoon-input w-full p-2"></div></div></div><button type="submit" id="btn-save-edit" class="cartoon-btn w-full bg-blue-500 text-white text-xl py-3 mt-4">💾 GUARDAR</button></form></div></div>
+    <datalist id="all-moves-list"></datalist><datalist id="valid-abilities-list"></datalist><datalist id="valid-items-list"></datalist><datalist id="valid-natures-list"></datalist><datalist id="og-route-options"></datalist>
+    <div id="modal-edit-pokemon" class="modal-overlay"><div class="cartoon-panel modal-content bg-white relative"><button onclick="document.getElementById('modal-edit-pokemon').style.display='none'" class="absolute top-4 right-4 text-2xl font-black text-gray-500">X</button><h2 id="edit-modal-title" class="title-font text-3xl text-center text-blue-600 mb-2">⚙️ PERSONALIZAR</h2><p id="modal-pokemon-name" class="text-center font-bold text-gray-500 mb-4 uppercase"></p><form id="editPokeForm" class="space-y-3"><input type="hidden" id="edit-poke-id"><input type="hidden" id="edit-mode" value="gym"><div id="edit-mode-profile" class="hidden"><div><label class="block font-bold text-sm">MOTE:</label><input type="text" id="edit-mote" maxlength="40" class="cartoon-input w-full p-2"></div><div><label class="block font-bold text-sm">RUTA/ZONA:</label><input type="text" id="edit-route" maxlength="80" class="cartoon-input w-full p-2"><p id="og-route-hint-edit" class="hidden mt-1 text-xs font-bold text-emerald-700">Selecciona una ruta o zona de la lista para guardar el cambio.</p></div></div><div id="edit-mode-gym"><div class="grid grid-cols-1 md:grid-cols-2 gap-3"><div><label class="block font-bold text-sm">Objeto (@):</label><input type="text" id="edit-item" list="valid-items-list" autocomplete="off" class="cartoon-input w-full p-2"></div><div><label class="block font-bold text-sm">Habilidad:</label><input type="text" id="edit-ability" list="valid-abilities-list" autocomplete="off" class="cartoon-input w-full p-2"></div></div><div class="pt-2 border-t-2 border-gray-200 mt-2"><label class="block font-bold text-sm text-center mb-1 text-red-600">Ataques Randomlocke</label><div class="grid grid-cols-1 md:grid-cols-2 gap-2"><input type="text" id="edit-m1" list="all-moves-list" autocomplete="off" class="cartoon-input w-full p-2"><input type="text" id="edit-m2" list="all-moves-list" autocomplete="off" class="cartoon-input w-full p-2"><input type="text" id="edit-m3" list="all-moves-list" autocomplete="off" class="cartoon-input w-full p-2"><input type="text" id="edit-m4" list="all-moves-list" autocomplete="off" class="cartoon-input w-full p-2"></div></div></div><button type="submit" id="btn-save-edit" class="cartoon-btn w-full bg-blue-500 text-white text-xl py-3 mt-4">💾 GUARDAR</button></form></div></div>
     <div id="modal-view-pokemon" class="modal-overlay"><div class="cartoon-panel modal-content bg-white relative text-center"><button onclick="document.getElementById('modal-view-pokemon').style.display='none'" class="absolute top-4 right-4 text-2xl font-black text-gray-500">X</button><h2 class="title-font text-3xl text-blue-600 mb-1" id="view-mote"></h2><p class="font-bold text-gray-500 mb-1" id="view-especie-ruta"></p><p id="view-gym-context" class="hidden text-sm font-black text-fuchsia-600 mb-3"></p><div class="flex justify-center mb-4"><img id="view-sprite" src="" class="pixel-art scale-[2] h-24"></div><div class="grid grid-cols-2 gap-2 text-left bg-gray-100 p-4 rounded-xl border-4 border-gray-200 font-bold text-sm"><p>Nivel: <span id="view-level" class="text-blue-600"></span></p><p>Género: <span id="view-gender" class="text-blue-600"></span></p><p>Objeto: <span id="view-item" class="text-blue-600"></span></p><p>Habilidad: <span id="view-ability" class="text-blue-600"></span></p><p class="col-span-2">Naturaleza: <span id="view-nature" class="text-blue-600"></span></p><div class="col-span-2 mt-2 pt-2 border-t-2 border-gray-300"><p class="mb-1 text-center">Ataques:</p><ul class="list-disc pl-5 text-red-600" id="view-moves"></ul></div></div></div></div>
     <div id="capture-animation" role="status" aria-live="assertive" hidden>
         <div class="capture-animation-content">
@@ -1420,7 +1442,7 @@
             { id: 'b9', name: 'Liga Pokémon', icon: '🏆', maxLevel: 59 }
         ];
 
-        // Rutas permitidas por gimnasio (coincidencia de cadena de caracteres)
+        // Rutas permitidas por gimnasio en PawPatrol V2.
         const GYM_ROUTES = {
             '1': ['Engobe', '19', 'Ocre', '20', 'Rancho', 'Inicial'],
             '2': ['Hormigon', 'Hormigón'],
@@ -1432,6 +1454,174 @@
             '8': ['Marga', '22'],
             'league': ['21', 'Costera', 'Gigante', '23', 'Victoria']
         };
+
+        const OG_ROUTE = (locations, habitats = [], label = '', suggestions = []) => ({ locations, habitats, label, suggestions });
+        const OG_GYM_ROUTES = {
+            '1': [
+                OG_ROUTE(['Inicial', 'pueblo boceto', 'inicial de pueblo boceto'], [], 'Pueblo Boceto - Inicial', ['Inicial', 'Pueblo Boceto', 'Inicial de Pueblo Boceto']),
+                OG_ROUTE(['ruta 2'], ['hierba normal']),
+                OG_ROUTE(['bosque novarte'], ['hierba normal']),
+                OG_ROUTE(['bosque novarte'], ['hierba alta']),
+                OG_ROUTE(['ruta 3'], ['hierba normal']),
+                OG_ROUTE(['ruta 3'], ['hierba alta']),
+                OG_ROUTE(['ruta 22'], ['hierba normal']),
+                OG_ROUTE(['ruta 22'], ['flores amarillas'])
+            ],
+            '2': [
+                OG_ROUTE(['ruta 4'], ['flores rojas']),
+                OG_ROUTE(['ruta 4'], ['flores amarillas']),
+                OG_ROUTE(['Laboratorio', 'Ciudad Luminalia'], [], 'Ciudad Luminalia - Laboratorio', ['Laboratorio', 'Ciudad Luminalia']),
+                OG_ROUTE(['ruta 5'], ['hierba normal']),
+                OG_ROUTE(['ruta 5'], ['flores moradas']),
+                OG_ROUTE(['ruta 6'], ['hierba alta']),
+                OG_ROUTE(['palacio cenit'], ['hierba alta']),
+                OG_ROUTE(['ruta 7'], ['hierba normal']),
+                OG_ROUTE(['ruta 7'], ['flores amarillas']),
+                OG_ROUTE(['ruta 7'], ['flores moradas']),
+                OG_ROUTE(['gruta tierraunida']),
+                OG_ROUTE(['ruta 8'], ['flores amarillas']),
+                OG_ROUTE(['ruta 8'], ['hierba normal']),
+                OG_ROUTE(['pueblo vanitas'], [], 'Pueblo Vánitas (Revivir fósiles)'),
+                OG_ROUTE(['ruta 9']),
+                OG_ROUTE(['cueva brillante']),
+                OG_ROUTE(['ciudad relieve'], [], 'Ciudad Relieve (Regalos / Intercambios / Pesca)')
+            ],
+            '3': [
+                OG_ROUTE(['ruta 10'], ['hierba normal']),
+                OG_ROUTE(['ruta 10'], ['flores amarillas']),
+                OG_ROUTE(['ruta 11'], ['hierba normal']),
+                OG_ROUTE(['cueva de los reflejos', 'cueva reflejos']),
+                OG_ROUTE(['ciudad yantra', 'torre maestria', 'lucario'], [], 'Ciudad Yantra / Torre Maestría (Lucario)')
+            ],
+            '4': [
+                OG_ROUTE(['ruta 12'], ['hierba normal']),
+                OG_ROUTE(['ruta 12'], ['flores amarillas']),
+                OG_ROUTE(['bahia azul'], ['hierba normal']),
+                OG_ROUTE(['bahia azul'], ['flores amarillas'])
+            ],
+            '5': [OG_ROUTE(['ruta 13'])],
+            '6': [OG_ROUTE(['ruta 14'], ['flores rojas'])],
+            '7': [
+                OG_ROUTE(['ruta 15'], ['hierba normal']),
+                OG_ROUTE(['ruta 15'], ['flores amarillas']),
+                OG_ROUTE(['hotel desolacion']),
+                OG_ROUTE(['ruta 16'], ['hierba normal']),
+                OG_ROUTE(['ruta 16'], ['hierba alta']),
+                OG_ROUTE(['ruta 16'], ['flores amarillas']),
+                OG_ROUTE(['caverna helada'])
+            ],
+            '8': [
+                OG_ROUTE(['ruta 17']),
+                OG_ROUTE(['ruta 18'], ['hierba normal']),
+                OG_ROUTE(['ruta 18'], ['flores rojas']),
+                OG_ROUTE(['cueva terminus']),
+                OG_ROUTE(['ruta 19'], ['hierba normal']),
+                OG_ROUTE(['ruta 19'], ['flores amarillas']),
+                OG_ROUTE(['ruta 19'], ['flores moradas']),
+                OG_ROUTE(['ruta 20'], ['hierba normal']),
+                OG_ROUTE(['ruta 20'], ['hierba alta']),
+                OG_ROUTE(['villa pokemon'], ['hierba normal']),
+                OG_ROUTE(['villa pokemon'], ['flores amarillas']),
+                OG_ROUTE(['villa pokemon'], ['flores rojas'])
+            ],
+            'league': [
+                OG_ROUTE(['ruta 21'], ['flores rojas']),
+                OG_ROUTE(['ruta 21'], ['flores moradas']),
+                OG_ROUTE(['calle victoria'], ['cueva']),
+                OG_ROUTE(['calle victoria'], ['flores amarillas'])
+            ]
+        };
+
+        const OG_ROUTE_LOCATION_LABELS = {
+            'pueblo boceto': 'Pueblo Boceto',
+            'bosque novarte': 'Bosque Novarte',
+            'ciudad luminalia': 'Ciudad Luminalia',
+            'palacio cenit': 'Palacio Cenit',
+            'gruta tierraunida': 'Gruta Tierraunida',
+            'pueblo vanitas': 'Pueblo Vánitas',
+            'cueva brillante': 'Cueva Brillante',
+            'cueva de los reflejos': 'Cueva de los Reflejos',
+            'torre maestria': 'Torre Maestría',
+            'ciudad yantra': 'Ciudad Yantra',
+            'bahia azul': 'Bahía Azul',
+            'hotel desolacion': 'Hotel Desolación',
+            'caverna helada': 'Caverna Helada',
+            'cueva terminus': 'Cueva Terminus',
+            'villa pokemon': 'Villa Pokémon',
+            'calle victoria': 'Calle Victoria'
+        };
+
+        function getOgRouteSuggestions() {
+            return [...new Set(Object.values(OG_GYM_ROUTES).flat().flatMap(area => {
+                if(area.label) return [area.label, ...area.suggestions];
+                const location = area.locations[0];
+                const locationLabel = OG_ROUTE_LOCATION_LABELS[location]
+                    || location.replace(/\b\w/g, character => character.toUpperCase());
+                const habitatLabel = area.habitats[0]
+                    ? area.habitats[0].replace(/\b\w/g, character => character.toUpperCase())
+                    : '';
+                return [habitatLabel ? `${locationLabel} - ${habitatLabel}` : locationLabel, ...area.suggestions];
+            }))];
+        }
+
+        function syncOgRouteAutocomplete() {
+            const enabled = currentLocke === 'PawPatrolOG';
+            const datalist = document.getElementById('og-route-options');
+            datalist.replaceChildren(...(enabled
+                ? getOgRouteSuggestions().map(route => {
+                    const option = document.createElement('option');
+                    option.value = route;
+                    return option;
+                })
+                : []));
+            ['routeInput', 'edit-route'].forEach(inputId => {
+                const input = document.getElementById(inputId);
+                if(enabled) input.setAttribute('list', 'og-route-options');
+                else input.removeAttribute('list');
+            });
+            document.getElementById('og-route-hint-add').classList.toggle('hidden', !enabled);
+            document.getElementById('og-route-hint-edit').classList.toggle('hidden', !enabled);
+        }
+
+        function isValidOgRouteEntry(route) {
+            return currentLocke !== 'PawPatrolOG' ||
+                getOgRouteSuggestions().some(suggestion => normalizeRouteKeyword(suggestion) === normalizeRouteKeyword(route));
+        }
+
+        function normalizeRouteKeyword(value) {
+            return (value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                .toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().replace(/\s+/g, ' ');
+        }
+
+        function routeHasKeyword(route, keyword) {
+            const normalizedRoute = ` ${normalizeRouteKeyword(route)} `;
+            const normalizedKeyword = normalizeRouteKeyword(keyword);
+            return normalizedKeyword && normalizedRoute.includes(` ${normalizedKeyword} `);
+        }
+
+        function routeMatchesOgLocation(route, keyword) {
+            if(normalizeRouteKeyword(keyword) === 'inicial') {
+                return normalizeRouteKeyword(route) === 'inicial';
+            }
+            return routeHasKeyword(route, keyword);
+        }
+
+        function isPokemonAllowedForOgGym(pokemonRoute, gymNumber) {
+            if(!gymNumber) return true;
+            const finalStage = gymNumber === 'league' ? 8 : parseInt(gymNumber, 10);
+            const allowedAreas = [];
+            for(let stage = 1; stage <= finalStage; stage++) {
+                allowedAreas.push(...(OG_GYM_ROUTES[stage.toString()] || []));
+            }
+            if(gymNumber === 'league') allowedAreas.push(...OG_GYM_ROUTES.league);
+            const routeHasHabitat = Object.values(OG_GYM_ROUTES).flat()
+                .some(area => area.habitats.some(keyword => routeHasKeyword(pokemonRoute, keyword)));
+            return allowedAreas.some(area =>
+                area.locations.some(keyword => routeMatchesOgLocation(pokemonRoute, keyword)) &&
+                (!area.habitats.length || !routeHasHabitat ||
+                    area.habitats.every(keyword => routeHasKeyword(pokemonRoute, keyword)))
+            );
+        }
 
         // Función para obtener todas las rutas permitidas hasta un gimnasio específico
         function getAllowedRoutesForGym(gymNumber) {
@@ -1453,9 +1643,10 @@
 
         // Función para verificar si un Pokémon puede usarse en un gimnasio
         function isPokemonAllowedForGym(pokemonRoute, gymNumber) {
+            if(currentLocke === 'PawPatrolOG') return isPokemonAllowedForOgGym(pokemonRoute, gymNumber);
             if (!gymNumber) return true; // Si no se seleccionó gimnasio, permitir todos
             const allowedRoutes = getAllowedRoutesForGym(gymNumber);
-            return allowedRoutes.some(route => pokemonRoute.toLowerCase().includes(route.toLowerCase()));
+            return allowedRoutes.some(route => (pokemonRoute || '').toLowerCase().includes(route.toLowerCase()));
         }
 
         // --- 2. DICCIONARIO UNIVERSAL (100% DE ATAQUES, OBJETOS Y HABILIDADES) ---
@@ -1683,6 +1874,9 @@
             document.body.classList.toggle('theme-og', locke === 'PawPatrolOG');
             document.body.classList.toggle('theme-v2', locke === 'PawPatrolV2');
             document.getElementById('locke-title').textContent = locke.toUpperCase();
+            document.getElementById('rules-table-og').classList.toggle('hidden', locke !== 'PawPatrolOG');
+            document.getElementById('rules-table-v2').classList.toggle('hidden', locke !== 'PawPatrolV2');
+            syncOgRouteAutocomplete();
             updateProfileActions();
             try {
                 if(locke === 'PawPatrolV2') await migrateLegacyV2Data();
@@ -2414,7 +2608,9 @@
             GYM_BADGES.forEach((badge, index) => {
                 const unlocked = myBadges[badge.id] === true;
                 const imageFile = badgeImages[badge.id];
-                if(imageFile) {
+                if(currentLocke === 'PawPatrolOG' && badge.id === 'b1' && unlocked) {
+                    container.innerHTML += `<div class="flex flex-col items-center"><div class="badge-slot unlocked"><video src="medalla-og.mp4" class="w-16 h-16 object-cover rounded-full cursor-pointer" autoplay muted loop playsinline aria-label="Vídeo de la primera medalla" onclick="event.stopPropagation(); window.openBadgeVideo()"></video></div><p class="font-bold text-gray-700 mt-2 text-sm">${badge.name}</p></div>`;
+                } else if(imageFile) {
                     container.innerHTML += `<div class="flex flex-col items-center"><div class="${unlocked ? 'badge-slot unlocked' : 'badge-slot'}" onclick="window.toggleBadge('${badge.id}', '${badge.name}', ${unlocked})">${unlocked ? `<img src="${imageFile}" class="w-16 h-16 object-contain cursor-pointer" onclick="event.stopPropagation(); window.enlargeBadge('${imageFile}')">` : '🔒'}</div><p class="font-bold text-gray-700 mt-2 text-sm">${unlocked ? badge.name : '???'}</p></div>`;
                 } else {
                     container.innerHTML += `<div class="flex flex-col items-center"><div class="${unlocked ? 'badge-slot unlocked' : 'badge-slot'}" onclick="window.toggleBadge('${badge.id}', '${badge.name}', ${unlocked})">${unlocked ? badge.icon : '🔒'}</div><p class="font-bold text-gray-700 mt-2 text-sm">${unlocked ? badge.name : '???'}</p></div>`;
@@ -2437,6 +2633,20 @@
             modal.onclick = (e) => { if(e.target === modal) modal.remove(); };
             document.body.appendChild(modal);
         }
+        window.openBadgeVideo = function() {
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.style.display = 'flex';
+            modal.innerHTML = `
+                <div class="cartoon-panel modal-content bg-white relative p-6 text-center" style="max-width: 800px;">
+                    <button type="button" class="absolute top-4 right-4 text-2xl font-black text-gray-500 cursor-pointer hover:text-red-500">X</button>
+                    <video src="medalla-og.mp4" controls autoplay playsinline class="w-full h-auto mx-auto" style="max-height: 85vh;"></video>
+                </div>
+            `;
+            modal.querySelector('button').onclick = () => modal.remove();
+            modal.onclick = (event) => { if(event.target === modal) modal.remove(); };
+            document.body.appendChild(modal);
+        };
         window.toggleBadge = function(badgeId, badgeName, isUnlocked) {
             if(isUnlocked) return alert("Ya tienes esta medalla.");
 
@@ -2532,6 +2742,10 @@
             const isShiny = document.getElementById('shinyInput').checked;
             const p = getMyPlayer();
 
+            if(!isValidOgRouteEntry(routeRaw)) {
+                return alert('❌ Selecciona una ruta o zona válida de la lista de autocompletado.');
+            }
+
             const playerFailedRoutes = globalFailedRoutes[p] || [];
             if (playerFailedRoutes.some(r => r.toLowerCase() === routeRaw.toLowerCase())) {
                 return alert(`🚫 Ya has registrado "${routeRaw}" como fallida anteriormente.`);
@@ -2617,7 +2831,8 @@
             let myTeam, myBox;
 
             // Mostrar SOLO el equipo guardado para el gimnasio
-            const gymTeam = globalEquiposGimnasio[p]?.[selectedGym] || [];
+            const gymTeam = (globalEquiposGimnasio[p]?.[selectedGym] || [])
+                .filter(poke => currentLocke !== 'PawPatrolOG' || isPokemonAllowedForGym(poke.ruta, selectedGym));
             // Añadir propiedades necesarias para generateCardsHTML
             myTeam = gymTeam.map(poke => ({
                 ...poke,
@@ -2686,9 +2901,17 @@
                     const livePokemonIds = globalData.filter(x => x.jugador === p && x.estado === 'Vivo').map(x => x.id);
                     gymTeamSelection[gymNumber] = savedTeam.map(poke => poke.id).filter(id => livePokemonIds.includes(id));
                 }
+                if(currentLocke === 'PawPatrolOG') {
+                    const eligiblePokemonIds = new Set(myActive.map(pokemon => pokemon.id));
+                    gymTeamSelection[gymNumber] = gymTeamSelection[gymNumber].filter(id => eligiblePokemonIds.has(id));
+                }
                 gymTeamSelectionLoaded[gymNumber] = true;
             }
 
+            if(currentLocke === 'PawPatrolOG') {
+                const eligiblePokemonIds = new Set(myActive.map(pokemon => pokemon.id));
+                gymTeamSelection[gymNumber] = (gymTeamSelection[gymNumber] || []).filter(id => eligiblePokemonIds.has(id));
+            }
             const currentSelection = gymTeamSelection[gymNumber] || [];
 
             const isGym1Or2 = gymNumber === '1' || gymNumber === '2';
@@ -2959,6 +3182,7 @@
                     const ruta = document.getElementById('edit-route').value.trim();
 
                     if(!player || !db || !mote || !ruta) return alert('El mote y la ruta son obligatorios.');
+                    if(!isValidOgRouteEntry(ruta)) return alert('❌ Selecciona una ruta o zona válida de la lista de autocompletado.');
 
                     const result = await runTransaction(ref(db, userPath(`${player}/pokemon`)), (pokemon) => {
                         if(!pokemon) return;
