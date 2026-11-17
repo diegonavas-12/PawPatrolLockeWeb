@@ -121,19 +121,22 @@
         #kalos-map { height: min(68vh, 680px); min-height: 380px; border-radius: 16px; }
         .map-route-marker, .map-gym-marker { background: transparent; border: 0; }
         .map-route-pin {
-            width: 25px; height: 25px; border: 2px solid white; border-radius: 50% 50% 50% 0;
+            width: calc(25px * var(--map-marker-scale, 1)); height: calc(25px * var(--map-marker-scale, 1));
+            border: 2px solid white; border-radius: 50% 50% 50% 0;
             display: flex; align-items: center; justify-content: center; transform: rotate(-45deg);
-            color: white; font: 800 11px/1 'Fredoka', sans-serif; text-shadow: 0 1px 2px #111;
+            color: white; font: 800 calc(11px * var(--map-marker-scale, 1))/1 'Fredoka', sans-serif; text-shadow: 0 1px 2px #111;
             box-shadow: 0 2px 5px #1119;
         }
         .map-route-pin span { transform: rotate(45deg); }
         .map-route-pin.is-captured { background: #dc2626; }
+        .map-route-pin.is-partial { background: linear-gradient(135deg, #dc2626 50%, #eab308 50%); }
         .map-route-pin.is-failed { background: #64748b; }
         .map-route-pin.is-available { background: #eab308; color: #1f2937; text-shadow: none; }
         .map-gym-pin {
-            width: 27px; height: 27px; border: 3px solid white; border-radius: 50%;
+            width: calc(27px * var(--map-marker-scale, 1)); height: calc(27px * var(--map-marker-scale, 1));
+            border: 3px solid white; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            color: white; font: 900 12px/1 'Fredoka', sans-serif; box-shadow: 0 2px 6px #1119;
+            color: white; font: 900 calc(12px * var(--map-marker-scale, 1))/1 'Fredoka', sans-serif; box-shadow: 0 2px 6px #1119;
         }
         .map-gym-pin.is-earned { background: #16a34a; }
         .map-gym-pin.is-pending { background: #2563eb; }
@@ -163,6 +166,9 @@
             padding-bottom: 6px; border-bottom: 1px solid #54f39a;
         }
         body.theme-og .map-popup-status { color: #d7ffe1; margin: 7px 0; }
+        body.theme-og .map-popup-encounter { margin-top: 6px; padding: 5px; border: 1px solid #28644b; background: #0c1b2b; }
+        body.theme-og .map-popup-encounter-title { color: #f5d547; }
+        body.theme-og .leaflet-popup-content { max-height: min(60vh, 420px); overflow-y: auto; }
         body.theme-og .map-popup-pokemon {
             display: flex; align-items: center; gap: 8px; margin-top: 6px; padding: 4px;
             border: 1px solid #28644b; background: #102135;
@@ -171,7 +177,8 @@
         body.theme-og .map-popup-pokemon-info { display: flex; flex-direction: column; min-width: 0; }
         body.theme-og .map-popup-pokemon-info strong { color: #68d9ff; overflow-wrap: anywhere; }
         body.theme-og .map-popup-pokemon-info span { color: #b7d5c2; font-size: 17px; }
-        body.theme-og .map-route-pin { font-family: 'VT323', monospace; font-size: 15px; }
+        body.theme-og .map-route-pin { font-family: 'VT323', monospace; font-size: calc(15px * var(--map-marker-scale, 1)); }
+        body.theme-og .map-gym-pin { font-family: 'VT323', monospace; font-size: calc(16px * var(--map-marker-scale, 1)); }
 
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -1162,6 +1169,7 @@
             </div>
             <div class="flex flex-wrap gap-x-5 gap-y-2 mb-4 text-sm font-bold">
                 <span><i class="inline-block w-3 h-3 rounded-full bg-red-600 mr-1"></i>Captura registrada</span>
+                <span><i class="inline-block w-3 h-3 rounded-full bg-gradient-to-br from-red-600 to-yellow-500 mr-1"></i>Captura parcial</span>
                 <span><i class="inline-block w-3 h-3 rounded-full bg-yellow-500 mr-1"></i>Pendiente</span>
                 <span><i class="inline-block w-3 h-3 rounded-full bg-slate-500 mr-1"></i>Captura fallida</span>
                 <span><i class="inline-block w-3 h-3 rounded-full bg-green-600 mr-1"></i>Medalla conseguida</span>
@@ -1254,6 +1262,7 @@
         let selectedBanPlayer = '';
         let kalosMapInstance = null;
         let kalosMapMarkers = null;
+        let kalosMapBaseZoom = null;
 
         // Variable temporal para el teambuilder de gimnasio - ahora independiente por gimnasio
         let gymTeamSelection = {}; // Objeto con selecciones por gimnasio: { '1': [], '2': [], ... }
@@ -1546,9 +1555,7 @@
                 OG_ROUTE(['Inicial', 'pueblo boceto', 'inicial de pueblo boceto'], [], 'Pueblo Boceto - Inicial', ['Inicial', 'Pueblo Boceto', 'Inicial de Pueblo Boceto']),
                 OG_ROUTE(['ruta 2'], ['hierba normal']),
                 OG_ROUTE(['bosque novarte'], ['hierba normal']),
-                OG_ROUTE(['bosque novarte'], ['hierba alta']),
                 OG_ROUTE(['ruta 3'], ['hierba normal']),
-                OG_ROUTE(['ruta 3'], ['hierba alta']),
                 OG_ROUTE(['ruta 22'], ['hierba normal']),
                 OG_ROUTE(['ruta 22'], ['flores amarillas'])
             ],
@@ -1558,8 +1565,8 @@
                 OG_ROUTE(['Laboratorio', 'Ciudad Luminalia'], [], 'Ciudad Luminalia - Laboratorio', ['Laboratorio', 'Ciudad Luminalia']),
                 OG_ROUTE(['ruta 5'], ['hierba normal']),
                 OG_ROUTE(['ruta 5'], ['flores moradas']),
-                OG_ROUTE(['ruta 6'], ['hierba alta']),
-                OG_ROUTE(['palacio cenit'], ['hierba alta']),
+                OG_ROUTE(['ruta 6'], ['hierba normal']),
+                OG_ROUTE(['palacio cenit'], ['hierba normal']),
                 OG_ROUTE(['ruta 7'], ['hierba normal']),
                 OG_ROUTE(['ruta 7'], ['flores amarillas']),
                 OG_ROUTE(['ruta 7'], ['flores moradas']),
@@ -1591,7 +1598,6 @@
                 OG_ROUTE(['ruta 15'], ['flores amarillas']),
                 OG_ROUTE(['hotel desolacion']),
                 OG_ROUTE(['ruta 16'], ['hierba normal']),
-                OG_ROUTE(['ruta 16'], ['hierba alta']),
                 OG_ROUTE(['ruta 16'], ['flores amarillas']),
                 OG_ROUTE(['caverna helada'])
             ],
@@ -1604,7 +1610,6 @@
                 OG_ROUTE(['ruta 19'], ['flores amarillas']),
                 OG_ROUTE(['ruta 19'], ['flores moradas']),
                 OG_ROUTE(['ruta 20'], ['hierba normal']),
-                OG_ROUTE(['ruta 20'], ['hierba alta']),
                 OG_ROUTE(['villa pokemon'], ['hierba normal']),
                 OG_ROUTE(['villa pokemon'], ['flores amarillas']),
                 OG_ROUTE(['villa pokemon'], ['flores rojas'])
@@ -1737,7 +1742,7 @@
             }));
         }
 
-        function createMapPopup(title, status, records = []) {
+        function createMapPopup(title, status, records = [], encounters = []) {
             const popup = document.createElement('div');
             const heading = document.createElement('div');
             heading.className = 'map-popup-title';
@@ -1747,28 +1752,41 @@
             statusLine.className = 'map-popup-status';
             statusLine.textContent = status;
             popup.appendChild(statusLine);
-            if(records.length) {
-                records.forEach(record => {
-                    const pokemon = document.createElement('div');
-                    pokemon.className = 'map-popup-pokemon';
-                    const sprite = document.createElement('img');
-                    sprite.className = 'map-popup-sprite pixel-art';
-                    sprite.src = getPokemonSpriteUrl(record);
-                    sprite.alt = `Sprite animado de ${record.especie}`;
-                    sprite.dataset.speciesName = record.especie;
-                    sprite.dataset.shiny = String(!!record.shiny);
-                    sprite.onerror = () => window.pokemonSpriteFallback(sprite);
-                    const info = document.createElement('div');
-                    info.className = 'map-popup-pokemon-info';
-                    const nickname = document.createElement('strong');
-                    nickname.textContent = record.mote || record.especie;
-                    const species = document.createElement('span');
-                    species.textContent = `${record.especie}${record.shiny ? ' · Shiny' : ''}${record.estado !== 'Vivo' ? ` · ${record.estado.toLowerCase()}` : ''}`;
-                    info.append(nickname, species);
-                    pokemon.append(sprite, info);
-                    popup.appendChild(pokemon);
-                });
-            }
+            const appendPokemon = record => {
+                const pokemon = document.createElement('div');
+                pokemon.className = 'map-popup-pokemon';
+                const sprite = document.createElement('img');
+                sprite.className = 'map-popup-sprite pixel-art';
+                sprite.src = getPokemonSpriteUrl(record);
+                sprite.alt = `Sprite animado de ${record.especie}`;
+                sprite.dataset.speciesName = record.especie;
+                sprite.dataset.shiny = String(!!record.shiny);
+                sprite.onerror = () => window.pokemonSpriteFallback(sprite);
+                const info = document.createElement('div');
+                info.className = 'map-popup-pokemon-info';
+                const nickname = document.createElement('strong');
+                nickname.textContent = record.mote || record.especie;
+                const species = document.createElement('span');
+                species.textContent = `${record.especie}${record.shiny ? ' · Shiny' : ''}${record.estado !== 'Vivo' ? ` · ${record.estado.toLowerCase()}` : ''}`;
+                info.append(nickname, species);
+                pokemon.append(sprite, info);
+                return pokemon;
+            };
+            encounters.forEach(encounter => {
+                const section = document.createElement('div');
+                section.className = 'map-popup-encounter';
+                const encounterStatus = document.createElement('div');
+                encounterStatus.className = 'map-popup-encounter-title';
+                encounterStatus.textContent = encounter.records.length
+                    ? `✅ ${encounter.name} · Capturada`
+                    : encounter.failedRoutes.length
+                        ? `❌ ${encounter.name} · Fallida`
+                        : `⏳ ${encounter.name} · Pendiente`;
+                section.appendChild(encounterStatus);
+                encounter.records.forEach(record => section.appendChild(appendPokemon(record)));
+                popup.appendChild(section);
+            });
+            records.forEach(record => popup.appendChild(appendPokemon(record)));
             return popup;
         }
 
@@ -1791,30 +1809,69 @@
             'Calle Victoria': 'CV'
         };
 
+        const KALOS_CAPTURE_SLOTS = Object.values(OG_GYM_ROUTES).flat().map(area => {
+            const location = getKalosMapLocation(area.locations[0]);
+            const locationLabel = OG_ROUTE_LOCATION_LABELS[area.locations[0]]
+                || area.locations[0].replace(/\b\w/g, character => character.toUpperCase());
+            const habitatLabel = area.habitats[0]
+                ? area.habitats[0].replace(/\b\w/g, character => character.toUpperCase())
+                : '';
+            const canonicalLabel = area.label || (habitatLabel ? `${locationLabel} - ${habitatLabel}` : locationLabel);
+            const aliases = [canonicalLabel, ...area.suggestions];
+            if(!area.habitats.length) aliases.push(...area.locations);
+            return { location, name: habitatLabel || area.label || locationLabel, aliases: [...new Set(aliases)] };
+        }).filter(slot => slot.location);
+
+        function getKalosMapEncounterSlot(route, location) {
+            const normalizedRoute = normalizeRouteKeyword(route);
+            const exactSlot = KALOS_CAPTURE_SLOTS.find(slot => slot.location === location &&
+                slot.aliases.some(alias => normalizeRouteKeyword(alias) === normalizedRoute));
+            if(exactSlot) return exactSlot;
+            if(getKalosMapLocation(route) !== location) return undefined;
+            const locationSlots = KALOS_CAPTURE_SLOTS.filter(slot => slot.location === location);
+            return locationSlots.length === 1
+                ? locationSlots[0]
+                : locationSlots.find(slot => normalizeRouteKeyword(slot.name) === 'hierba normal');
+        }
+
         function addKalosMapMarkers(player) {
             if(!kalosMapMarkers) return;
             kalosMapMarkers.clearLayers();
             const captures = globalData.filter(record => record.jugador === player);
             const failures = globalFailedRoutes[player] || [];
+            const isMobile = window.matchMedia('(max-width: 640px)').matches;
+            const zoomIncrease = Math.max(0, kalosMapInstance.getZoom() - kalosMapBaseZoom);
+            const markerScale = Math.min(isMobile ? 1.9 : 1.6, (isMobile ? 1.15 : 1) * Math.pow(1.18, zoomIncrease));
 
             KALOS_CAPTURE_LOCATIONS.forEach(location => {
-                const records = captures.filter(record => getKalosMapLocation(record.ruta) === location);
-                const failedRoutes = failures.filter(route => getKalosMapLocation(route) === location);
-                const state = records.length ? 'captured' : failedRoutes.length ? 'failed' : 'available';
+                const encounters = KALOS_CAPTURE_SLOTS.filter(slot => slot.location === location).map(slot => ({
+                    ...slot,
+                    records: captures.filter(record => getKalosMapEncounterSlot(record.ruta, location) === slot),
+                    failedRoutes: failures.filter(route => getKalosMapEncounterSlot(route, location) === slot)
+                }));
+                const capturedCount = encounters.filter(encounter => encounter.records.length > 0).length;
+                const failedCount = encounters.filter(encounter => encounter.failedRoutes.length > 0).length;
+                const unassignedRecords = captures.filter(record =>
+                    getKalosMapLocation(record.ruta) === location && !getKalosMapEncounterSlot(record.ruta, location));
+                const unassignedFailures = failures.filter(route =>
+                    getKalosMapLocation(route) === location && !getKalosMapEncounterSlot(route, location));
+                const state = capturedCount === encounters.length && capturedCount > 0 ? 'captured'
+                    : capturedCount > 0 || unassignedRecords.length ? 'partial'
+                    : failedCount > 0 || unassignedFailures.length ? 'failed' : 'available';
                 const routeNumber = location.name.match(/^Ruta (\d+)$/);
                 const markerLabel = routeNumber ? routeNumber[1] : KALOS_MARKER_LABELS[location.name];
                 const pin = L.divIcon({
                     className: 'map-route-marker',
-                    html: `<div class="map-route-pin is-${state}"><span>${markerLabel}</span></div>`,
-                    iconSize: [34, 34],
-                    iconAnchor: [17, 29],
-                    popupAnchor: [0, -28]
+                    html: `<div class="map-route-pin is-${state}" style="--map-marker-scale:${markerScale}"><span>${markerLabel}</span></div>`,
+                    iconSize: [Math.round(34 * markerScale), Math.round(34 * markerScale)],
+                    iconAnchor: [Math.round(17 * markerScale), Math.round(29 * markerScale)],
+                    popupAnchor: [0, Math.round(-28 * markerScale)]
                 });
-                let status = '⏳ Pendiente de captura.';
-                if(records.length) status = `✅ ${records.length} Pokémon capturado${records.length === 1 ? '' : 's'}.`;
-                else if(failedRoutes.length) status = `❌ Captura fallida: ${failedRoutes.join(', ')}.`;
+                let status = `${capturedCount} de ${encounters.length} encuentros capturados.`;
+                if(unassignedRecords.length) status += ` ${unassignedRecords.length} captura(s) sin zona identificada.`;
+                if(unassignedFailures.length) status += ` ${unassignedFailures.length} intento(s) fallido(s) sin zona identificada.`;
                 L.marker(location.coords, { icon: pin })
-                    .bindPopup(createMapPopup(location.name, status, records))
+                    .bindPopup(createMapPopup(location.name, status, unassignedRecords, encounters))
                     .addTo(kalosMapMarkers);
             });
 
@@ -1824,10 +1881,10 @@
                 const badge = GYM_BADGES.find(item => item.id === `b${gym.number}`);
                 const pin = L.divIcon({
                     className: 'map-gym-marker',
-                    html: `<div class="map-gym-pin is-${earned ? 'earned' : 'pending'}">${earned ? '★' : gym.number}</div>`,
-                    iconSize: [27, 27],
-                    iconAnchor: [13, 13],
-                    popupAnchor: [0, -12]
+                    html: `<div class="map-gym-pin is-${earned ? 'earned' : 'pending'}" style="--map-marker-scale:${markerScale}">${earned ? '★' : gym.number}</div>`,
+                    iconSize: [Math.round(27 * markerScale), Math.round(27 * markerScale)],
+                    iconAnchor: [Math.round(13 * markerScale), Math.round(13 * markerScale)],
+                    popupAnchor: [0, Math.round(-12 * markerScale)]
                 });
                 L.marker(gym.coords, { icon: pin })
                     .bindPopup(createMapPopup(
@@ -1895,6 +1952,8 @@
                 L.imageOverlay('KalosMap.jpg', KALOS_MAP_BOUNDS).addTo(kalosMapInstance);
                 kalosMapMarkers = L.layerGroup().addTo(kalosMapInstance);
                 kalosMapInstance.fitBounds(KALOS_MAP_BOUNDS);
+                kalosMapBaseZoom = kalosMapInstance.getZoom();
+                kalosMapInstance.on('zoomend', () => addKalosMapMarkers(selector.value));
             }
             requestAnimationFrame(() => kalosMapInstance.invalidateSize());
             addKalosMapMarkers(selectedPlayer);
