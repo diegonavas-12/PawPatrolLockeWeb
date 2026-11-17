@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tracker PawPatrolLocke</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Chewy&family=Fredoka:wght@400;600;700&family=Permanent+Marker&family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
     <style>
         body {
@@ -117,6 +118,60 @@
         }
 
         .text-shadow-hard { text-shadow: 3px 3px 0px #000; }
+        #kalos-map { height: min(68vh, 680px); min-height: 380px; border-radius: 16px; }
+        .map-route-marker, .map-gym-marker { background: transparent; border: 0; }
+        .map-route-pin {
+            width: 25px; height: 25px; border: 2px solid white; border-radius: 50% 50% 50% 0;
+            display: flex; align-items: center; justify-content: center; transform: rotate(-45deg);
+            color: white; font: 800 11px/1 'Fredoka', sans-serif; text-shadow: 0 1px 2px #111;
+            box-shadow: 0 2px 5px #1119;
+        }
+        .map-route-pin span { transform: rotate(45deg); }
+        .map-route-pin.is-captured { background: #dc2626; }
+        .map-route-pin.is-failed { background: #64748b; }
+        .map-route-pin.is-available { background: #eab308; color: #1f2937; text-shadow: none; }
+        .map-gym-pin {
+            width: 27px; height: 27px; border: 3px solid white; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font: 900 12px/1 'Fredoka', sans-serif; box-shadow: 0 2px 6px #1119;
+        }
+        .map-gym-pin.is-earned { background: #16a34a; }
+        .map-gym-pin.is-pending { background: #2563eb; }
+        .map-popup-title { font-weight: 800; font-size: 1rem; margin-bottom: 5px; }
+        .map-popup-status { font-weight: 700; margin-bottom: 4px; }
+        .map-popup-list { margin: 4px 0 0; padding-left: 18px; list-style: disc; }
+        body.theme-og #screen-map { z-index: 3; }
+        body.theme-og #kalos-map { border: 3px solid #54f39a; box-shadow: 5px 5px 0 #030811; }
+        body.theme-og #kalos-map .leaflet-control-zoom a {
+            background: #102135; color: #d7ffe1; border-color: #54f39a;
+            font-family: 'VT323', monospace; font-size: 24px;
+        }
+        body.theme-og #kalos-map .leaflet-control-attribution {
+            color: #d7ffe1; background: rgba(7, 19, 35, 0.9);
+        }
+        body.theme-og #kalos-map .leaflet-control-attribution a { color: #68d9ff; }
+        body.theme-og .leaflet-popup-content-wrapper {
+            color: #d7ffe1; background: #071323; border: 3px solid #54f39a;
+            border-radius: 2px; box-shadow: 4px 4px 0 #030811;
+            font: 20px/1.1 'VT323', monospace;
+        }
+        body.theme-og .leaflet-popup-content { margin: 12px; min-width: 190px; max-width: 280px; }
+        body.theme-og .leaflet-popup-tip { background: #071323; border: 1px solid #54f39a; }
+        body.theme-og .leaflet-popup-close-button { color: #f5d547 !important; font: 24px/20px 'VT323', monospace !important; }
+        body.theme-og .map-popup-title {
+            color: #f5d547; font: 10px/1.5 'Press Start 2P', monospace;
+            padding-bottom: 6px; border-bottom: 1px solid #54f39a;
+        }
+        body.theme-og .map-popup-status { color: #d7ffe1; margin: 7px 0; }
+        body.theme-og .map-popup-pokemon {
+            display: flex; align-items: center; gap: 8px; margin-top: 6px; padding: 4px;
+            border: 1px solid #28644b; background: #102135;
+        }
+        body.theme-og .map-popup-sprite { width: 68px; height: 68px; object-fit: contain; flex: 0 0 68px; }
+        body.theme-og .map-popup-pokemon-info { display: flex; flex-direction: column; min-width: 0; }
+        body.theme-og .map-popup-pokemon-info strong { color: #68d9ff; overflow-wrap: anywhere; }
+        body.theme-og .map-popup-pokemon-info span { color: #b7d5c2; font-size: 17px; }
+        body.theme-og .map-route-pin { font-family: 'VT323', monospace; font-size: 15px; }
 
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -694,6 +749,7 @@
 
             <button onclick="nav('rules')" class="cartoon-btn bg-cyan-600 hover:bg-cyan-500 text-white text-xl py-3 mt-4"><span>📜 Normas</span></button>
             <button onclick="nav('suggestions')" class="cartoon-btn bg-fuchsia-600 hover:bg-fuchsia-500 text-white text-xl py-3 mt-4"><span>💡 Sugerencias/Felicitaciones</span></button>
+            <button id="menu-map-button" onclick="nav('map')" class="hidden cartoon-btn col-span-2 bg-emerald-600 hover:bg-emerald-500 text-white text-2xl py-4 mt-2"><span>🗺️ MAPA INTERACTIVO DE KALOS</span></button>
         </div>
     </div>
 
@@ -1093,6 +1149,28 @@
         </div>
     </div>
     <div id="screen-suggestions" class="w-full max-w-4xl hidden flex-col mt-4"><div class="flex justify-between items-center mb-4"><button onclick="nav('menu')" class="cartoon-btn-sm">⬅ VOLVER</button><h2 class="title-font text-4xl text-white text-shadow-hard uppercase">💡 SUGERENCIAS</h2></div><div class="cartoon-panel p-6 mb-6"><form id="suggestionForm" class="space-y-4"><textarea id="suggestionInput" required placeholder="Escribe aquí..." class="cartoon-input w-full p-4 h-32 resize-none"></textarea><button type="submit" class="cartoon-btn w-full bg-pink-500 text-white text-xl py-3">Enviar</button></form></div><div id="grid-suggestions" class="space-y-4 w-full"></div></div>
+    <div id="screen-map" class="w-full max-w-6xl hidden flex-col mt-4">
+        <div class="flex justify-between items-center mb-4 gap-2 flex-wrap">
+            <button onclick="nav('menu')" class="cartoon-btn-sm">⬅ VOLVER</button>
+            <h2 class="title-font text-3xl md:text-4xl text-white text-shadow-hard uppercase">🗺️ MAPA DE KALOS</h2>
+        </div>
+        <div id="map-content" class="cartoon-panel p-4 md:p-6">
+            <p id="map-error-message" class="hidden mb-4 rounded-xl border-2 border-red-500 bg-red-50 p-4 text-center font-bold text-red-800"></p>
+            <div class="mb-4 max-w-md">
+                <label for="map-player-selector" class="block font-bold mb-1">Entrenador</label>
+                <select id="map-player-selector" onchange="window.updateKalosMap()" class="cartoon-input w-full p-3 text-lg"></select>
+            </div>
+            <div class="flex flex-wrap gap-x-5 gap-y-2 mb-4 text-sm font-bold">
+                <span><i class="inline-block w-3 h-3 rounded-full bg-red-600 mr-1"></i>Captura registrada</span>
+                <span><i class="inline-block w-3 h-3 rounded-full bg-yellow-500 mr-1"></i>Pendiente</span>
+                <span><i class="inline-block w-3 h-3 rounded-full bg-slate-500 mr-1"></i>Captura fallida</span>
+                <span><i class="inline-block w-3 h-3 rounded-full bg-green-600 mr-1"></i>Medalla conseguida</span>
+                <span><i class="inline-block w-3 h-3 rounded-full bg-blue-600 mr-1"></i>Medalla pendiente</span>
+            </div>
+            <div id="kalos-map" role="application" aria-label="Mapa interactivo de Kalos con capturas y gimnasios"></div>
+            <div id="map-unlocated-records" class="hidden mt-4 rounded-xl border-2 border-amber-400 bg-amber-50 p-4 text-sm text-amber-950"></div>
+        </div>
+    </div>
 
     <!-- MODALES Y DATALISTS POKÉMON -->
     <datalist id="all-moves-list"></datalist><datalist id="valid-abilities-list"></datalist><datalist id="valid-items-list"></datalist><datalist id="valid-natures-list"></datalist><datalist id="og-route-options"></datalist>
@@ -1141,6 +1219,7 @@
     </div>
 
 
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <!-- SCRIPT PRINCIPAL -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
@@ -1173,6 +1252,8 @@
         let globalEco = {}; let globalInv = {}; let globalActivos = {}; let globalFailedRoutes = {}; let globalEquiposGimnasio = {};
         let currentScreen = 'landing';
         let selectedBanPlayer = '';
+        let kalosMapInstance = null;
+        let kalosMapMarkers = null;
 
         // Variable temporal para el teambuilder de gimnasio - ahora independiente por gimnasio
         let gymTeamSelection = {}; // Objeto con selecciones por gimnasio: { '1': [], '2': [], ... }
@@ -1441,6 +1522,10 @@
             { id: 'b7', name: 'Medalla Leyenda', icon: '🐉', maxLevel: 43 }, { id: 'b8', name: 'Medalla Ola', icon: '🌊', maxLevel: 51 },
             { id: 'b9', name: 'Liga Pokémon', icon: '🏆', maxLevel: 59 }
         ];
+        const OG_GYM_EXPORT_LEVELS = {
+            '1': 12, '2': 25, '3': 32, '4': 34, '5': 37,
+            '6': 42, '7': 48, '8': 59, league: 68
+        };
 
         // Rutas permitidas por gimnasio en PawPatrol V2.
         const GYM_ROUTES = {
@@ -1592,6 +1677,228 @@
             return (value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
                 .toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().replace(/\s+/g, ' ');
         }
+
+        const KALOS_MAP_BOUNDS = [[0, 0], [636, 970]];
+        const KALOS_CAPTURE_LOCATIONS = [
+            { name: 'Inicial · Pueblo Boceto', coords: [520, 650], aliases: ['inicial', 'pueblo boceto', 'inicial de pueblo boceto'] },
+            { name: 'Ruta 2', coords: [420, 660], aliases: ['ruta 2'] },
+            { name: 'Bosque Novarte', coords: [394, 635], aliases: ['bosque novarte'] },
+            { name: 'Ruta 3', coords: [373, 594], aliases: ['ruta 3'] },
+            { name: 'Ruta 22', coords: [310, 677], aliases: ['ruta 22'] },
+            { name: 'Ruta 4', coords: [288, 611], aliases: ['ruta 4'] },
+            { name: 'Ciudad Luminalia · Laboratorio', coords: [222, 524], aliases: ['ciudad luminalia', 'laboratorio'] },
+            { name: 'Ruta 5', coords: [315, 491], aliases: ['ruta 5'] },
+            { name: 'Ruta 6', coords: [310, 389], aliases: ['ruta 6'] },
+            { name: 'Palacio Cenit', coords: [294, 319], aliases: ['palacio cenit'] },
+            { name: 'Ruta 7', coords: [389, 325], aliases: ['ruta 7'] },
+            { name: 'Gruta Tierraunida', coords: [404, 303], aliases: ['gruta tierraunida'] },
+            { name: 'Ruta 8', coords: [420, 193], aliases: ['ruta 8'] },
+            { name: 'Pueblo Vánitas', coords: [348, 422], aliases: ['pueblo vanitas'] },
+            { name: 'Ruta 9', coords: [432, 321], aliases: ['ruta 9'] },
+            { name: 'Cueva Brillante', coords: [451, 392], aliases: ['cueva brillante'] },
+            { name: 'Ciudad Relieve', coords: [355, 198], aliases: ['ciudad relieve'] },
+            { name: 'Ruta 10', coords: [327, 143], aliases: ['ruta 10'] },
+            { name: 'Cueva de los Reflejos', coords: [307, 137], aliases: ['cueva de los reflejos', 'cueva reflejos'] },
+            { name: 'Ruta 11', coords: [270, 108], aliases: ['ruta 11'] },
+            { name: 'Ciudad Yantra · Torre Maestría', coords: [215, 161], aliases: ['ciudad yantra', 'torre maestria', 'lucario'] },
+            { name: 'Ruta 12', coords: [204, 226], aliases: ['ruta 12'] },
+            { name: 'Bahía Azul', coords: [104, 263], aliases: ['bahia azul'] },
+            { name: 'Ruta 13', coords: [222, 426], aliases: ['ruta 13'] },
+            { name: 'Ruta 14', coords: [128, 493], aliases: ['ruta 14'] },
+            { name: 'Ruta 15', coords: [86, 630], aliases: ['ruta 15'] },
+            { name: 'Hotel Desolación', coords: [162, 595], aliases: ['hotel desolacion'] },
+            { name: 'Ruta 16', coords: [211, 638], aliases: ['ruta 16'] },
+            { name: 'Caverna Helada', coords: [106, 751], aliases: ['caverna helada'] },
+            { name: 'Ruta 17', coords: [192, 785], aliases: ['ruta 17'] },
+            { name: 'Ruta 18', coords: [262, 912], aliases: ['ruta 18'] },
+            { name: 'Cueva Terminus', coords: [191, 911], aliases: ['cueva terminus'] },
+            { name: 'Ruta 19', coords: [314, 820], aliases: ['ruta 19'] },
+            { name: 'Ruta 20', coords: [412, 839], aliases: ['ruta 20'] },
+            { name: 'Villa Pokémon', coords: [447, 801], aliases: ['villa pokemon'] },
+            { name: 'Ruta 21', coords: [350, 778], aliases: ['ruta 21'] },
+            { name: 'Calle Victoria', coords: [307, 735], aliases: ['calle victoria'] }
+        ];
+        const KALOS_GYM_LOCATIONS = [
+            { number: '1', city: 'Ciudad Novarte', coords: [337, 615] },
+            { number: '2', city: 'Ciudad Relieve', coords: [375, 220] },
+            { number: '3', city: 'Ciudad Yantra', coords: [194, 180] },
+            { number: '4', city: 'Ciudad Témpera', coords: [167, 350] },
+            { number: '5', city: 'Ciudad Luminalia', coords: [243, 547] },
+            { number: '6', city: 'Ciudad Romantis', coords: [80, 523] },
+            { number: '7', city: 'Ciudad Fluxus', coords: [245, 851] },
+            { number: '8', city: 'Ciudad Fractal', coords: [342, 825] }
+        ];
+
+        function getKalosMapLocation(route) {
+            const normalizedRoute = normalizeRouteKeyword(route);
+            return KALOS_CAPTURE_LOCATIONS.find(location => location.aliases.some(alias => {
+                const normalizedAlias = normalizeRouteKeyword(alias);
+                return normalizedRoute === normalizedAlias || normalizedRoute.startsWith(`${normalizedAlias} `);
+            }));
+        }
+
+        function createMapPopup(title, status, records = []) {
+            const popup = document.createElement('div');
+            const heading = document.createElement('div');
+            heading.className = 'map-popup-title';
+            heading.textContent = title;
+            popup.appendChild(heading);
+            const statusLine = document.createElement('div');
+            statusLine.className = 'map-popup-status';
+            statusLine.textContent = status;
+            popup.appendChild(statusLine);
+            if(records.length) {
+                records.forEach(record => {
+                    const pokemon = document.createElement('div');
+                    pokemon.className = 'map-popup-pokemon';
+                    const sprite = document.createElement('img');
+                    sprite.className = 'map-popup-sprite pixel-art';
+                    sprite.src = getPokemonSpriteUrl(record);
+                    sprite.alt = `Sprite animado de ${record.especie}`;
+                    sprite.dataset.speciesName = record.especie;
+                    sprite.dataset.shiny = String(!!record.shiny);
+                    sprite.onerror = () => window.pokemonSpriteFallback(sprite);
+                    const info = document.createElement('div');
+                    info.className = 'map-popup-pokemon-info';
+                    const nickname = document.createElement('strong');
+                    nickname.textContent = record.mote || record.especie;
+                    const species = document.createElement('span');
+                    species.textContent = `${record.especie}${record.shiny ? ' · Shiny' : ''}${record.estado !== 'Vivo' ? ` · ${record.estado.toLowerCase()}` : ''}`;
+                    info.append(nickname, species);
+                    pokemon.append(sprite, info);
+                    popup.appendChild(pokemon);
+                });
+            }
+            return popup;
+        }
+
+        const KALOS_MARKER_LABELS = {
+            'Inicial · Pueblo Boceto': 'IN',
+            'Bosque Novarte': 'BN',
+            'Ciudad Luminalia · Laboratorio': 'CL',
+            'Palacio Cenit': 'PC',
+            'Gruta Tierraunida': 'GT',
+            'Pueblo Vánitas': 'PV',
+            'Cueva Brillante': 'CB',
+            'Ciudad Relieve': 'CR',
+            'Cueva de los Reflejos': 'REF',
+            'Ciudad Yantra · Torre Maestría': 'CY',
+            'Bahía Azul': 'BA',
+            'Hotel Desolación': 'HD',
+            'Caverna Helada': 'CH',
+            'Cueva Terminus': 'CT',
+            'Villa Pokémon': 'VP',
+            'Calle Victoria': 'CV'
+        };
+
+        function addKalosMapMarkers(player) {
+            if(!kalosMapMarkers) return;
+            kalosMapMarkers.clearLayers();
+            const captures = globalData.filter(record => record.jugador === player);
+            const failures = globalFailedRoutes[player] || [];
+
+            KALOS_CAPTURE_LOCATIONS.forEach(location => {
+                const records = captures.filter(record => getKalosMapLocation(record.ruta) === location);
+                const failedRoutes = failures.filter(route => getKalosMapLocation(route) === location);
+                const state = records.length ? 'captured' : failedRoutes.length ? 'failed' : 'available';
+                const routeNumber = location.name.match(/^Ruta (\d+)$/);
+                const markerLabel = routeNumber ? routeNumber[1] : KALOS_MARKER_LABELS[location.name];
+                const pin = L.divIcon({
+                    className: 'map-route-marker',
+                    html: `<div class="map-route-pin is-${state}"><span>${markerLabel}</span></div>`,
+                    iconSize: [34, 34],
+                    iconAnchor: [17, 29],
+                    popupAnchor: [0, -28]
+                });
+                let status = '⏳ Pendiente de captura.';
+                if(records.length) status = `✅ ${records.length} Pokémon capturado${records.length === 1 ? '' : 's'}.`;
+                else if(failedRoutes.length) status = `❌ Captura fallida: ${failedRoutes.join(', ')}.`;
+                L.marker(location.coords, { icon: pin })
+                    .bindPopup(createMapPopup(location.name, status, records))
+                    .addTo(kalosMapMarkers);
+            });
+
+            const badges = globalBadges[player] || {};
+            KALOS_GYM_LOCATIONS.forEach(gym => {
+                const earned = badges[`b${gym.number}`] === true;
+                const badge = GYM_BADGES.find(item => item.id === `b${gym.number}`);
+                const pin = L.divIcon({
+                    className: 'map-gym-marker',
+                    html: `<div class="map-gym-pin is-${earned ? 'earned' : 'pending'}">${earned ? '★' : gym.number}</div>`,
+                    iconSize: [27, 27],
+                    iconAnchor: [13, 13],
+                    popupAnchor: [0, -12]
+                });
+                L.marker(gym.coords, { icon: pin })
+                    .bindPopup(createMapPopup(
+                        `${gym.number}.º gimnasio · ${gym.city}`,
+                        `${earned ? '🏅 Medalla conseguida' : '🔒 Medalla pendiente'}${badge ? ` · ${badge.name}` : ''}`
+                    ))
+                    .addTo(kalosMapMarkers);
+            });
+
+            const unlocatedCaptures = captures.filter(record => !getKalosMapLocation(record.ruta));
+            const unlocatedFailures = failures.filter(route => !getKalosMapLocation(route));
+            const unlocated = document.getElementById('map-unlocated-records');
+            unlocated.replaceChildren();
+            if(unlocatedCaptures.length || unlocatedFailures.length) {
+                unlocated.classList.remove('hidden');
+                const title = document.createElement('strong');
+                title.textContent = 'Registros sin ubicación reconocida en este mapa';
+                unlocated.appendChild(title);
+                const list = document.createElement('ul');
+                list.className = 'list-disc pl-5 mt-1';
+                unlocatedCaptures.forEach(record => {
+                    const item = document.createElement('li');
+                    item.textContent = `${record.ruta}: ${record.mote || record.especie} (${record.especie})`;
+                    list.appendChild(item);
+                });
+                unlocatedFailures.forEach(route => {
+                    const item = document.createElement('li');
+                    item.textContent = `${route}: captura fallida`;
+                    list.appendChild(item);
+                });
+                unlocated.appendChild(list);
+            } else {
+                unlocated.classList.add('hidden');
+            }
+        }
+
+        window.updateKalosMap = function() {
+            if(currentLocke !== 'PawPatrolOG') return;
+            const errorMessage = document.getElementById('map-error-message');
+            if(!window.L) {
+                console.error('Leaflet no está disponible; no se puede inicializar el mapa de Kalos.');
+                errorMessage.textContent = 'No se pudo cargar Leaflet. Comprueba tu conexión e inténtalo de nuevo.';
+                errorMessage.classList.remove('hidden');
+                return;
+            }
+            errorMessage.classList.add('hidden');
+
+            const selector = document.getElementById('map-player-selector');
+            const players = LOCKE_PLAYERS[currentLocke] || [];
+            const selectedPlayer = players.includes(selector.value) ? selector.value
+                : players.includes(currentPlayer) ? currentPlayer : players[0];
+            selector.replaceChildren(...players.map(player => new Option(player, player)));
+            selector.value = selectedPlayer;
+
+            if(!kalosMapInstance) {
+                kalosMapInstance = L.map('kalos-map', {
+                    crs: L.CRS.Simple,
+                    minZoom: -1.5,
+                    maxZoom: 2,
+                    zoomSnap: 0.25,
+                    zoomDelta: 0.5,
+                    maxBounds: KALOS_MAP_BOUNDS,
+                    maxBoundsViscosity: 1
+                });
+                L.imageOverlay('KalosMap.jpg', KALOS_MAP_BOUNDS).addTo(kalosMapInstance);
+                kalosMapMarkers = L.layerGroup().addTo(kalosMapInstance);
+                kalosMapInstance.fitBounds(KALOS_MAP_BOUNDS);
+            }
+            requestAnimationFrame(() => kalosMapInstance.invalidateSize());
+            addKalosMapMarkers(selectedPlayer);
+        };
 
         function routeHasKeyword(route, keyword) {
             const normalizedRoute = ` ${normalizeRouteKeyword(route)} `;
@@ -1871,6 +2178,7 @@
             gymTeamSelection = {};
             gymTeamSelectionLoaded = {};
             currentLocke = locke;
+            document.getElementById('menu-map-button').classList.toggle('hidden', locke !== 'PawPatrolOG');
             document.body.classList.toggle('theme-og', locke === 'PawPatrolOG');
             document.body.classList.toggle('theme-v2', locke === 'PawPatrolV2');
             document.getElementById('locke-title').textContent = locke.toUpperCase();
@@ -2030,6 +2338,10 @@
                 if(targetScreen !== 'auth') showOnlyScreen('auth');
                 return;
             }
+            if(targetScreen === 'map' && currentLocke !== 'PawPatrolOG') {
+                alert('El mapa de Kalos solo está disponible en PawPatrol OG.');
+                return showOnlyScreen('menu');
+            }
             if (['add', 'capture-select', 'capture-failed', 'teambuilder', 'badges', 'gacha', 'collectibles', 'revive', 'ban-select', 'repel'].includes(targetScreen) && !getMyPlayer()) {
                 alert("⚠️ Primero debes iniciar sesión y vincular un entrenador."); return showOnlyScreen('auth');
             }
@@ -2052,6 +2364,7 @@
             if(currentScreen === 'profile') window.updateProfileView();
             if(currentScreen === 'teambuilder') window.updateTeambuilderView();
             if(currentScreen === 'badges') window.updateBadgesView();
+            if(currentScreen === 'map') window.updateKalosMap();
             if(currentScreen === 'collectibles') window.switchInvTab('skins');
             if(currentScreen === 'revive') window.updateReviveSelectionView();
             if(currentScreen === 'ban-select') window.updateBanSelectionView();
@@ -3325,20 +3638,12 @@
             const gymNumber = document.getElementById('teambuilder-gym-selector').value;
             const p = getMyPlayer();
 
-            // Niveles por gimnasio
-            const gymLevels = {
-                '1': 13,
-                '2': 18,
-                '3': 24,
-                '4': 30,
-                '5': 33,
-                '6': 39,
-                '7': 43,
-                '8': 51,
-                'league': 59
+            const gymLevels = currentLocke === 'PawPatrolOG' ? OG_GYM_EXPORT_LEVELS : {
+                '1': 13, '2': 18, '3': 24, '4': 30, '5': 33,
+                '6': 39, '7': 43, '8': 51, league: 59
             };
-
             const targetLevel = gymLevels[gymNumber];
+            if(!targetLevel) return alert('❌ No se encontró el límite de nivel para este gimnasio.');
 
             // Obtener equipo del gimnasio seleccionado (usar datos guardados específicos del gimnasio)
             const savedTeam = globalEquiposGimnasio[p]?.[gymNumber] || [];
