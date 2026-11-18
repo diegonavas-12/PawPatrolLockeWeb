@@ -82,6 +82,36 @@
         .cartoon-input::placeholder { color: #94a3b8; }
         .cartoon-input:focus { outline: none; border-color: #22d3ee; box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.2), 0 0 18px rgba(34, 211, 238, 0.18); }
         .cartoon-input:disabled { background-color: #1e293b; color: #64748b; }
+        .og-route-suggestions {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: calc(100% + 6px);
+            z-index: 1200;
+            max-height: 220px;
+            overflow-y: auto;
+            padding: 6px;
+            border: 3px solid #54f39a;
+            border-radius: 10px;
+            background: #071323;
+            box-shadow: 6px 6px 0 #030811, 0 12px 30px rgba(0, 0, 0, 0.65);
+        }
+        .og-route-suggestion {
+            width: 100%;
+            display: block;
+            padding: 10px 12px;
+            border: 0;
+            border-radius: 6px;
+            background: transparent;
+            color: #d7ffe1;
+            text-align: left;
+            font: 600 17px/1.2 'VT323', monospace;
+        }
+        .og-route-suggestion:hover,
+        .og-route-suggestion.is-active {
+            background: #102135;
+            color: #f5d547;
+        }
 
         .shiny-bg { background: linear-gradient(135deg, #fffde7 0%, #ffeb3b 100%); }
         .grayscale-dead { filter: grayscale(100%); opacity: 0.85; background-color: #e2e8f0; }
@@ -1762,20 +1792,92 @@
         function syncOgRouteAutocomplete() {
             const enabled = currentLocke === 'PawPatrolOG';
             const datalist = document.getElementById('og-route-options');
+            const suggestions = getOgRouteSuggestions();
             datalist.replaceChildren(...(enabled
-                ? getOgRouteSuggestions().map(route => {
+                ? suggestions.map(route => {
                     const option = document.createElement('option');
                     option.value = route;
                     return option;
                 })
                 : []));
-            ['routeInput', 'edit-route'].forEach(inputId => {
+            ['routeInput', 'failedRouteInput', 'edit-route'].forEach(inputId => {
                 const input = document.getElementById(inputId);
-                if(enabled) input.setAttribute('list', 'og-route-options');
-                else input.removeAttribute('list');
+                if(enabled) {
+                    input.setAttribute('list', 'og-route-options');
+                    setupOgRouteAutocomplete(input, suggestions);
+                } else {
+                    input.removeAttribute('list');
+                    setupOgRouteAutocomplete(input, []);
+                }
             });
             document.getElementById('og-route-hint-add').classList.toggle('hidden', !enabled);
             document.getElementById('og-route-hint-edit').classList.toggle('hidden', !enabled);
+        }
+
+        function setupOgRouteAutocomplete(input, suggestions) {
+            if(!input) return;
+            const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+            if(isIOS) input.removeAttribute('list');
+            if(input.parentElement) input.parentElement.style.position = 'relative';
+
+            let dropdown = input.parentElement.querySelector(':scope > .og-route-suggestions');
+            if(!dropdown) {
+                dropdown = document.createElement('div');
+                dropdown.className = 'og-route-suggestions hidden';
+                dropdown.setAttribute('role', 'listbox');
+                input.parentElement.appendChild(dropdown);
+            }
+
+            input.oninput = () => renderOgRouteSuggestions(input, dropdown, suggestions);
+            input.onfocus = () => renderOgRouteSuggestions(input, dropdown, suggestions);
+            input.onkeydown = event => handleOgRouteAutocompleteKeydown(input, dropdown, event);
+            input.onblur = () => window.setTimeout(() => dropdown.classList.add('hidden'), 150);
+        }
+
+        function renderOgRouteSuggestions(input, dropdown, suggestions) {
+            const query = normalizeRouteKeyword(input.value);
+            const matches = suggestions.filter(route => {
+                return !query || normalizeRouteKeyword(route).includes(query);
+            }).slice(0, 12);
+            dropdown.replaceChildren();
+            if(!matches.length) {
+                dropdown.classList.add('hidden');
+                return;
+            }
+            matches.forEach((route, index) => {
+                const option = document.createElement('button');
+                option.type = 'button';
+                option.className = `og-route-suggestion${index === 0 ? ' is-active' : ''}`;
+                option.textContent = route;
+                option.setAttribute('role', 'option');
+                option.onmousedown = event => event.preventDefault();
+                option.onclick = () => {
+                    input.value = route;
+                    dropdown.classList.add('hidden');
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                };
+                dropdown.appendChild(option);
+            });
+            dropdown.classList.remove('hidden');
+        }
+
+        function handleOgRouteAutocompleteKeydown(input, dropdown, event) {
+            const options = [...dropdown.querySelectorAll('.og-route-suggestion')];
+            if(!options.length) return;
+            let activeIndex = options.findIndex(option => option.classList.contains('is-active'));
+            if(event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+                event.preventDefault();
+                activeIndex = event.key === 'ArrowDown'
+                    ? (activeIndex + 1) % options.length
+                    : (activeIndex - 1 + options.length) % options.length;
+                options.forEach((option, index) => option.classList.toggle('is-active', index === activeIndex));
+                options[activeIndex].scrollIntoView({ block: 'nearest' });
+            } else if(event.key === 'Enter' && !dropdown.classList.contains('hidden') && activeIndex >= 0) {
+                event.preventDefault();
+                options[activeIndex].click();
+            } else if(event.key === 'Escape') {
+                dropdown.classList.add('hidden');
+            }
         }
 
         function isValidOgRouteEntry(route) {
@@ -3208,6 +3310,9 @@
 
             if (!p) return alert("❌ Debes vincular tu dispositivo primero.");
             if (!routeRaw) return alert("❌ Debes introducir una ruta/zona.");
+            if(!isValidOgRouteEntry(routeRaw)) {
+                return alert('❌ Selecciona una ruta o zona válida de la lista de autocompletado.');
+            }
 
             const playerFailedRoutes = globalFailedRoutes[p] || [];
             if (playerFailedRoutes.some(r => r.toLowerCase() === routeRaw.toLowerCase())) {
