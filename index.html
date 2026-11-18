@@ -151,6 +151,15 @@
         #kalos-map .leaflet-popup {
             margin-bottom: 18px;
         }
+        #kalos-map .leaflet-popup-content-wrapper {
+            width: 300px;
+        }
+        #kalos-map .leaflet-popup-content {
+            box-sizing: border-box;
+            width: 276px !important;
+            min-width: 276px !important;
+            max-width: 276px !important;
+        }
         #kalos-map.leaflet-container {
             background:
                 radial-gradient(circle at 20% 20%, rgba(104, 217, 255, 0.12), transparent 28%),
@@ -206,6 +215,32 @@
             color: #d7ffe1;
             text-shadow: 1px 1px 0 #030811;
         }
+        body.theme-og #kalos-map .map-popup-title {
+            min-height: 28px;
+            display: flex;
+            align-items: center;
+            line-height: 1.25;
+            overflow-wrap: anywhere;
+            word-break: normal;
+        }
+        body.theme-og #kalos-map .map-popup-status {
+            min-height: 22px;
+            line-height: 1.25;
+            overflow-wrap: anywhere;
+        }
+        body.theme-og #kalos-map .map-popup-encounter {
+            box-sizing: border-box;
+            width: 100%;
+            line-height: 1.15;
+        }
+        body.theme-og #kalos-map .map-popup-encounter-title {
+            line-height: 1.15;
+            overflow-wrap: anywhere;
+        }
+        body.theme-og #kalos-map .map-gym-pin {
+            line-height: 1;
+            padding-bottom: 1px;
+        }
         body.theme-og #kalos-map .leaflet-popup-close-button {
             width: 28px;
             height: 28px;
@@ -230,6 +265,24 @@
         }
         body.theme-og #kalos-map .map-popup-pokemon-info span {
             color: #effff4;
+        }
+        @media (max-width: 640px) {
+            #kalos-map .leaflet-popup-content-wrapper {
+                width: 260px;
+            }
+            #kalos-map .leaflet-popup-content {
+                width: 236px !important;
+                min-width: 236px !important;
+                max-width: 236px !important;
+            }
+            body.theme-og #kalos-map .map-popup-pokemon {
+                gap: 5px;
+            }
+            body.theme-og #kalos-map .map-popup-sprite {
+                width: 56px;
+                height: 56px;
+                flex-basis: 56px;
+            }
         }
 
         .modal-overlay {
