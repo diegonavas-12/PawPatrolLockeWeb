@@ -143,8 +143,24 @@
         .map-popup-title { font-weight: 800; font-size: 1rem; margin-bottom: 5px; }
         .map-popup-status { font-weight: 700; margin-bottom: 4px; }
         .map-popup-list { margin: 4px 0 0; padding-left: 18px; list-style: disc; }
-        body.theme-og #screen-map { z-index: 3; }
+        body.theme-og #screen-map { z-index: 3; overflow: visible; }
         body.theme-og #kalos-map { border: 3px solid #54f39a; box-shadow: 5px 5px 0 #030811; }
+        #kalos-map .leaflet-popup-pane { z-index: 900; }
+        #kalos-map .leaflet-popup { max-width: calc(100% - 24px); z-index: 901; }
+        #kalos-map .leaflet-popup-content-wrapper { overflow: visible; }
+        #kalos-map .leaflet-popup {
+            margin-bottom: 18px;
+        }
+        #kalos-map.leaflet-container {
+            background:
+                radial-gradient(circle at 20% 20%, rgba(104, 217, 255, 0.12), transparent 28%),
+                radial-gradient(circle at 80% 75%, rgba(84, 243, 154, 0.10), transparent 30%),
+                #071323;
+        }
+        body.theme-og #kalos-map .leaflet-popup-content {
+            max-height: min(50vh, 380px);
+            overflow-y: auto;
+        }
         body.theme-og #kalos-map .leaflet-control-zoom a {
             background: #102135; color: #d7ffe1; border-color: #54f39a;
             font-family: 'VT323', monospace; font-size: 24px;
@@ -179,6 +195,42 @@
         body.theme-og .map-popup-pokemon-info span { color: #b7d5c2; font-size: 17px; }
         body.theme-og .map-route-pin { font-family: 'VT323', monospace; font-size: calc(15px * var(--map-marker-scale, 1)); }
         body.theme-og .map-gym-pin { font-family: 'VT323', monospace; font-size: calc(16px * var(--map-marker-scale, 1)); }
+        body.theme-og #kalos-map .leaflet-popup-content-wrapper {
+            background:
+                linear-gradient(rgba(7, 19, 35, 0.96), rgba(7, 19, 35, 0.96)),
+                repeating-linear-gradient(0deg, transparent 0 3px, rgba(84, 243, 154, 0.08) 3px 4px);
+            border: 3px solid #54f39a;
+            box-shadow: 6px 6px 0 #030811, 0 0 18px rgba(84, 243, 154, 0.35);
+        }
+        body.theme-og #kalos-map .leaflet-popup-content {
+            color: #d7ffe1;
+            text-shadow: 1px 1px 0 #030811;
+        }
+        body.theme-og #kalos-map .leaflet-popup-close-button {
+            width: 28px;
+            height: 28px;
+            top: 2px;
+            right: 2px;
+            color: #f5d547 !important;
+            background: #102135;
+            border: 1px solid #54f39a;
+            text-align: center;
+        }
+        body.theme-og #kalos-map .map-popup-status {
+            color: #e8fff1;
+            font-weight: 400;
+        }
+        body.theme-og #kalos-map .map-popup-pokemon {
+            background: #102135;
+            border: 2px solid #54f39a;
+            box-shadow: inset 0 0 0 2px #07101f;
+        }
+        body.theme-og #kalos-map .map-popup-pokemon-info strong {
+            color: #68d9ff;
+        }
+        body.theme-og #kalos-map .map-popup-pokemon-info span {
+            color: #effff4;
+        }
 
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -1871,7 +1923,14 @@
                 if(unassignedRecords.length) status += ` ${unassignedRecords.length} captura(s) sin zona identificada.`;
                 if(unassignedFailures.length) status += ` ${unassignedFailures.length} intento(s) fallido(s) sin zona identificada.`;
                 L.marker(location.coords, { icon: pin })
-                    .bindPopup(createMapPopup(location.name, status, unassignedRecords, encounters))
+                    .bindPopup(createMapPopup(location.name, status, unassignedRecords, encounters), {
+                        autoPan: true,
+                        autoPanPaddingTopLeft: [40, 80],
+                        autoPanPaddingBottomRight: [40, 40],
+                        keepInView: true,
+                        maxWidth: 280,
+                        closeButton: true
+                    })
                     .addTo(kalosMapMarkers);
             });
 
@@ -1890,7 +1949,14 @@
                     .bindPopup(createMapPopup(
                         `${gym.number}.º gimnasio · ${gym.city}`,
                         `${earned ? '🏅 Medalla conseguida' : '🔒 Medalla pendiente'}${badge ? ` · ${badge.name}` : ''}`
-                    ))
+                    ), {
+                        autoPan: true,
+                        autoPanPaddingTopLeft: [40, 80],
+                        autoPanPaddingBottomRight: [40, 40],
+                        keepInView: true,
+                        maxWidth: 280,
+                        closeButton: true
+                    })
                     .addTo(kalosMapMarkers);
             });
 
@@ -1939,6 +2005,7 @@
             selector.replaceChildren(...players.map(player => new Option(player, player)));
             selector.value = selectedPlayer;
 
+            let shouldFitMap = false;
             if(!kalosMapInstance) {
                 kalosMapInstance = L.map('kalos-map', {
                     crs: L.CRS.Simple,
@@ -1953,9 +2020,19 @@
                 kalosMapMarkers = L.layerGroup().addTo(kalosMapInstance);
                 kalosMapInstance.fitBounds(KALOS_MAP_BOUNDS);
                 kalosMapBaseZoom = kalosMapInstance.getZoom();
+                kalosMapInstance.setMinZoom(kalosMapBaseZoom);
                 kalosMapInstance.on('zoomend', () => addKalosMapMarkers(selector.value));
+                shouldFitMap = true;
             }
-            requestAnimationFrame(() => kalosMapInstance.invalidateSize());
+            requestAnimationFrame(() => {
+                kalosMapInstance.invalidateSize();
+                if(shouldFitMap) {
+                    kalosMapInstance.fitBounds(KALOS_MAP_BOUNDS);
+                    kalosMapBaseZoom = kalosMapInstance.getZoom();
+                    kalosMapInstance.setMinZoom(kalosMapBaseZoom);
+                    addKalosMapMarkers(selectedPlayer);
+                }
+            });
             addKalosMapMarkers(selectedPlayer);
         };
 
