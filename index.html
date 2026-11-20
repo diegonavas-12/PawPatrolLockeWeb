@@ -161,6 +161,7 @@
         .map-route-pin.is-captured { background: #dc2626; }
         .map-route-pin.is-partial { background: linear-gradient(135deg, #dc2626 50%, #eab308 50%); }
         .map-route-pin.is-failed { background: #64748b; }
+        .map-route-pin.is-complete { background: #16a34a; }
         .map-route-pin.is-available { background: #eab308; color: #1f2937; text-shadow: none; }
         .map-gym-pin {
             width: calc(27px * var(--map-marker-scale, 1)); height: calc(27px * var(--map-marker-scale, 1));
@@ -1236,6 +1237,27 @@
             <h3 class="font-bold text-sm text-gray-600 mb-2">❌ Rutas de captura fallida:</h3>
             <div id="failed-routes-list" class="flex flex-wrap gap-2"></div>
         </div>
+        <div id="profile-og-capture-progress" class="cartoon-panel p-4 mb-4 hidden">
+            <div class="flex items-center gap-3 flex-wrap text-white">
+                <label for="profile-og-capture-gym" class="font-bold text-lg md:text-xl">Capturas hasta</label>
+                <select id="profile-og-capture-gym" onchange="window.updateOgCaptureProgress()" class="cartoon-input p-2 text-base md:text-lg">
+                    <option value="1">Gimnasio 1</option>
+                    <option value="2">Gimnasio 2</option>
+                    <option value="3">Gimnasio 3</option>
+                    <option value="4">Gimnasio 4</option>
+                    <option value="5">Gimnasio 5</option>
+                    <option value="6">Gimnasio 6</option>
+                    <option value="7">Gimnasio 7</option>
+                    <option value="8">Gimnasio 8</option>
+                </select>
+                <span class="text-lg md:text-xl font-bold">:</span>
+                <p id="profile-og-capture-progress-count" class="text-lg md:text-xl font-black text-white" aria-live="polite"></p>
+            </div>
+            <div class="mt-3 border-t border-white pt-3 text-white">
+                <p class="font-bold">Capturas pendientes:</p>
+                <ul id="profile-og-capture-progress-list" class="mt-1 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 list-disc pl-5" aria-live="polite"></ul>
+            </div>
+        </div>
         <div id="profile-gym-teams" class="cartoon-panel p-4 mb-4 bg-yellow-50 border-yellow-300 hidden">
             <div class="flex items-center gap-4 mb-3">
                 <label class="font-bold text-gray-700">Ver equipo de:</label>
@@ -1385,6 +1407,7 @@
                 <span><i class="inline-block w-3 h-3 rounded-full bg-gradient-to-br from-red-600 to-yellow-500 mr-1"></i>Captura parcial</span>
                 <span><i class="inline-block w-3 h-3 rounded-full bg-yellow-500 mr-1"></i>Pendiente</span>
                 <span><i class="inline-block w-3 h-3 rounded-full bg-slate-500 mr-1"></i>Captura fallida</span>
+                <span><i class="inline-block w-3 h-3 rounded-full bg-green-600 mr-1"></i>Ruta completa</span>
                 <span><i class="inline-block w-3 h-3 rounded-full bg-green-600 mr-1"></i>Medalla conseguida</span>
                 <span><i class="inline-block w-3 h-3 rounded-full bg-blue-600 mr-1"></i>Medalla pendiente</span>
             </div>
@@ -2095,18 +2118,26 @@
             'Calle Victoria': 'CV'
         };
 
-        const KALOS_CAPTURE_SLOTS = Object.values(OG_GYM_ROUTES).flat().map(area => {
-            const location = getKalosMapLocation(area.locations[0]);
-            const locationLabel = OG_ROUTE_LOCATION_LABELS[area.locations[0]]
-                || area.locations[0].replace(/\b\w/g, character => character.toUpperCase());
-            const habitatLabel = area.habitats[0]
-                ? area.habitats[0].replace(/\b\w/g, character => character.toUpperCase())
-                : '';
-            const canonicalLabel = area.label || (habitatLabel ? `${locationLabel} - ${habitatLabel}` : locationLabel);
-            const aliases = [canonicalLabel, ...area.suggestions];
-            if(!area.habitats.length) aliases.push(...area.locations);
-            return { location, name: habitatLabel || area.label || locationLabel, aliases: [...new Set(aliases)] };
-        }).filter(slot => slot.location);
+        const KALOS_CAPTURE_SLOTS = Object.entries(OG_GYM_ROUTES).flatMap(([gymNumber, areas]) =>
+            areas.map(area => {
+                const location = getKalosMapLocation(area.locations[0]);
+                const locationLabel = OG_ROUTE_LOCATION_LABELS[area.locations[0]]
+                    || area.locations[0].replace(/\b\w/g, character => character.toUpperCase());
+                const habitatLabel = area.habitats[0]
+                    ? area.habitats[0].replace(/\b\w/g, character => character.toUpperCase())
+                    : '';
+                const canonicalLabel = area.label || (habitatLabel ? `${locationLabel} - ${habitatLabel}` : locationLabel);
+                const aliases = [canonicalLabel, ...area.suggestions];
+                if(!area.habitats.length) aliases.push(...area.locations);
+                return {
+                    location,
+                    name: habitatLabel || area.label || locationLabel,
+                    progressName: canonicalLabel,
+                    aliases: [...new Set(aliases)],
+                    gymStage: gymNumber === 'league' ? 9 : Number(gymNumber)
+                };
+            })
+        ).filter(slot => slot.location);
 
         function getKalosMapEncounterSlot(route, location) {
             const normalizedRoute = normalizeRouteKeyword(route);
@@ -2118,6 +2149,11 @@
             return locationSlots.length === 1
                 ? locationSlots[0]
                 : locationSlots.find(slot => normalizeRouteKeyword(slot.name) === 'hierba normal');
+        }
+
+        function isKalosCaptureSlotCompleted(slot, captures, failures) {
+            return captures.some(record => getKalosMapEncounterSlot(record.ruta, slot.location) === slot)
+                || failures.some(route => getKalosMapEncounterSlot(route, slot.location) === slot);
         }
 
         function addKalosMapMarkers(player) {
@@ -2137,11 +2173,13 @@
                 }));
                 const capturedCount = encounters.filter(encounter => encounter.records.length > 0).length;
                 const failedCount = encounters.filter(encounter => encounter.failedRoutes.length > 0).length;
+                const completedCount = encounters.filter(encounter =>
+                    encounter.records.length > 0 || encounter.failedRoutes.length > 0).length;
                 const unassignedRecords = captures.filter(record =>
                     getKalosMapLocation(record.ruta) === location && !getKalosMapEncounterSlot(record.ruta, location));
                 const unassignedFailures = failures.filter(route =>
                     getKalosMapLocation(route) === location && !getKalosMapEncounterSlot(route, location));
-                const state = capturedCount === encounters.length && capturedCount > 0 ? 'captured'
+                const state = completedCount === encounters.length && completedCount > 0 ? 'complete'
                     : capturedCount > 0 || unassignedRecords.length ? 'partial'
                     : failedCount > 0 || unassignedFailures.length ? 'failed' : 'available';
                 const routeNumber = location.name.match(/^Ruta (\d+)$/);
@@ -2153,7 +2191,7 @@
                     iconAnchor: [Math.round(17 * markerScale), Math.round(29 * markerScale)],
                     popupAnchor: [0, Math.round(-28 * markerScale)]
                 });
-                let status = `${capturedCount} de ${encounters.length} encuentros capturados.`;
+                let status = `${completedCount} de ${encounters.length} capturas completadas (${capturedCount} capturadas, ${failedCount} fallidas).`;
                 if(unassignedRecords.length) status += ` ${unassignedRecords.length} captura(s) sin zona identificada.`;
                 if(unassignedFailures.length) status += ` ${unassignedFailures.length} intento(s) fallido(s) sin zona identificada.`;
                 L.marker(location.coords, { icon: pin })
@@ -3475,6 +3513,38 @@
         });
 
         // --- VISTAS PERFIL Y EQUIPO ---
+        window.updateOgCaptureProgress = function() {
+            const progressEl = document.getElementById('profile-og-capture-progress');
+            const player = getMyPlayer();
+            if(!player || currentLocke !== 'PawPatrolOG') {
+                progressEl.classList.add('hidden');
+                return;
+            }
+
+            progressEl.classList.remove('hidden');
+            const gymNumber = Number(document.getElementById('profile-og-capture-gym').value) || 1;
+            const slots = KALOS_CAPTURE_SLOTS.filter(slot => slot.gymStage <= gymNumber);
+            const captures = globalData.filter(record => record.jugador === player);
+            const failures = globalFailedRoutes[player] || [];
+            const pendingSlots = slots.filter(slot =>
+                !isKalosCaptureSlotCompleted(slot, captures, failures));
+            document.getElementById('profile-og-capture-progress-count').textContent =
+                `${pendingSlots.length} capturas pendientes`;
+            const pendingList = document.getElementById('profile-og-capture-progress-list');
+            pendingList.replaceChildren();
+            if(pendingSlots.length) {
+                pendingSlots.forEach(slot => {
+                    const item = document.createElement('li');
+                    item.textContent = slot.progressName;
+                    pendingList.appendChild(item);
+                });
+            } else {
+                const item = document.createElement('li');
+                item.textContent = 'Ninguna';
+                pendingList.appendChild(item);
+            }
+        };
+
         window.updateProfileView = function() {
             const p = getMyPlayer();
             if (!p) {
@@ -3484,6 +3554,7 @@
                 document.getElementById('profile-account-email').innerText = currentAccountEmail;
                 document.getElementById('profile-my-skin').classList.add('hidden');
                 document.getElementById('profile-gym-teams').classList.add('hidden');
+                document.getElementById('profile-og-capture-progress').classList.add('hidden');
                 document.getElementById('grid-profile').innerHTML = '';
                 document.getElementById('profile-failed-routes').classList.add('hidden');
                 return;
@@ -3504,6 +3575,7 @@
             } else {
                 failedRoutesEl.classList.add('hidden');
             }
+            window.updateOgCaptureProgress();
 
             const gymSelector = document.getElementById('profile-gym-selector');
             const gymTeamsDiv = document.getElementById('profile-gym-teams');
