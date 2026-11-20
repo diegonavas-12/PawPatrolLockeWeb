@@ -1785,7 +1785,8 @@
             'league': ['21', 'Costera', 'Gigante', '23', 'Victoria']
         };
 
-        const OG_ROUTE = (locations, habitats = [], label = '', suggestions = []) => ({ locations, habitats, label, suggestions });
+        const OG_ROUTE = (locations, habitats = [], label = '', suggestions = [], repeatable = false, aliases = []) =>
+            ({ locations, habitats, label, suggestions, repeatable, aliases });
         const OG_GYM_ROUTES = {
             '1': [
                 OG_ROUTE(['Inicial', 'pueblo boceto', 'inicial de pueblo boceto'], [], 'Pueblo Boceto - Inicial', ['Inicial', 'Pueblo Boceto', 'Inicial de Pueblo Boceto']),
@@ -1810,7 +1811,7 @@
                 OG_ROUTE(['gruta tierraunida']),
                 OG_ROUTE(['ruta 8'], ['flores amarillas']),
                 OG_ROUTE(['ruta 8'], ['hierba normal']),
-                OG_ROUTE(['pueblo vanitas'], [], 'Pueblo Vánitas (Revivir fósiles)'),
+                OG_ROUTE(['pueblo petroglifo'], [], 'Pueblo Petroglifo - Fósil', [], true, ['Pueblo Vánitas (Revivir fósiles)']),
                 OG_ROUTE(['ruta 9']),
                 OG_ROUTE(['cueva brillante']),
                 OG_ROUTE(['ciudad relieve'], [], 'Ciudad Relieve (Regalos / Intercambios / Pesca)')
@@ -1866,6 +1867,7 @@
             'palacio cenit': 'Palacio Cenit',
             'gruta tierraunida': 'Gruta Tierraunida',
             'pueblo vanitas': 'Pueblo Vánitas',
+            'pueblo petroglifo': 'Pueblo Petroglifo',
             'cueva brillante': 'Cueva Brillante',
             'cueva de los reflejos': 'Cueva de los Reflejos',
             'torre maestria': 'Torre Maestría',
@@ -2008,6 +2010,7 @@
             { name: 'Gruta Tierraunida', coords: [404, 303], aliases: ['gruta tierraunida'] },
             { name: 'Ruta 8', coords: [420, 193], aliases: ['ruta 8'] },
             { name: 'Pueblo Vánitas', coords: [348, 422], aliases: ['pueblo vanitas'] },
+            { name: 'Pueblo Petroglifo', coords: [452, 241], aliases: ['pueblo petroglifo', 'pueblo vanitas revivir fosiles'] },
             { name: 'Ruta 9', coords: [432, 321], aliases: ['ruta 9'] },
             { name: 'Cueva Brillante', coords: [451, 392], aliases: ['cueva brillante'] },
             { name: 'Ciudad Relieve', coords: [355, 198], aliases: ['ciudad relieve'] },
@@ -2045,6 +2048,9 @@
 
         function getKalosMapLocation(route) {
             const normalizedRoute = normalizeRouteKeyword(route);
+            const exactMatch = KALOS_CAPTURE_LOCATIONS.find(location =>
+                location.aliases.some(alias => normalizeRouteKeyword(alias) === normalizedRoute));
+            if(exactMatch) return exactMatch;
             return KALOS_CAPTURE_LOCATIONS.find(location => location.aliases.some(alias => {
                 const normalizedAlias = normalizeRouteKeyword(alias);
                 return normalizedRoute === normalizedAlias || normalizedRoute.startsWith(`${normalizedAlias} `);
@@ -2106,6 +2112,7 @@
             'Palacio Cenit': 'PC',
             'Gruta Tierraunida': 'GT',
             'Pueblo Vánitas': 'PV',
+            'Pueblo Petroglifo': 'PP',
             'Cueva Brillante': 'CB',
             'Ciudad Relieve': 'CR',
             'Cueva de los Reflejos': 'REF',
@@ -2129,11 +2136,13 @@
                 const canonicalLabel = area.label || (habitatLabel ? `${locationLabel} - ${habitatLabel}` : locationLabel);
                 const aliases = [canonicalLabel, ...area.suggestions];
                 if(!area.habitats.length) aliases.push(...area.locations);
+                aliases.push(...area.aliases);
                 return {
                     location,
                     name: habitatLabel || area.label || locationLabel,
                     progressName: canonicalLabel,
                     aliases: [...new Set(aliases)],
+                    repeatable: area.repeatable,
                     gymStage: gymNumber === 'league' ? 9 : Number(gymNumber)
                 };
             })
@@ -2156,6 +2165,14 @@
                 || failures.some(route => getKalosMapEncounterSlot(route, slot.location) === slot);
         }
 
+        function isOgRepeatableCapture(route) {
+            const normalizedRoute = normalizeRouteKeyword(route);
+            return Object.values(OG_GYM_ROUTES).flat().some(area =>
+                area.repeatable &&
+                [area.label, ...area.suggestions, ...area.locations, ...area.aliases]
+                    .some(alias => normalizeRouteKeyword(alias) === normalizedRoute));
+        }
+
         function addKalosMapMarkers(player) {
             if(!kalosMapMarkers) return;
             kalosMapMarkers.clearLayers();
@@ -2166,7 +2183,9 @@
             const markerScale = Math.min(isMobile ? 1.9 : 1.6, (isMobile ? 1.15 : 1) * Math.pow(1.18, zoomIncrease));
 
             KALOS_CAPTURE_LOCATIONS.forEach(location => {
-                const encounters = KALOS_CAPTURE_SLOTS.filter(slot => slot.location === location).map(slot => ({
+                const locationSlots = KALOS_CAPTURE_SLOTS.filter(slot => slot.location === location);
+                if(!locationSlots.length) return;
+                const encounters = locationSlots.map(slot => ({
                     ...slot,
                     records: captures.filter(record => getKalosMapEncounterSlot(record.ruta, location) === slot),
                     failedRoutes: failures.filter(route => getKalosMapEncounterSlot(route, location) === slot)
@@ -2326,7 +2345,7 @@
         }
 
         function isPokemonAllowedForOgGym(pokemonRoute, gymNumber) {
-            if(!gymNumber) return true;
+            if(!gymNumber || isOgRepeatableCapture(pokemonRoute)) return true;
             const finalStage = gymNumber === 'league' ? 8 : parseInt(gymNumber, 10);
             const allowedAreas = [];
             for(let stage = 1; stage <= finalStage; stage++) {
@@ -3441,8 +3460,9 @@
                 return alert(`🚫 Ya has registrado "${routeRaw}" anteriormente.`);
             }
 
+            const repeatableOgCapture = currentLocke === 'PawPatrolOG' && isOgRepeatableCapture(routeRaw);
             const alreadyCaptured = globalData.find(x => x.jugador === p && x.ruta.toLowerCase() === routeRaw.toLowerCase());
-            if (alreadyCaptured) return alert(`🚫 Ya tienes un registro exitoso en "${routeRaw}".`);
+            if (alreadyCaptured && !repeatableOgCapture) return alert(`🚫 Ya tienes un registro exitoso en "${routeRaw}".`);
 
             btnSubmit.disabled = true; btnSubmit.innerHTML = "💾 Registrando...";
 
@@ -3475,13 +3495,14 @@
                 return alert('❌ Selecciona una ruta o zona válida de la lista de autocompletado.');
             }
 
+            const repeatableOgCapture = currentLocke === 'PawPatrolOG' && isOgRepeatableCapture(routeRaw);
             const playerFailedRoutes = globalFailedRoutes[p] || [];
-            if (playerFailedRoutes.some(r => r.toLowerCase() === routeRaw.toLowerCase())) {
+            if (!repeatableOgCapture && playerFailedRoutes.some(r => r.toLowerCase() === routeRaw.toLowerCase())) {
                 return alert(`🚫 Ya has registrado "${routeRaw}" como fallida anteriormente.`);
             }
 
             const alreadyCaptured = globalData.find(x => x.jugador === p && x.ruta.toLowerCase() === routeRaw.toLowerCase());
-            if (alreadyCaptured && !isShiny) return alert(`🚫 Ya tienes un registro en "${routeRaw}".\n✨ ¡Solo puedes capturar shiny en rutas ya usadas!`);
+            if (alreadyCaptured && !isShiny && !repeatableOgCapture) return alert(`🚫 Ya tienes un registro en "${routeRaw}".\n✨ ¡Solo puedes capturar shiny en rutas ya usadas!`);
 
             btnSubmit.disabled = true; btnSubmit.innerHTML = "🔍 Pokédex...";
 
