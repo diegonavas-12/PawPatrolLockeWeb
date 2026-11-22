@@ -3360,12 +3360,17 @@
                 'b7': 'Medalla7.jpg',
                 'b8': 'Medalla8.jpg'
             };
+            const ogBadgeVideos = {
+                'b1': 'medalla-og.mp4',
+                'b2': 'medalla-og2.mp4'
+            };
 
             GYM_BADGES.forEach((badge, index) => {
                 const unlocked = myBadges[badge.id] === true;
                 const imageFile = badgeImages[badge.id];
-                if(currentLocke === 'PawPatrolOG' && badge.id === 'b1' && unlocked) {
-                    container.innerHTML += `<div class="flex flex-col items-center"><div class="badge-slot unlocked"><video src="medalla-og.mp4" class="w-16 h-16 object-cover rounded-full cursor-pointer" autoplay muted loop playsinline aria-label="Vídeo de la primera medalla" onclick="event.stopPropagation(); window.openBadgeVideo()"></video></div><p class="font-bold text-gray-700 mt-2 text-sm">${badge.name}</p></div>`;
+                const ogBadgeVideo = currentLocke === 'PawPatrolOG' ? ogBadgeVideos[badge.id] : '';
+                if(ogBadgeVideo && unlocked) {
+                    container.innerHTML += `<div class="flex flex-col items-center"><div class="badge-slot unlocked"><video src="${ogBadgeVideo}" class="w-16 h-16 object-cover rounded-full cursor-pointer" autoplay muted loop playsinline aria-label="Vídeo de ${badge.name}" onclick="event.stopPropagation(); window.openBadgeVideo('${ogBadgeVideo}')"></video></div><p class="font-bold text-gray-700 mt-2 text-sm">${badge.name}</p></div>`;
                 } else if(imageFile) {
                     container.innerHTML += `<div class="flex flex-col items-center"><div class="${unlocked ? 'badge-slot unlocked' : 'badge-slot'}" onclick="window.toggleBadge('${badge.id}', '${badge.name}', ${unlocked})">${unlocked ? `<img src="${imageFile}" class="w-16 h-16 object-contain cursor-pointer" onclick="event.stopPropagation(); window.enlargeBadge('${imageFile}')">` : '🔒'}</div><p class="font-bold text-gray-700 mt-2 text-sm">${unlocked ? badge.name : '???'}</p></div>`;
                 } else {
@@ -3389,14 +3394,14 @@
             modal.onclick = (e) => { if(e.target === modal) modal.remove(); };
             document.body.appendChild(modal);
         }
-        window.openBadgeVideo = function() {
+        window.openBadgeVideo = function(videoSource = 'medalla-og.mp4') {
             const modal = document.createElement('div');
             modal.className = 'modal-overlay';
             modal.style.display = 'flex';
             modal.innerHTML = `
                 <div class="cartoon-panel modal-content bg-white relative p-6 text-center" style="max-width: 800px;">
                     <button type="button" class="absolute top-4 right-4 text-2xl font-black text-gray-500 cursor-pointer hover:text-red-500">X</button>
-                    <video src="medalla-og.mp4" controls autoplay playsinline class="w-full h-auto mx-auto" style="max-height: 85vh;"></video>
+                    <video src="${videoSource}" controls autoplay playsinline class="w-full h-auto mx-auto" style="max-height: 85vh;"></video>
                 </div>
             `;
             modal.querySelector('button').onclick = () => modal.remove();
