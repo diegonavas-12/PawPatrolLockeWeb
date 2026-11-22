@@ -970,9 +970,8 @@
 
             <button onclick="nav('rules')" class="cartoon-btn bg-cyan-600 hover:bg-cyan-500 text-white text-xl py-3 mt-4"><span>📜 Normas</span></button>
             <button onclick="nav('suggestions')" class="cartoon-btn bg-fuchsia-600 hover:bg-fuchsia-500 text-white text-xl py-3 mt-4"><span>💡 Sugerencias/Felicitaciones</span></button>
-            <div id="menu-map-closed" class="hidden col-span-2 mt-2 text-center">
-                <p class="font-black text-amber-300 text-xl mb-2">🚧 TEMPORALMENTE CERRADO 🚧</p>
-                <button id="menu-map-button" type="button" disabled aria-disabled="true" class="cartoon-btn w-full bg-gray-500 text-white text-2xl py-4 cursor-not-allowed opacity-70"><span>🗺️ MAPA INTERACTIVO DE KALOS</span></button>
+            <div id="menu-map-action" class="hidden col-span-2 mt-2 text-center">
+                <button id="menu-map-button" type="button" onclick="nav('map')" class="cartoon-btn w-full bg-emerald-700 hover:bg-emerald-600 text-white text-2xl py-4"><span>🗺️ MAPA INTERACTIVO DE KALOS</span></button>
             </div>
         </div>
     </div>
@@ -1797,7 +1796,6 @@
                 OG_ROUTE(['bosque novarte'], ['hierba normal']),
                 OG_ROUTE(['ruta 3'], ['hierba normal']),
                 OG_ROUTE(['ruta 22'], ['hierba normal']),
-                OG_ROUTE(['ruta 22'], ['flores amarillas'])
             ],
             '2': [
                 OG_ROUTE(['ruta 4'], ['flores rojas']),
@@ -1806,6 +1804,7 @@
                 OG_ROUTE(['ruta 5'], ['hierba normal']),
                 OG_ROUTE(['ruta 5'], ['flores moradas']),
                 OG_ROUTE(['ruta 6'], ['hierba normal']),
+                OG_ROUTE(['ruta 6'], [], 'Ruta 6-Arbusto', ['Ruta 6-Arbusto', 'Ruta 6 - Arbusto']),
                 OG_ROUTE(['palacio cenit'], ['hierba normal']),
                 OG_ROUTE(['ruta 7'], ['hierba normal']),
                 OG_ROUTE(['ruta 7'], ['flores amarillas']),
@@ -1873,13 +1872,13 @@
             'pueblo vanitas': 'Pueblo Vánitas',
             'pueblo petroglifo': 'Pueblo Petroglifo',
             'cueva brillante': 'Cueva Brillante',
-            'cueva de los reflejos': 'Cueva de los Reflejos',
+            'cueva de los reflejos': 'Cueva Reflejos',
             'torre maestria': 'Torre Maestría',
             'ciudad yantra': 'Ciudad Yantra',
             'bahia azul': 'Bahía Azul',
             'hotel desolacion': 'Hotel Desolación',
-            'caverna helada': 'Caverna Helada',
-            'cueva terminus': 'Cueva Terminus',
+            'caverna helada': 'Gruta Helada',
+            'cueva terminus': 'Cueva Desenlace',
             'villa pokemon': 'Villa Pokémon',
             'calle victoria': 'Calle Victoria'
         };
@@ -1998,65 +1997,66 @@
                 .toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().replace(/\s+/g, ' ');
         }
 
-        const KALOS_MAP_BOUNDS = [[0, 0], [636, 970]];
-        const KALOS_COORDINATE_SOURCE = { width: 1000, height: 648 };
+        const KALOS_MAP_SIZE = { width: 1171, height: 768 };
+        const KALOS_MAP_BOUNDS = [[0, 0], [KALOS_MAP_SIZE.height, KALOS_MAP_SIZE.width]];
 
-        function mapKalosCoordinate(x, y) {
+        function mapKalosPercent(x, y) {
+            // Leaflet's Simple CRS counts latitude bottom-to-top; map coordinates count y top-to-bottom.
             return [
-                y * KALOS_MAP_BOUNDS[1][0] / KALOS_COORDINATE_SOURCE.height,
-                x * KALOS_MAP_BOUNDS[1][1] / KALOS_COORDINATE_SOURCE.width
+                (100 - y) * KALOS_MAP_SIZE.height / 100,
+                x * KALOS_MAP_SIZE.width / 100
             ];
         }
 
         const KALOS_CAPTURE_LOCATIONS = [
-            { name: 'Inicial · Pueblo Boceto', coords: mapKalosCoordinate(668, 537), aliases: ['inicial', 'pueblo boceto', 'inicial de pueblo boceto'] },
-            { name: 'Ruta 2', coords: mapKalosCoordinate(662, 437), aliases: ['ruta 2'] },
-            { name: 'Bosque Novarte', coords: mapKalosCoordinate(656, 409), aliases: ['bosque novarte'] },
-            { name: 'Ruta 3', coords: mapKalosCoordinate(645.5, 371), aliases: ['ruta 3'] },
-            { name: 'Ruta 22', coords: mapKalosCoordinate(699.98, 343.67), aliases: ['ruta 22'] },
-            { name: 'Ruta 4', coords: mapKalosCoordinate(587.5, 284.5), aliases: ['ruta 4'] },
-            { name: 'Ciudad Luminalia · Laboratorio', coords: mapKalosCoordinate(540, 236), aliases: ['ciudad luminalia', 'laboratorio'] },
-            { name: 'Ruta 5', coords: mapKalosCoordinate(486.5, 296.5), aliases: ['ruta 5'] },
-            { name: 'Ruta 6', coords: mapKalosCoordinate(381, 328.5), aliases: ['ruta 6'] },
-            { name: 'Palacio Cenit', coords: mapKalosCoordinate(329, 300), aliases: ['palacio cenit'] },
-            { name: 'Ruta 7', coords: mapKalosCoordinate(346.26, 382.6), aliases: ['ruta 7'] },
-            { name: 'Gruta Tierraunida', coords: mapKalosCoordinate(261, 413), aliases: ['gruta tierraunida'] },
-            { name: 'Ruta 8', coords: mapKalosCoordinate(232, 385), aliases: ['ruta 8'] },
-            { name: 'Pueblo Vánitas', coords: mapKalosCoordinate(433, 357), aliases: ['pueblo vanitas'] },
-            { name: 'Pueblo Petroglifo', coords: mapKalosCoordinate(248, 465), aliases: ['pueblo petroglifo', 'pueblo vanitas revivir fosiles'] },
-            { name: 'Ruta 9', coords: mapKalosCoordinate(326, 465), aliases: ['ruta 9'] },
-            { name: 'Cueva Brillante', coords: mapKalosCoordinate(404, 465), aliases: ['cueva brillante'] },
-            { name: 'Ciudad Relieve', coords: mapKalosCoordinate(203, 357), aliases: ['ciudad relieve'] },
-            { name: 'Ruta 10', coords: mapKalosCoordinate(149.5, 335), aliases: ['ruta 10'] },
-            { name: 'Cueva de los Reflejos', coords: mapKalosCoordinate(141, 276), aliases: ['cueva de los reflejos', 'cueva reflejos'] },
-            { name: 'Ruta 11', coords: mapKalosCoordinate(142.3, 272.89), aliases: ['ruta 11'] },
-            { name: 'Ciudad Yantra · Torre Maestría', coords: mapKalosCoordinate(166, 216), aliases: ['ciudad yantra', 'torre maestria', 'lucario'] },
-            { name: 'Ruta 12', coords: mapKalosCoordinate(264.55, 193.8), aliases: ['ruta 12'] },
-            { name: 'Bahía Azul', coords: mapKalosCoordinate(271, 103), aliases: ['bahia azul'] },
-            { name: 'Ruta 13', coords: mapKalosCoordinate(450.03, 198.43), aliases: ['ruta 13'] },
-            { name: 'Ruta 14', coords: mapKalosCoordinate(540, 161.5), aliases: ['ruta 14'] },
-            { name: 'Ruta 15', coords: mapKalosCoordinate(625.98, 121.11), aliases: ['ruta 15'] },
-            { name: 'Hotel Desolación', coords: mapKalosCoordinate(661, 135), aliases: ['hotel desolacion'] },
-            { name: 'Ruta 16', coords: mapKalosCoordinate(622.74, 204.05), aliases: ['ruta 16'] },
-            { name: 'Caverna Helada', coords: mapKalosCoordinate(774, 104), aliases: ['caverna helada'] },
-            { name: 'Ruta 17', coords: mapKalosCoordinate(791.5, 208), aliases: ['ruta 17'] },
-            { name: 'Ruta 18', coords: mapKalosCoordinate(910.5, 269.5), aliases: ['ruta 18'] },
-            { name: 'Cueva Terminus', coords: mapKalosCoordinate(943, 198), aliases: ['cueva terminus'] },
-            { name: 'Ruta 19', coords: mapKalosCoordinate(896, 312.5), aliases: ['ruta 19'] },
-            { name: 'Ruta 20', coords: mapKalosCoordinate(837.5, 399), aliases: ['ruta 20'] },
-            { name: 'Villa Pokémon', coords: mapKalosCoordinate(825, 465), aliases: ['villa pokemon'] },
-            { name: 'Ruta 21', coords: mapKalosCoordinate(803, 321.5), aliases: ['ruta 21'] },
-            { name: 'Calle Victoria', coords: mapKalosCoordinate(756, 310), aliases: ['calle victoria'] }
+            { name: 'Inicial · Pueblo Boceto', coords: mapKalosPercent(66.8, 81.8), aliases: ['inicial', 'pueblo boceto', 'inicial de pueblo boceto'] },
+            { name: 'Ruta 2', coords: mapKalosPercent(66.2, 66.5), aliases: ['ruta 2'] },
+            { name: 'Bosque Novarte', coords: mapKalosPercent(65.5, 62.0), aliases: ['bosque novarte'] },
+            { name: 'Ruta 3', coords: mapKalosPercent(64.5, 57.5), aliases: ['ruta 3'] },
+            { name: 'Ruta 22', coords: mapKalosPercent(69.5, 51.1), aliases: ['ruta 22'] },
+            { name: 'Ruta 4', coords: mapKalosPercent(59.0, 44.5), aliases: ['ruta 4'] },
+            { name: 'Ciudad Luminalia · Laboratorio', coords: mapKalosPercent(53.9, 35.1), aliases: ['ciudad luminalia', 'laboratorio'] },
+            { name: 'Ruta 5', coords: mapKalosPercent(48.6, 45.0), aliases: ['ruta 5'] },
+            { name: 'Ruta 6', coords: mapKalosPercent(38.2, 50.5), aliases: ['ruta 6'] },
+            { name: 'Palacio Cenit', coords: mapKalosPercent(32.9, 46.2), aliases: ['palacio cenit'] },
+            { name: 'Ruta 7', coords: mapKalosPercent(31.8, 60.0), aliases: ['ruta 7'] },
+            { name: 'Gruta Tierraunida', coords: mapKalosPercent(26.0, 62.5), aliases: ['gruta tierraunida'] },
+            { name: 'Ruta 8', coords: mapKalosPercent(22.5, 63.5), aliases: ['ruta 8'] },
+            { name: 'Pueblo Vánitas', coords: mapKalosPercent(43.3, 54.8), aliases: ['pueblo vanitas'] },
+            { name: 'Pueblo Petroglifo', coords: mapKalosPercent(24.6, 71.1), aliases: ['pueblo petroglifo', 'pueblo vanitas revivir fosiles'] },
+            { name: 'Ruta 9', coords: mapKalosPercent(32.5, 71.1), aliases: ['ruta 9'] },
+            { name: 'Cueva Brillante', coords: mapKalosPercent(40.5, 71.1), aliases: ['cueva brillante'] },
+            { name: 'Ciudad Relieve', coords: mapKalosPercent(20.3, 55.6), aliases: ['ciudad relieve'] },
+            { name: 'Ruta 10', coords: mapKalosPercent(15.0, 51.8), aliases: ['ruta 10'] },
+            { name: 'Cueva Reflejos', coords: mapKalosPercent(14.0, 45.0), aliases: ['cueva de los reflejos', 'cueva reflejos'] },
+            { name: 'Ruta 11', coords: mapKalosPercent(11.7, 45.5), aliases: ['ruta 11'] },
+            { name: 'Ciudad Yantra · Torre Maestría', coords: mapKalosPercent(16.6, 33.7), aliases: ['ciudad yantra', 'torre maestria', 'lucario'] },
+            { name: 'Ruta 12', coords: mapKalosPercent(22.0, 31.6), aliases: ['ruta 12'] },
+            { name: 'Bahía Azul', coords: mapKalosPercent(35.8, 20.3), aliases: ['bahia azul'] },
+            { name: 'Ruta 13', coords: mapKalosPercent(43.1, 34.0), aliases: ['ruta 13'] },
+            { name: 'Ruta 14', coords: mapKalosPercent(49.3, 20.3), aliases: ['ruta 14'] },
+            { name: 'Ruta 15', coords: mapKalosPercent(63.0, 14.0), aliases: ['ruta 15'] },
+            { name: 'Hotel Desolación', coords: mapKalosPercent(70.3, 26.2), aliases: ['hotel desolacion'] },
+            { name: 'Ruta 16', coords: mapKalosPercent(62.2, 30.6), aliases: ['ruta 16'] },
+            { name: 'Gruta Helada', coords: mapKalosPercent(77.3, 17.5), aliases: ['caverna helada', 'gruta helada'] },
+            { name: 'Ruta 17', coords: mapKalosPercent(79.1, 32.4), aliases: ['ruta 17'] },
+            { name: 'Ruta 18', coords: mapKalosPercent(90.9, 42.6), aliases: ['ruta 18'] },
+            { name: 'Cueva Desenlace', coords: mapKalosPercent(94.0, 30.3), aliases: ['cueva terminus', 'cueva desenlace'] },
+            { name: 'Ruta 19', coords: mapKalosPercent(89.5, 50.2), aliases: ['ruta 19'] },
+            { name: 'Ruta 20', coords: mapKalosPercent(83.8, 62.0), aliases: ['ruta 20'] },
+            { name: 'Villa Pokémon', coords: mapKalosPercent(82.4, 70.3), aliases: ['villa pokemon'] },
+            { name: 'Ruta 21', coords: mapKalosPercent(80.3, 51.4), aliases: ['ruta 21'] },
+            { name: 'Calle Victoria', coords: mapKalosPercent(75.6, 49.0), aliases: ['calle victoria'] }
         ];
         const KALOS_GYM_LOCATIONS = [
-            { number: '1', city: 'Ciudad Novarte', coords: mapKalosCoordinate(635, 333) },
-            { number: '2', city: 'Ciudad Relieve', coords: mapKalosCoordinate(203, 357) },
-            { number: '3', city: 'Ciudad Yantra', coords: mapKalosCoordinate(166, 216) },
-            { number: '4', city: 'Ciudad Témpera', coords: mapKalosCoordinate(360, 161) },
-            { number: '5', city: 'Ciudad Luminalia', coords: mapKalosCoordinate(540, 236) },
-            { number: '6', city: 'Ciudad Romantis', coords: mapKalosCoordinate(540, 87) },
-            { number: '7', city: 'Ciudad Fluxus', coords: mapKalosCoordinate(879, 247) },
-            { number: '8', city: 'Ciudad Fractal', coords: mapKalosCoordinate(850, 333) }
+            { number: '1', city: 'Ciudad Novarte', coords: mapKalosPercent(63.4, 53.2) },
+            { number: '2', city: 'Ciudad Relieve', coords: mapKalosPercent(20.3, 55.6) },
+            { number: '3', city: 'Ciudad Yantra', coords: mapKalosPercent(16.6, 33.7) },
+            { number: '4', city: 'Ciudad Témpera', coords: mapKalosPercent(36.0, 26.6) },
+            { number: '5', city: 'Ciudad Luminalia', coords: mapKalosPercent(53.9, 35.1) },
+            { number: '6', city: 'Ciudad Romantis', coords: mapKalosPercent(53.9, 12.8) },
+            { number: '7', city: 'Ciudad Fluxus', coords: mapKalosPercent(87.8, 38.6) },
+            { number: '8', city: 'Ciudad Fractal', coords: mapKalosPercent(85.1, 53.8) }
         ];
 
         function getKalosMapLocation(route) {
@@ -2130,12 +2130,12 @@
             'Pueblo Petroglifo': 'PP',
             'Cueva Brillante': 'CB',
             'Ciudad Relieve': 'CR',
-            'Cueva de los Reflejos': 'REF',
+            'Cueva Reflejos': 'REF',
             'Ciudad Yantra · Torre Maestría': 'CY',
             'Bahía Azul': 'BA',
             'Hotel Desolación': 'HD',
-            'Caverna Helada': 'CH',
-            'Cueva Terminus': 'CT',
+            'Gruta Helada': 'GH',
+            'Cueva Desenlace': 'CD',
             'Villa Pokémon': 'VP',
             'Calle Victoria': 'CV'
         };
@@ -2625,7 +2625,7 @@
             gymTeamSelection = {};
             gymTeamSelectionLoaded = {};
             currentLocke = locke;
-            document.getElementById('menu-map-closed').classList.toggle('hidden', locke !== 'PawPatrolOG');
+            document.getElementById('menu-map-action').classList.toggle('hidden', locke !== 'PawPatrolOG');
             document.body.classList.toggle('theme-og', locke === 'PawPatrolOG');
             document.body.classList.toggle('theme-v2', locke === 'PawPatrolV2');
             document.getElementById('locke-title').textContent = locke.toUpperCase();
@@ -2784,10 +2784,6 @@
             if(!auth || !auth.currentUser || (!getMyPlayer() && targetScreen !== 'profile')) {
                 if(targetScreen !== 'auth') showOnlyScreen('auth');
                 return;
-            }
-            if(targetScreen === 'map') {
-                alert('El mapa está temporalmente cerrado.');
-                return showOnlyScreen('menu');
             }
             if (['add', 'capture-select', 'capture-failed', 'teambuilder', 'badges', 'gacha', 'collectibles', 'revive', 'ban-select', 'repel'].includes(targetScreen) && !getMyPlayer()) {
                 alert("⚠️ Primero debes iniciar sesión y vincular un entrenador."); return showOnlyScreen('auth');
