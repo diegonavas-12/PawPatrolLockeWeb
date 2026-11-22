@@ -1910,8 +1910,65 @@
             '6': 42, '7': 48, '8': 59, league: 68
         };
 
-        // Rutas permitidas por gimnasio en PawPatrol V2.
-        const GYM_ROUTES = {
+        const V2_CAPTURE_AREA = (mapLocationId, gym, suggestions, aliases = []) => ({
+            mapLocationId,
+            gym,
+            suggestions,
+            aliases: [...new Set([...suggestions, ...aliases])]
+        });
+        const V2_CAPTURE_AREAS = [
+            V2_CAPTURE_AREA('ciudad_engobe', 1, ['Ciudad Engobe - Inicial'], ['Ciudad Engobe', 'Engobe', 'Inicial']),
+            V2_CAPTURE_AREA('ruta_19', 1, ['Ruta 19 - Hierba verde'], ['Ruta 19', '19']),
+            V2_CAPTURE_AREA('ruta_20', 1, ['Ruta 20 - Hierba verde', 'Ruta 20 - Hierba azul'], ['Ruta 20', '20']),
+            V2_CAPTURE_AREA('rancho_ocre', 1, ['Rancho Ocre - Hierba verde'], ['Rancho Ocre', 'Rancho', 'Ocre']),
+            V2_CAPTURE_AREA('poligono_hormigon', 2, ['Polígono Hormigón - Exterior - Hierba verde', 'Polígono Hormigón - Interior - Hierba verde', 'Polígono Hormigón - Interior - Hierba azul'], ['Polígono Hormigón', 'Hormigón', 'Hormigon']),
+            V2_CAPTURE_AREA('cloacas_porcelana', 3, ['Cloacas Porcelana - Cueva/agua'], ['Cloacas Porcelana', 'Alcantarillas']),
+            V2_CAPTURE_AREA('gruta_antigua', 3, ['Pasadizo Ancestral - Cueva'], ['Pasadizo Ancestral', 'Pasadizo', 'Reliquia', 'Gruta Antigua']),
+            V2_CAPTURE_AREA('parque_porcelana', 3, ['Parque Porcelana - Hierba verde', 'Parque Porcelana - Hierba azul'], ['Parque Porcelana']),
+            V2_CAPTURE_AREA('ruta_4', 4, ['Ruta 4 - Arena'], ['Ruta 4', '4']),
+            V2_CAPTURE_AREA('zona_desierto', 4, ['Zona Desierto - Arena'], ['Zona Desierto', 'Zona Desértica', 'Desierto', 'Desértica']),
+            V2_CAPTURE_AREA('castillo_ancestral', 4, ['Castillo Ancestral - Interior'], ['Castillo Ancestral', 'Castillo', 'Ancestral']),
+            V2_CAPTURE_AREA('ruta_16', 4, ['Ruta 16 - Hierba verde', 'Ruta 16 - Hierba azul'], ['Ruta 16', '16']),
+            V2_CAPTURE_AREA('bosque_perdido', 4, ['Bosque Perdidos - Hierba verde', 'Bosque Perdidos - Hierba azul'], ['Bosque Perdidos', 'Bosque Perdido', 'Bosque']),
+            V2_CAPTURE_AREA('claro_oculto_bosque_perdidos', 4, ['Claro Oculto (Bosque Perdidos)']),
+            V2_CAPTURE_AREA('ruta_5', 4, ['Ruta 5 - Hierba verde', 'Ruta 5 - Hierba azul'], ['Ruta 5', '5']),
+            V2_CAPTURE_AREA('claro_oculto_ruta_5', 4, ['Claro Oculto (Ruta 5 - obligatorio con Bel)']),
+            V2_CAPTURE_AREA('puente_fayenza', 5, ['Puente Fayenza - Sombras de Pokémon voladores'], ['Puente de Fayenza', 'Puente Fayenza']),
+            V2_CAPTURE_AREA('ciudad_fayenza', 5, ['Ciudad Fayenza - Regalo Zorua'], ['Ciudad Fayenza', 'Zorua regalo', 'Fayenza']),
+            V2_CAPTURE_AREA('ruta_6', 5, ['Ruta 6 - Hierba verde', 'Ruta 6 - Hierba azul'], ['Ruta 6', '6']),
+            V2_CAPTURE_AREA('centro_estudios_estacionales', 5, ['Centro de Estudios Estacionales - Regalo Deerling'], ['Centro Estudios Estacionales', 'Deerling regalo']),
+            V2_CAPTURE_AREA('claro_oculto_ruta_6_norte', 5, ['Claro Oculto (Ruta 6 - Norte)']),
+            V2_CAPTURE_AREA('engobe_agua_surf', 6, ['Ciudad Engobe - Agua (Surf)']),
+            V2_CAPTURE_AREA('fayenza_agua_surf', 6, ['Ciudad Fayenza - Agua (Surf)']),
+            V2_CAPTURE_AREA('claro_oculto_rancho_ocre', 6, ['Claro Oculto (Rancho Ocre - Surf)']),
+            V2_CAPTURE_AREA('claro_oculto_ruta_6_sur', 6, ['Claro Oculto (Ruta 6 - Sur - Surf)']),
+            V2_CAPTURE_AREA('cueva_loza', 6, ['Cueva Loza - Cueva'], ['Cueva Loza', 'Loza']),
+            V2_CAPTURE_AREA('cueva_electrorroca', 6, ['Cueva Electrorroca - Cueva'], ['Cueva Electrorroca', 'Electrorroca']),
+            V2_CAPTURE_AREA('ruta_7', 6, ['Ruta 7 - Hierba verde', 'Ruta 7 - Hierba azul'], ['Ruta 7', '7']),
+            V2_CAPTURE_AREA('claro_oculto_ruta_7', 6, ['Claro Oculto (Ruta 7)']),
+            V2_CAPTURE_AREA('torre_cielos', 6, ['Torre de los Cielos - Interior'], ['Torre de los Cielos', 'Torre Cielos', 'Cielos']),
+            V2_CAPTURE_AREA('montana_reversia', 7, ['Montaña Reversia - Exterior - Hierba verde', 'Montaña Reversia - Interior - Cueva'], ['Montaña Reversia', 'Reversia']),
+            V2_CAPTURE_AREA('bahia_arenisca', 7, ['Bahía Arenisca - Agua (Surf)'], ['Bahía Arenisca', 'Arenisca']),
+            V2_CAPTURE_AREA('ruta_13', 7, ['Ruta 13 - Hierba verde', 'Ruta 13 - Hierba azul'], ['Ruta 13', '13']),
+            V2_CAPTURE_AREA('claro_oculto_ruta_13_norte', 7, ['Claro Oculto (Ruta 13 - Norte)']),
+            V2_CAPTURE_AREA('claro_oculto_ruta_13_sur', 7, ['Claro Oculto (Ruta 13 - Sur)']),
+            V2_CAPTURE_AREA('ruta_12', 7, ['Ruta 12 - Hierba verde', 'Ruta 12 - Hierba azul'], ['Ruta 12', '12']),
+            V2_CAPTURE_AREA('puente_villa', 7, ['Puente Villa - Hierba verde', 'Puente Villa - Hierba azul'], ['Puente Villa', 'Villa']),
+            V2_CAPTURE_AREA('ruta_11', 7, ['Ruta 11 - Hierba verde', 'Ruta 11 - Hierba azul'], ['Ruta 11', '11']),
+            V2_CAPTURE_AREA('ruta_9', 7, ['Ruta 9 - Hierba verde', 'Ruta 9 - Hierba azul'], ['Ruta 9', '9']),
+            V2_CAPTURE_AREA('claro_oculto_ruta_9', 7, ['Claro Oculto (Ruta 9)']),
+            V2_CAPTURE_AREA('ciudad_marga', 8, ['Ciudad Marga - Agua (Surf)'], ['Ciudad Marga', 'Marga']),
+            V2_CAPTURE_AREA('ruta_21', 8, ['Ruta 21 - Agua (Surf)'], ['Ruta 21', '21']),
+            V2_CAPTURE_AREA('gruta_marina', 8, ['Cueva Costera - Cueva'], ['Cueva Costera', 'Gruta Marina', 'Costera']),
+            V2_CAPTURE_AREA('ruta_22', 8, ['Ruta 22 - Hierba verde', 'Ruta 22 - Hierba azul'], ['Ruta 22', '22']),
+            V2_CAPTURE_AREA('claro_oculto_ruta_22', 8, ['Claro Oculto (Ruta 22)']),
+            V2_CAPTURE_AREA('boquete_gigante', 9, ['Boquete Gigante - Exterior - Hierba verde', 'Boquete Gigante - Cueva', 'Boquete Gigante - Cráter - Hierba verde', 'Boquete Gigante - Cráter - Hierba azul'], ['Boquete Gigante', 'Gigante']),
+            V2_CAPTURE_AREA('claro_oculto_boquete_gigante', 9, ['Claro Oculto (Boquete Gigante - interior del cráter)']),
+            V2_CAPTURE_AREA('ruta_23', 9, ['Ruta 23 - Hierba verde', 'Ruta 23 - Hierba azul'], ['Ruta 23', '23']),
+            V2_CAPTURE_AREA('claro_oculto_ruta_23', 9, ['Claro Oculto (Ruta 23 - requiere Corte)']),
+            V2_CAPTURE_AREA('calle_victoria', 9, ['Calle Victoria - Cueva', 'Calle Victoria - Exterior - Hierba verde', 'Calle Victoria - Exterior - Hierba azul'], ['Calle Victoria', 'Victoria'])
+        ];
+        const V2_LEGACY_GYM_ROUTE_KEYWORDS = {
             '1': ['Engobe', '19', 'Ocre', '20', 'Rancho', 'Inicial'],
             '2': ['Hormigon', 'Hormigón'],
             '3': ['Porcelana', 'Alcantarillas', 'Pasadizo', 'Reliquia'],
@@ -1920,7 +1977,7 @@
             '6': ['Reliquia', '6', 'Loza', 'Electrorroca', '7', 'Cielos'],
             '7': ['Reversia', 'Horroris', 'Arenisca', '13', '14', 'Ladrillo', '12', 'Villa', '11', '9'],
             '8': ['Marga', '22'],
-            'league': ['21', 'Costera', 'Gigante', '23', 'Victoria']
+            league: ['21', 'Costera', 'Gigante', '23', 'Victoria']
         };
 
         const OG_ROUTE = (locations, habitats = [], label = '', suggestions = [], repeatable = false, aliases = []) =>
@@ -2032,29 +2089,61 @@
             }))];
         }
 
+        function getV2CaptureRouteSuggestions() {
+            return [...new Set(V2_CAPTURE_AREAS.flatMap(area => area.suggestions))];
+        }
+
         function syncOgRouteAutocomplete() {
-            const enabled = currentLocke === 'PawPatrolOG';
+            const isOg = currentLocke === 'PawPatrolOG';
+            const isV2 = currentLocke === 'PawPatrolV2';
             const datalist = document.getElementById('og-route-options');
-            const suggestions = getOgRouteSuggestions();
-            datalist.replaceChildren(...(enabled
+            const suggestions = isOg ? getOgRouteSuggestions()
+                : isV2 ? getV2CaptureRouteSuggestions() : [];
+            datalist.replaceChildren(...(isOg || isV2
                 ? suggestions.map(route => {
                     const option = document.createElement('option');
                     option.value = route;
                     return option;
                 })
                 : []));
-            ['routeInput', 'failedRouteInput', 'edit-route'].forEach(inputId => {
+            const ogRouteInputIds = ['routeInput', 'failedRouteInput', 'edit-route'];
+            const routeInputIds = [...ogRouteInputIds, 'repel-route', 'edit-capture-route'];
+            routeInputIds.forEach(inputId => {
                 const input = document.getElementById(inputId);
-                if(enabled) {
+                if(!input) return;
+                if(isOg) {
+                    if(ogRouteInputIds.includes(inputId)) {
+                        input.setAttribute('list', 'og-route-options');
+                        setupOgRouteAutocomplete(input, suggestions);
+                    } else {
+                        input.removeAttribute('list');
+                    }
+                } else if(isV2) {
                     input.setAttribute('list', 'og-route-options');
-                    setupOgRouteAutocomplete(input, suggestions);
+                    input.oninput = null;
+                    input.onfocus = null;
+                    input.onkeydown = null;
+                    input.onblur = null;
+                    input.parentElement?.querySelector(':scope > .og-route-suggestions')?.classList.add('hidden');
                 } else {
                     input.removeAttribute('list');
-                    setupOgRouteAutocomplete(input, []);
+                    if(ogRouteInputIds.includes(inputId)) setupOgRouteAutocomplete(input, []);
+                    else {
+                        input.oninput = null;
+                        input.onfocus = null;
+                        input.onkeydown = null;
+                        input.onblur = null;
+                    }
                 }
             });
-            document.getElementById('og-route-hint-add').classList.toggle('hidden', !enabled);
-            document.getElementById('og-route-hint-edit').classList.toggle('hidden', !enabled);
+            document.getElementById('og-route-hint-add').innerText = isOg
+                ? 'Selecciona una ruta o zona de la lista para registrar la captura.'
+                : 'Elige una ubicación y zona de captura para identificarla en el mapa y validar el equipo.';
+            document.getElementById('og-route-hint-edit').innerText = isOg
+                ? 'Selecciona una ruta o zona de la lista para guardar el cambio.'
+                : 'Elige una ubicación y zona de captura para identificarla en el mapa y validar el equipo.';
+            document.getElementById('og-route-hint-add').classList.toggle('hidden', !(isOg || isV2));
+            document.getElementById('og-route-hint-edit').classList.toggle('hidden', !(isOg || isV2));
         }
 
         function setupOgRouteAutocomplete(input, suggestions) {
@@ -2198,10 +2287,12 @@
         const V2_MAP_SIZE = { width: 2532, height: 1664 };
         const V2_MAP_BOUNDS = [[0, 0], [V2_MAP_SIZE.height, V2_MAP_SIZE.width]];
         const V2_MAP_LOCATIONS = [
-            { id: 'ciudad_engobe', name: 'Ciudad Engobe', type: 'ciudad', x: 5.2, y: 91.5, postgame: false, connections: ['ruta_19'] },
+            { id: 'ciudad_engobe', name: 'Ciudad Engobe', type: 'ciudad', x: 5.2, y: 91.5, postgame: false, connections: ['ruta_19', 'engobe_agua_surf'] },
+            { id: 'engobe_agua_surf', name: 'Ciudad Engobe - Agua (Surf)', type: 'zona', x: 2.8, y: 93.6, postgame: false, markerLabel: 'ES', connections: ['ciudad_engobe'] },
             { id: 'ruta_19', name: 'Ruta 19', type: 'ruta', x: 7.5, y: 77.5, postgame: false, connections: ['ciudad_engobe', 'pueblo_ocre'] },
             { id: 'pueblo_ocre', name: 'Pueblo Ocre', type: 'pueblo', x: 12.6, y: 75.5, postgame: false, connections: ['ruta_19', 'ruta_20', 'rancho_ocre', 'arboleda_promesa'] },
-            { id: 'rancho_ocre', name: 'Rancho Ocre', type: 'zona', x: 15.8, y: 70.0, postgame: false, connections: ['pueblo_ocre'] },
+            { id: 'rancho_ocre', name: 'Rancho Ocre', type: 'zona', x: 15.8, y: 70.0, postgame: false, connections: ['pueblo_ocre', 'claro_oculto_rancho_ocre'] },
+            { id: 'claro_oculto_rancho_ocre', name: 'Claro Oculto - Rancho Ocre', type: 'zona', x: 18.0, y: 67.2, postgame: false, markerLabel: 'CR', connections: ['rancho_ocre'] },
             { id: 'arboleda_promesa', name: 'Arboleda Promesa', type: 'zona', x: 15.8, y: 82.2, postgame: false, connections: ['pueblo_ocre'] },
             { id: 'ruta_20', name: 'Ruta 20', type: 'ruta', x: 19.8, y: 75.5, postgame: false, connections: ['pueblo_ocre', 'ciudad_hormigon'] },
             { id: 'ciudad_hormigon', name: 'Ciudad Hormigón', type: 'ciudad', x: 26.8, y: 75.5, postgame: false, connections: ['ruta_20', 'pokewood', 'poligono_hormigon', 'ciudad_porcelana'] },
@@ -2209,9 +2300,10 @@
             { id: 'poligono_hormigon', name: 'Polígono Hormigón', type: 'zona', x: 24.8, y: 82.2, postgame: false, connections: ['ciudad_hormigon'] },
             { id: 'torre_union', name: 'Torre Unión', type: 'zona', x: 28.6, y: 86.7, postgame: false, connections: ['ciudad_porcelana'] },
             { id: 'isla_libertad', name: 'Isla Libertad', type: 'zona', x: 38.6, y: 94.0, postgame: false, connections: ['ciudad_porcelana'] },
-            { id: 'ciudad_porcelana', name: 'Ciudad Porcelana', type: 'ciudad', x: 51.5, y: 77.5, postgame: false, connections: ['ciudad_hormigon', 'cloacas_porcelana', 'gruta_antigua', 'ruta_4', 'puente_saeta'] },
+            { id: 'ciudad_porcelana', name: 'Ciudad Porcelana', type: 'ciudad', x: 51.5, y: 77.5, postgame: false, connections: ['ciudad_hormigon', 'cloacas_porcelana', 'gruta_antigua', 'parque_porcelana', 'ruta_4', 'puente_saeta'] },
             { id: 'cloacas_porcelana', name: 'Cloacas Porcelana', type: 'zona', x: 60.8, y: 85.0, postgame: false, connections: ['ciudad_porcelana', 'gruta_antigua'] },
-            { id: 'gruta_antigua', name: 'Gruta Antigua', type: 'zona', x: 40.9, y: 70.0, postgame: false, connections: ['ciudad_porcelana', 'cloacas_porcelana', 'pwt'] },
+            { id: 'gruta_antigua', name: 'Pasadizo Ancestral', type: 'zona', x: 40.9, y: 70.0, postgame: false, connections: ['ciudad_porcelana', 'cloacas_porcelana', 'pwt'] },
+            { id: 'parque_porcelana', name: 'Parque Porcelana', type: 'zona', x: 54.2, y: 81.0, postgame: false, markerLabel: 'PP', connections: ['ciudad_porcelana'] },
             { id: 'ruta_4', name: 'Ruta 4', type: 'ruta', x: 51.5, y: 69.5, postgame: false, connections: ['ciudad_porcelana', 'galeria_union'] },
             { id: 'galeria_union', name: 'Galería Unión', type: 'zona', x: 51.5, y: 62.0, postgame: false, connections: ['ruta_4', 'zona_desierto', 'ciudad_mayolica'] },
             { id: 'zona_desierto', name: 'Zona Desierto', type: 'zona', x: 48.0, y: 62.0, postgame: false, connections: ['galeria_union', 'castillo_ancestral'] },
@@ -2219,17 +2311,24 @@
             { id: 'ciudad_mayolica', name: 'Ciudad Mayólica', type: 'ciudad', x: 51.5, y: 54.5, postgame: false, connections: ['galeria_union', 'ruta_5', 'ruta_16', 'pueblo_biscuit'] },
             { id: 'zona_nexo', name: 'Zona Nexo', type: 'zona', x: 51.5, y: 40.0, postgame: false, connections: [] },
             { id: 'ruta_16', name: 'Ruta 16', type: 'ruta', x: 57.0, y: 54.5, postgame: false, connections: ['ciudad_mayolica', 'bosque_perdido', 'puente_progreso'] },
-            { id: 'bosque_perdido', name: 'Bosque Perdido', type: 'zona', x: 56.8, y: 50.0, postgame: false, connections: ['ruta_16'] },
-            { id: 'ruta_5', name: 'Ruta 5', type: 'ruta', x: 45.0, y: 54.5, postgame: false, connections: ['ciudad_mayolica', 'puente_fayenza'] },
+            { id: 'bosque_perdido', name: 'Bosque Perdidos', type: 'zona', x: 56.8, y: 50.0, postgame: false, connections: ['ruta_16', 'claro_oculto_bosque_perdidos'] },
+            { id: 'claro_oculto_bosque_perdidos', name: 'Claro Oculto - Bosque Perdidos', type: 'zona', x: 54.8, y: 48.5, postgame: false, markerLabel: 'CB', connections: ['bosque_perdido'] },
+            { id: 'ruta_5', name: 'Ruta 5', type: 'ruta', x: 45.0, y: 54.5, postgame: false, connections: ['ciudad_mayolica', 'puente_fayenza', 'claro_oculto_ruta_5'] },
+            { id: 'claro_oculto_ruta_5', name: 'Claro Oculto - Ruta 5', type: 'zona', x: 42.8, y: 52.8, postgame: false, markerLabel: 'C5', connections: ['ruta_5'] },
             { id: 'puente_fayenza', name: 'Puente de Fayenza', type: 'puente', x: 37.5, y: 54.5, postgame: false, connections: ['ruta_5', 'ciudad_fayenza'] },
-            { id: 'ciudad_fayenza', name: 'Ciudad Fayenza', type: 'ciudad', x: 28.8, y: 54.5, postgame: false, connections: ['puente_fayenza', 'pwt', 'ruta_6', 'tunel_yakon'] },
+            { id: 'ciudad_fayenza', name: 'Ciudad Fayenza', type: 'ciudad', x: 28.8, y: 54.5, postgame: false, connections: ['puente_fayenza', 'pwt', 'ruta_6', 'tunel_yakon', 'fayenza_agua_surf'] },
+            { id: 'fayenza_agua_surf', name: 'Ciudad Fayenza - Agua (Surf)', type: 'zona', x: 30.6, y: 52.8, postgame: false, markerLabel: 'FS', connections: ['ciudad_fayenza'] },
             { id: 'pwt', name: 'Pokémon World Tournament', type: 'zona', x: 29.8, y: 61.3, postgame: false, connections: ['ciudad_fayenza', 'gruta_antigua'] },
             { id: 'tunel_yakon', name: 'Túnel Yakón', type: 'zona', x: 28.0, y: 45.8, postgame: true, connections: ['ciudad_fayenza', 'monte_tuerca'] },
-            { id: 'ruta_6', name: 'Ruta 6', type: 'ruta', x: 21.8, y: 47.0, postgame: false, connections: ['ciudad_fayenza', 'cueva_loza', 'cueva_electrorroca', 'ciudad_loza'] },
+            { id: 'ruta_6', name: 'Ruta 6', type: 'ruta', x: 21.8, y: 47.0, postgame: false, connections: ['ciudad_fayenza', 'cueva_loza', 'cueva_electrorroca', 'ciudad_loza', 'centro_estudios_estacionales', 'claro_oculto_ruta_6_norte', 'claro_oculto_ruta_6_sur'] },
+            { id: 'centro_estudios_estacionales', name: 'Centro de Estudios Estacionales', type: 'zona', x: 19.8, y: 44.8, postgame: false, markerLabel: 'CE', connections: ['ruta_6'] },
+            { id: 'claro_oculto_ruta_6_norte', name: 'Claro Oculto - Ruta 6 Norte', type: 'zona', x: 23.8, y: 44.2, postgame: false, markerLabel: '6N', connections: ['ruta_6'] },
+            { id: 'claro_oculto_ruta_6_sur', name: 'Claro Oculto - Ruta 6 Sur', type: 'zona', x: 23.8, y: 49.2, postgame: false, markerLabel: '6S', connections: ['ruta_6'] },
             { id: 'cueva_loza', name: 'Cueva Loza', type: 'zona', x: 24.8, y: 42.3, postgame: false, connections: ['ruta_6'] },
             { id: 'cueva_electrorroca', name: 'Cueva Electrorroca', type: 'zona', x: 16.2, y: 47.4, postgame: false, connections: ['ruta_6', 'ciudad_loza'] },
             { id: 'ciudad_loza', name: 'Ciudad Loza', type: 'ciudad', x: 15.4, y: 39.8, postgame: false, connections: ['cueva_electrorroca', 'ruta_7', 'pueblo_chamota'] },
-            { id: 'ruta_7', name: 'Ruta 7', type: 'ruta', x: 22.0, y: 32.5, postgame: false, connections: ['ciudad_loza', 'torre_cielos', 'monte_tuerca', 'ciudad_teja'] },
+            { id: 'ruta_7', name: 'Ruta 7', type: 'ruta', x: 22.0, y: 32.5, postgame: false, connections: ['ciudad_loza', 'torre_cielos', 'monte_tuerca', 'ciudad_teja', 'claro_oculto_ruta_7'] },
+            { id: 'claro_oculto_ruta_7', name: 'Claro Oculto - Ruta 7', type: 'zona', x: 24.0, y: 30.2, postgame: false, markerLabel: 'C7', connections: ['ruta_7'] },
             { id: 'torre_cielos', name: 'Torre de los Cielos', type: 'zona', x: 20.8, y: 29.8, postgame: false, connections: ['ruta_7'] },
             { id: 'pueblo_biscuit', name: 'Pueblo Biscuit', type: 'pueblo', x: 2.4, y: 17.5, postgame: false, connections: ['ciudad_mayolica'] },
             { id: 'pueblo_chamota', name: 'Pueblo Chamota', type: 'pueblo', x: 73.0, y: 39.8, postgame: false, connections: ['ciudad_loza', 'montana_reversia', 'villa_horroris'] },
@@ -2239,19 +2338,25 @@
             { id: 'bahia_arenisca', name: 'Bahía Arenisca', type: 'zona', x: 96.5, y: 39.8, postgame: false, connections: ['pueblo_arenisca', 'ruta_21'] },
             { id: 'ruta_14', name: 'Ruta 14', type: 'ruta', x: 81.0, y: 47.0, postgame: false, connections: ['pueblo_arenisca', 'santuario_abundancia', 'ciudad_negra'] },
             { id: 'santuario_abundancia', name: 'Santuario Abundancia', type: 'zona', x: 77.0, y: 45.8, postgame: false, connections: ['ruta_14'] },
-            { id: 'ruta_13', name: 'Ruta 13', type: 'ruta', x: 81.0, y: 32.5, postgame: false, connections: ['pueblo_arenisca', 'pueblo_ladrillo'] },
+            { id: 'ruta_13', name: 'Ruta 13', type: 'ruta', x: 81.0, y: 32.5, postgame: false, connections: ['pueblo_arenisca', 'pueblo_ladrillo', 'claro_oculto_ruta_13_norte', 'claro_oculto_ruta_13_sur'] },
+            { id: 'claro_oculto_ruta_13_norte', name: 'Claro Oculto - Ruta 13 Norte', type: 'zona', x: 83.2, y: 30.0, postgame: false, markerLabel: '3N', connections: ['ruta_13'] },
+            { id: 'claro_oculto_ruta_13_sur', name: 'Claro Oculto - Ruta 13 Sur', type: 'zona', x: 78.8, y: 34.8, postgame: false, markerLabel: '3S', connections: ['ruta_13'] },
             { id: 'pueblo_ladrillo', name: 'Pueblo Ladrillo', type: 'pueblo', x: 74.2, y: 25.5, postgame: false, connections: ['ruta_13', 'ruta_12'] },
             { id: 'ruta_12', name: 'Ruta 12', type: 'ruta', x: 69.0, y: 25.5, postgame: false, connections: ['pueblo_ladrillo', 'puente_villa'] },
             { id: 'puente_villa', name: 'Puente Villa', type: 'puente', x: 63.5, y: 25.5, postgame: false, connections: ['ruta_12', 'ruta_11'] },
             { id: 'ruta_11', name: 'Ruta 11', type: 'ruta', x: 58.0, y: 25.5, postgame: false, connections: ['puente_villa', 'ciudad_caolin'] },
             { id: 'ciudad_caolin', name: 'Ciudad Caolín', type: 'ciudad', x: 51.5, y: 25.5, postgame: false, connections: ['ruta_11', 'ruta_9'] },
-            { id: 'ruta_9', name: 'Ruta 9', type: 'ruta', x: 47.0, y: 25.5, postgame: false, connections: ['ciudad_caolin', 'puente_axial'] },
-            { id: 'gruta_marina', name: 'Gruta Marina', type: 'zona', x: 91.8, y: 31.3, postgame: false, connections: ['pueblo_arenisca', 'ruta_21'] },
+            { id: 'ruta_9', name: 'Ruta 9', type: 'ruta', x: 47.0, y: 25.5, postgame: false, connections: ['ciudad_caolin', 'puente_axial', 'claro_oculto_ruta_9'] },
+            { id: 'claro_oculto_ruta_9', name: 'Claro Oculto - Ruta 9', type: 'zona', x: 45.0, y: 23.3, postgame: false, markerLabel: 'C9', connections: ['ruta_9'] },
+            { id: 'gruta_marina', name: 'Cueva Costera', type: 'zona', x: 91.8, y: 31.3, postgame: false, connections: ['pueblo_arenisca', 'ruta_21'] },
+            { id: 'claro_oculto_ruta_22', name: 'Claro Oculto - Ruta 22', type: 'zona', x: 84.2, y: 23.2, postgame: false, markerLabel: '22', connections: ['ruta_22'] },
             { id: 'ruta_21', name: 'Ruta 21', type: 'ruta', x: 92.0, y: 26.5, postgame: false, connections: ['gruta_marina', 'ciudad_marga'] },
             { id: 'ciudad_marga', name: 'Ciudad Marga', type: 'ciudad', x: 92.0, y: 21.2, postgame: false, connections: ['ruta_21', 'ruta_22'] },
-            { id: 'ruta_22', name: 'Ruta 22', type: 'ruta', x: 86.5, y: 21.2, postgame: false, connections: ['ciudad_marga', 'boquete_gigante'] },
-            { id: 'boquete_gigante', name: 'Boquete Gigante', type: 'zona', x: 81.2, y: 21.2, postgame: false, connections: ['ruta_22', 'ruta_23'] },
-            { id: 'ruta_23', name: 'Ruta 23', type: 'ruta', x: 76.5, y: 15.0, postgame: false, connections: ['boquete_gigante', 'calle_victoria'] },
+            { id: 'ruta_22', name: 'Ruta 22', type: 'ruta', x: 86.5, y: 21.2, postgame: false, connections: ['ciudad_marga', 'boquete_gigante', 'claro_oculto_ruta_22'] },
+            { id: 'boquete_gigante', name: 'Boquete Gigante', type: 'zona', x: 81.2, y: 21.2, postgame: false, connections: ['ruta_22', 'ruta_23', 'claro_oculto_boquete_gigante'] },
+            { id: 'claro_oculto_boquete_gigante', name: 'Claro Oculto - Boquete Gigante', type: 'zona', x: 79.0, y: 19.0, postgame: false, markerLabel: 'BG', connections: ['boquete_gigante'] },
+            { id: 'ruta_23', name: 'Ruta 23', type: 'ruta', x: 76.5, y: 15.0, postgame: false, connections: ['boquete_gigante', 'calle_victoria', 'claro_oculto_ruta_23'] },
+            { id: 'claro_oculto_ruta_23', name: 'Claro Oculto - Ruta 23', type: 'zona', x: 74.4, y: 12.8, postgame: false, markerLabel: '23', connections: ['ruta_23'] },
             { id: 'calle_victoria', name: 'Calle Victoria', type: 'zona', x: 72.0, y: 8.8, postgame: false, connections: ['ruta_23', 'liga_pokemon'] },
             { id: 'liga_pokemon', name: 'Liga Pokémon', type: 'zona', x: 66.2, y: 8.8, postgame: false, connections: ['calle_victoria'] },
             { id: 'puente_axial', name: 'Puente Axial', type: 'puente', x: 42.5, y: 25.5, postgame: true, connections: ['ruta_9', 'ruta_8'] },
@@ -2280,29 +2385,32 @@
             { id: 'laboratorio_pp', name: 'Laboratorio P+P', type: 'zona', x: 83.6, y: 90.2, postgame: true, connections: ['ruta_17'] }
         ];
         const V2_GYM_LOCATIONS = [
-            { number: '1', city: 'Ciudad Gres', id: 'ciudad_gres' },
-            { number: '2', city: 'Ciudad Esmalte', id: 'ciudad_esmalte' },
+            { number: '1', city: 'Ciudad Engobe', id: 'ciudad_engobe' },
+            { number: '2', city: 'Ciudad Hormigón', id: 'ciudad_hormigon' },
             { number: '3', city: 'Ciudad Porcelana', id: 'ciudad_porcelana' },
             { number: '4', city: 'Ciudad Mayólica', id: 'ciudad_mayolica' },
             { number: '5', city: 'Ciudad Fayenza', id: 'ciudad_fayenza' },
             { number: '6', city: 'Ciudad Loza', id: 'ciudad_loza' },
-            { number: '7', city: 'Ciudad Teja', id: 'ciudad_teja' },
-            { number: '8', city: 'Ciudad Caolín', id: 'ciudad_caolin' }
+            { number: '7', city: 'Ciudad Caolín', id: 'ciudad_caolin' },
+            { number: '8', city: 'Ciudad Marga', id: 'ciudad_marga' }
         ];
         const V2_MAP_LOCATION_ALIASES = {
             ciudad_engobe: ['Inicial', 'Engobe'],
             rancho_ocre: ['Rancho'],
             cloacas_porcelana: ['Alcantarillas'],
-            gruta_antigua: ['Pasadizo', 'Reliquia'],
+            gruta_antigua: ['Gruta Antigua', 'Pasadizo', 'Reliquia'],
+            parque_porcelana: ['Parque'],
             zona_desierto: ['Zona Desértica', 'Desértica'],
             castillo_ancestral: ['Castillo', 'Ancestral'],
             bosque_perdido: ['Bosque', 'Perdido', 'Perdidos'],
+            centro_estudios_estacionales: ['Centro Estudios Estacionales', 'Centro de Estudios'],
             cueva_electrorroca: ['Electrorroca'],
             torre_cielos: ['Cielos'],
             villa_horroris: ['Villa', 'Horroris'],
             montana_reversia: ['Reversia'],
             pueblo_arenisca: ['Arenisca'],
             pueblo_ladrillo: ['Ladrillo'],
+            gruta_marina: ['Gruta Marina', 'Costera', 'Cueva Costera'],
             ruta_21: ['Costera'],
             boquete_gigante: ['Gigante'],
             calle_victoria: ['Victoria']
@@ -2326,7 +2434,7 @@
             }));
         }
 
-        function createMapPopup(title, status, records = [], encounters = []) {
+        function createMapPopup(title, status, records = [], encounters = [], showCaptureRoutes = false) {
             const popup = document.createElement('div');
             const heading = document.createElement('div');
             heading.className = 'map-popup-title';
@@ -2353,6 +2461,12 @@
                 const species = document.createElement('span');
                 species.textContent = `${record.especie}${record.shiny ? ' · Shiny' : ''}${record.estado !== 'Vivo' ? ` · ${record.estado.toLowerCase()}` : ''}`;
                 info.append(nickname, species);
+                if(showCaptureRoutes && record.ruta) {
+                    const captureRoute = document.createElement('span');
+                    captureRoute.className = 'text-xs text-slate-500';
+                    captureRoute.textContent = record.ruta;
+                    info.appendChild(captureRoute);
+                }
                 pokemon.append(sprite, info);
                 return pokemon;
             };
@@ -2568,6 +2682,11 @@
         }
 
         function getV2MapLocation(route) {
+            const captureArea = getV2CaptureArea(route);
+            if(captureArea) {
+                const captureLocation = V2_MAP_LOCATIONS.find(location => location.id === captureArea.mapLocationId);
+                if(captureLocation) return captureLocation;
+            }
             return V2_MAP_LOCATIONS.find(location => v2MapLocationMatches(route, location));
         }
 
@@ -2605,10 +2724,10 @@
                     : hasCapture ? 'captured'
                     : hasFailure ? 'failed' : 'available';
                 locationStatus.set(location.id, hasCapture || hasFailure);
-                const routeNumber = location.type === 'ruta' ? location.name.match(/^Ruta (\\d+)$/) : null;
-                const label = routeNumber
+                const routeNumber = location.type === 'ruta' ? location.name.match(/^Ruta (\d+)$/) : null;
+                const label = location.markerLabel || (routeNumber
                     ? routeNumber[1]
-                    : location.name.split(/\\s+/).map(word => word[0]).join('').slice(0, 2).toUpperCase();
+                    : location.name.split(/\s+/).map(word => word[0]).join('').slice(0, 2).toUpperCase());
                 const postgameClass = location.postgame ? ' is-postgame' : '';
                 const pin = L.divIcon({
                     className: 'map-route-marker',
@@ -2624,7 +2743,7 @@
                     : 'Captura pendiente.';
                 if(location.postgame) status += ' Zona postgame.';
                 L.marker(mapV2Percent(location), { icon: pin })
-                    .bindPopup(createMapPopup(location.name, status, records), {
+                    .bindPopup(createMapPopup(location.name, status, records, [], true), {
                         autoPan: true,
                         autoPanPaddingTopLeft: [40, 80],
                         autoPanPaddingBottomRight: [40, 40],
@@ -2813,28 +2932,45 @@
 
         // Función para obtener todas las rutas permitidas hasta un gimnasio específico
         function getAllowedRoutesForGym(gymNumber) {
-            const allowedRoutes = [];
-            if (gymNumber === 'league') {
-                // Para la liga, incluir todas las rutas de gimnasios 1-8 más las de la liga
-                for (let i = 1; i <= 8; i++) {
-                    allowedRoutes.push(...(GYM_ROUTES[i.toString()] || []));
-                }
-                allowedRoutes.push(...GYM_ROUTES['league']);
-            } else {
-                const gymNum = parseInt(gymNumber);
-                for (let i = 1; i <= gymNum; i++) {
-                    allowedRoutes.push(...(GYM_ROUTES[i.toString()] || []));
-                }
+            const gymLimit = gymNumber === 'league' ? 9 : Number(gymNumber);
+            return V2_CAPTURE_AREAS.filter(area => area.gym <= gymLimit);
+        }
+
+        function getLegacyAllowedRoutesForGym(gymNumber) {
+            const gymLimit = gymNumber === 'league' ? 8 : Number(gymNumber);
+            const routes = [];
+            for(let stage = 1; stage <= gymLimit; stage++) {
+                routes.push(...(V2_LEGACY_GYM_ROUTE_KEYWORDS[stage.toString()] || []));
             }
-            return allowedRoutes;
+            if(gymNumber === 'league') routes.push(...V2_LEGACY_GYM_ROUTE_KEYWORDS.league);
+            return routes;
+        }
+
+        function getV2CaptureArea(route) {
+            const normalizedRoute = normalizeRouteKeyword(route).replace(/\bcon\b/g, ' ').replace(/\s+/g, ' ').trim();
+            if(!normalizedRoute) return null;
+
+            let bestMatch = null;
+            let bestMatchLength = 0;
+            V2_CAPTURE_AREAS.forEach(area => {
+                area.aliases.forEach(alias => {
+                    const normalizedAlias = normalizeRouteKeyword(alias).replace(/\bcon\b/g, ' ').replace(/\s+/g, ' ').trim();
+                    if(normalizedAlias && ` ${normalizedRoute} `.includes(` ${normalizedAlias} `) && normalizedAlias.length > bestMatchLength) {
+                        bestMatch = area;
+                        bestMatchLength = normalizedAlias.length;
+                    }
+                });
+            });
+            return bestMatch;
         }
 
         // Función para verificar si un Pokémon puede usarse en un gimnasio
         function isPokemonAllowedForGym(pokemonRoute, gymNumber) {
             if(currentLocke === 'PawPatrolOG') return isPokemonAllowedForOgGym(pokemonRoute, gymNumber);
             if (!gymNumber) return true; // Si no se seleccionó gimnasio, permitir todos
-            const allowedRoutes = getAllowedRoutesForGym(gymNumber);
-            return allowedRoutes.some(route => (pokemonRoute || '').toLowerCase().includes(route.toLowerCase()));
+            const captureArea = getV2CaptureArea(pokemonRoute);
+            if(captureArea) return getAllowedRoutesForGym(gymNumber).includes(captureArea);
+            return getLegacyAllowedRoutesForGym(gymNumber).some(keyword => routeHasKeyword(pokemonRoute, keyword));
         }
 
         // --- 2. DICCIONARIO UNIVERSAL (100% DE ATAQUES, OBJETOS Y HABILIDADES) ---
