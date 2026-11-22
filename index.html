@@ -1305,6 +1305,11 @@
             <div class="mb-4">
                 <button onclick="window.saveGymTeam()" class="cartoon-btn w-full bg-yellow-500 hover:bg-yellow-400 text-white text-xl py-3">💾 Guardar Equipo para este Gimnasio</button>
             </div>
+            <section class="cartoon-panel p-4 mb-4 border-2 border-emerald-300 bg-emerald-50 text-center">
+                <p class="text-sm font-bold text-gray-700 mb-3">Conserva los Pokémon ya seleccionados y completa hasta 6 con los que mejor compensen el equipo, usando solo los tipos. No lo guarda automáticamente.</p>
+                <button id="team-autocomplete-button" onclick="window.autoCompleteGymTeam()" class="cartoon-btn w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xl py-3">✨ Autocompletar</button>
+                <p id="team-autocomplete-status" class="mt-2 text-sm font-bold text-gray-600" aria-live="polite"></p>
+            </section>
             <p class="text-gray-600 font-bold mb-4 text-center">Pulsa "Añadir / Quitar" para formar tu equipo. Dale a "Personalizar" para meter ataques y objetos.</p>
             <section id="team-weakness-summary" aria-live="polite" class="cartoon-panel p-4 mb-4 border-2 border-indigo-300 bg-indigo-50 text-center">
                 <h3 class="title-font text-xl text-indigo-800 mb-1">🛡️ DEBILIDADES DEL EQUIPO</h3>
@@ -1505,6 +1510,7 @@
         // Variable temporal para el teambuilder de gimnasio - ahora independiente por gimnasio
         let gymTeamSelection = {}; // Objeto con selecciones por gimnasio: { '1': [], '2': [], ... }
         let gymTeamSelectionLoaded = {}; // Para controlar si ya se cargó el equipo de cada gimnasio
+        let teamAutocompleteRequestId = 0;
 
         const PLAYERS_IN_BOTH_LOCKES = ["Navas", "Varo", "Camilo", "Sergio", "Rubén", "Samu"];
         const LOCKE_PLAYERS = {
@@ -1617,6 +1623,80 @@
                 pokemonTypeDataCache.set(speciesSlug, request);
             }
             return pokemonTypeDataCache.get(speciesSlug);
+        }
+
+        function getTypeEffectivenessMultiplier(attackType, defendingTypes) {
+            return defendingTypes.reduce((multiplier, defendingType) => {
+                const rules = POKEMON_TYPE_CHART[attackType] || {};
+                if(rules.immune?.includes(defendingType)) return 0;
+                if(rules.weak?.includes(defendingType)) return multiplier * 2;
+                if(rules.resist?.includes(defendingType)) return multiplier * 0.5;
+                return multiplier;
+            }, 1);
+        }
+
+        function scoreTeamByTypes(team) {
+            const teamTypes = new Set();
+            const offensiveCoverage = new Set();
+            team.forEach(({ types }) => types.forEach(type => {
+                teamTypes.add(type);
+                (POKEMON_TYPE_CHART[type]?.weak || []).forEach(coveredType => offensiveCoverage.add(coveredType));
+            }));
+
+            let weaknessExposure = 0;
+            let coveredWeaknessTypes = 0;
+            let uncoveredWeaknessTypes = 0;
+            Object.keys(POKEMON_TYPE_CHART).forEach(attackType => {
+                const multipliers = team.map(({ types }) => getTypeEffectivenessMultiplier(attackType, types));
+                const weaknesses = multipliers.filter(multiplier => multiplier >= 2);
+                if(!weaknesses.length) return;
+
+                weaknessExposure += weaknesses.reduce((total, multiplier) => total + Math.log2(multiplier), 0);
+                if(multipliers.some(multiplier => multiplier < 1)) coveredWeaknessTypes++;
+                else uncoveredWeaknessTypes++;
+            });
+
+            return teamTypes.size * 2 + offensiveCoverage.size * 3 +
+                coveredWeaknessTypes * 2 - weaknessExposure * 2 - uncoveredWeaknessTypes * 4;
+        }
+
+        function recommendTeamByTypes(candidates, teamLimit = 6, fixedTeam = []) {
+            const orderedCandidates = candidates.filter(candidate =>
+                !fixedTeam.some(member => member.id === candidate.id)
+            );
+            const remaining = [...orderedCandidates];
+            const team = [...fixedTeam];
+
+            while(team.length < teamLimit && remaining.length) {
+                let bestIndex = 0;
+                let bestScore = -Infinity;
+                remaining.forEach((candidate, index) => {
+                    const score = scoreTeamByTypes([...team, candidate]);
+                    if(score > bestScore) {
+                        bestIndex = index;
+                        bestScore = score;
+                    }
+                });
+                team.push(remaining.splice(bestIndex, 1)[0]);
+            }
+
+            for(let teamIndex = fixedTeam.length; teamIndex < team.length; teamIndex++) {
+                let bestReplacement = null;
+                let bestScore = scoreTeamByTypes(team);
+                orderedCandidates.forEach(candidate => {
+                    if(team.some(member => member.id === candidate.id)) return;
+                    const proposal = [...team];
+                    proposal[teamIndex] = candidate;
+                    const score = scoreTeamByTypes(proposal);
+                    if(score > bestScore) {
+                        bestReplacement = candidate;
+                        bestScore = score;
+                    }
+                });
+                if(bestReplacement) team[teamIndex] = bestReplacement;
+            }
+
+            return team;
         }
 
         function applyPokemonTypeStyles(container) {
@@ -2851,13 +2931,8 @@
                 }
                 const weaknessCounts = {};
                 Object.keys(POKEMON_TYPE_CHART).forEach(attackType => {
-                    const count = available.filter(({ types }) => types.reduce((multiplier, defendingType) => {
-                        const rules = POKEMON_TYPE_CHART[attackType] || {};
-                        if(rules.immune?.includes(defendingType)) return 0;
-                        if(rules.weak?.includes(defendingType)) return multiplier * 2;
-                        if(rules.resist?.includes(defendingType)) return multiplier * 0.5;
-                        return multiplier;
-                    }, 1) >= 2).length;
+                    const count = available.filter(({ types }) =>
+                        getTypeEffectivenessMultiplier(attackType, types) >= 2).length;
                     if(count) weaknessCounts[attackType] = count;
                 });
                 const threshold = Math.max(1, Math.ceil(available.length / 3));
@@ -2893,6 +2968,100 @@
                 }
             });
         }
+
+        function cancelTeamAutocomplete() {
+            teamAutocompleteRequestId++;
+            const button = document.getElementById('team-autocomplete-button');
+            if(button) button.disabled = false;
+            const status = document.getElementById('team-autocomplete-status');
+            if(status) status.textContent = '';
+        }
+
+        window.autoCompleteGymTeam = async function() {
+            const gymSelector = document.getElementById('teambuilder-gym-selector');
+            const button = document.getElementById('team-autocomplete-button');
+            const status = document.getElementById('team-autocomplete-status');
+            const gymNumber = gymSelector.value;
+            const player = getMyPlayer();
+            if(!player) {
+                status.textContent = 'Inicia sesión para recomendar un equipo.';
+                return;
+            }
+
+            const requestId = ++teamAutocompleteRequestId;
+            button.disabled = true;
+            status.textContent = 'Consultando los tipos de los Pokémon disponibles...';
+            try {
+                const eligiblePokemon = getEligibleTeamPokemon(player, gymNumber);
+                if(!eligiblePokemon.length) {
+                    status.textContent = 'No hay Pokémon disponibles para este gimnasio.';
+                    return;
+                }
+
+                const selectedIds = [...new Set(gymTeamSelection[gymNumber] || [])];
+                const missingSlots = Math.max(0, 6 - selectedIds.length);
+                if(!missingSlots) {
+                    status.textContent = 'El equipo ya tiene seis Pokémon; se conserva la selección actual.';
+                    return;
+                }
+
+                const typeResults = await Promise.all(eligiblePokemon.map(async pokemon => {
+                    try {
+                        return { pokemon, types: await getPokemonTypeData(pokemon.especie) };
+                    } catch(error) {
+                        console.warn(`No se pudieron consultar los tipos de ${pokemon.especie}:`, error);
+                        return { pokemon, types: null };
+                    }
+                }));
+                if(requestId !== teamAutocompleteRequestId) return;
+                if(gymSelector.value !== gymNumber) {
+                    status.textContent = 'Cambió el gimnasio durante el cálculo; no se aplicó la propuesta.';
+                    return;
+                }
+
+                const selectedIdSet = new Set(selectedIds);
+                const typeResultsById = new Map(typeResults.map(result => [result.pokemon.id, result]));
+                const fixedTeam = selectedIds.map(id => {
+                    const selectedPokemon = typeResultsById.get(id);
+                    return {
+                        ...(selectedPokemon?.pokemon || { id }),
+                        types: selectedPokemon?.types || []
+                    };
+                });
+                const failedSelectedTypeCount = selectedIds.filter(id =>
+                    !typeResultsById.get(id)?.types?.length
+                ).length;
+                const candidates = typeResults
+                    .filter(result => !selectedIdSet.has(result.pokemon.id) && result.types?.length)
+                    .map(result => ({ ...result.pokemon, types: result.types }));
+                const failedCandidateTypeCount = typeResults.filter(result =>
+                    !selectedIdSet.has(result.pokemon.id) && !result.types?.length
+                ).length;
+                if(!candidates.length) {
+                    status.textContent = failedCandidateTypeCount
+                        ? 'No se pudieron cargar los tipos de los candidatos adicionales. Se conserva tu selección.'
+                        : 'No hay Pokémon adicionales disponibles para completar el equipo.';
+                    return;
+                }
+
+                const recommendedTeam = recommendTeamByTypes(candidates, 6, fixedTeam);
+                gymTeamSelection[gymNumber] = recommendedTeam.map(pokemon => pokemon.id);
+                window.updateTeambuilderView();
+                const addedCount = recommendedTeam.length - selectedIds.length;
+                const partialResult = failedCandidateTypeCount
+                    ? ` Se omitieron ${failedCandidateTypeCount} candidatos cuyos tipos no se pudieron consultar.`
+                    : '';
+                const incompleteTypeResult = failedSelectedTypeCount
+                    ? ` No se pudieron consultar los tipos de ${failedSelectedTypeCount} Pokémon ya seleccionados, así que la recomendación es menos precisa.`
+                    : '';
+                status.textContent = `Se conservaron ${selectedIds.length} seleccionados y se añadieron ${addedCount} Pokémon para completar el equipo. Revísalo y pulsa «Guardar Equipo» para conservarlo.${partialResult}${incompleteTypeResult}`;
+            } catch(error) {
+                console.error('Error al recomendar un equipo por tipos:', error);
+                status.textContent = 'No se pudo calcular la propuesta. Comprueba la conexión e inténtalo de nuevo.';
+            } finally {
+                if(requestId === teamAutocompleteRequestId) button.disabled = false;
+            }
+        };
 
         function subscribeToWorldData() {
             if(!db || !auth || !auth.currentUser || !currentPlayer) return;
@@ -3632,6 +3801,8 @@
 
             // Mostrar SOLO el equipo guardado para el gimnasio
             const gymTeam = (globalEquiposGimnasio[p]?.[selectedGym] || [])
+                .filter(poke => currentLocke !== 'PawPatrolOG' ||
+                    globalData.some(data => data.id === poke.id && data.jugador === p && data.estado === 'Vivo'))
                 .filter(poke => currentLocke !== 'PawPatrolOG' || isPokemonAllowedForGym(poke.ruta, selectedGym));
             // Añadir propiedades necesarias para generateCardsHTML
             myTeam = gymTeam.map(poke => ({
@@ -3653,36 +3824,40 @@
 
             // Determinar si se permite matar Pokémon (todos los gimnasios, pero comportamiento diferente)
             const allowKill = true;
-            const isGym1Or2 = selectedGym === '1' || selectedGym === '2';
+            const preserveDeadInEarlyGyms = allowsDeadPokemonForGym(selectedGym);
 
-            document.getElementById('grid-profile').innerHTML = `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase">${teamTitle}</h3></div>` + generateCardsHTML(myTeam, false, false, true, false, true, true, false, false, false, allowKill, 'Equipo vacío. Ve a "Formar Equipo" para asignar Pokémon.', isGym1Or2) + `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">🌟 Mochila (PC)</h3></div>` + generateCardsHTML(myBox, true, false, false, false, true, true, false) + `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">🪦 Cementerio</h3></div>` + generateCardsHTML(myDead, false, true, false, false, true, false, false, false, true) + (myBlocked.length > 0 ? `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">🔒 Bloqueados</h3></div>` + generateCardsHTML(myBlocked, false, false, false, false, false, false, true) : '') + `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">⛔ Baneados</h3></div>` + generateCardsHTML(myBanned, false, false, false, true, true, false, false);
+            document.getElementById('grid-profile').innerHTML = `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase">${teamTitle}</h3></div>` + generateCardsHTML(myTeam, false, false, true, false, true, true, false, false, false, allowKill, 'Equipo vacío. Ve a "Formar Equipo" para asignar Pokémon.', preserveDeadInEarlyGyms) + `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">🌟 Mochila (PC)</h3></div>` + generateCardsHTML(myBox, true, false, false, false, true, true, false) + `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">🪦 Cementerio</h3></div>` + generateCardsHTML(myDead, false, true, false, false, true, false, false, false, true) + (myBlocked.length > 0 ? `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">🔒 Bloqueados</h3></div>` + generateCardsHTML(myBlocked, false, false, false, false, false, false, true) : '') + `<div class="col-span-full mb-2"><h3 class="title-font text-3xl text-white text-shadow-hard uppercase mt-6">⛔ Baneados</h3></div>` + generateCardsHTML(myBanned, false, false, false, true, true, false, false);
             applyPokemonTypeStyles(document.getElementById('grid-profile'));
         };
 
         window.onGymSelectorChange = function() {
             // No limpiar la selección, cada gimnasio mantiene su propia selección
+            cancelTeamAutocomplete();
             window.updateTeambuilderView();
+        }
+
+        function allowsDeadPokemonForGym(gymNumber) {
+            return currentLocke !== 'PawPatrolOG' && (gymNumber === '1' || gymNumber === '2');
+        }
+
+        function getEligibleTeamPokemon(player, gymNumber) {
+            let myActive = globalData.filter(pokemon => pokemon.jugador === player && pokemon.estado === 'Vivo');
+            myActive = myActive.filter(pokemon => !pokemon.baneos || Object.keys(pokemon.baneos).length === 0);
+
+            if(allowsDeadPokemonForGym(gymNumber)) {
+                const myDead = globalData.filter(pokemon => pokemon.jugador === player && pokemon.estado === 'Muerto');
+                const validDead = myDead.filter(pokemon => isPokemonAllowedForGym(pokemon.ruta, gymNumber));
+                const deadAsAlive = validDead.map(pokemon => ({ ...pokemon, estado: 'Vivo', _originalEstado: 'Muerto' }));
+                myActive = [...myActive, ...deadAsAlive];
+            }
+
+            return myActive.filter(pokemon => isPokemonAllowedForGym(pokemon.ruta, gymNumber));
         }
 
         window.updateTeambuilderView = function() {
             const p = getMyPlayer();
             const gymNumber = document.getElementById('teambuilder-gym-selector').value;
-            let myActive = globalData.filter(x => x.jugador === p && x.estado === 'Vivo');
-
-            // Filtrar Pokémon bloqueados (que tienen baneos)
-            myActive = myActive.filter(x => !x.baneos || Object.keys(x.baneos).length === 0);
-
-            // Para gimnasio 1 y 2, también incluir muertos de rutas permitidas
-            if(gymNumber === '1' || gymNumber === '2') {
-                const myDead = globalData.filter(x => x.jugador === p && x.estado === 'Muerto');
-                const validDead = myDead.filter(x => isPokemonAllowedForGym(x.ruta, gymNumber));
-                // Crear copias con estado 'Vivo' temporalmente
-                const deadAsAlive = validDead.map(poke => ({ ...poke, estado: 'Vivo', _originalEstado: 'Muerto' }));
-                myActive = [...myActive, ...deadAsAlive];
-            }
-
-            // Filtrar por gimnasio
-            myActive = myActive.filter(x => isPokemonAllowedForGym(x.ruta, gymNumber));
+            const myActive = getEligibleTeamPokemon(p, gymNumber);
 
             // Inicializar selección para este gimnasio si no existe
             if(!gymTeamSelection[gymNumber]) {
@@ -3692,9 +3867,8 @@
             // Cargar equipo guardado solo la primera vez que se entra al gimnasio
             if(!gymTeamSelectionLoaded[gymNumber]) {
                 const savedTeam = globalEquiposGimnasio[p]?.[gymNumber] || [];
-                // Para gimnasio 3-8 y Liga, filtrar Pokémon muertos del equipo guardado
-                const isGym1Or2 = gymNumber === '1' || gymNumber === '2';
-                if(isGym1Or2) {
+                // Solo V2 permite conservar Pokémon muertos en los equipos de gimnasios 1 y 2.
+                if(allowsDeadPokemonForGym(gymNumber)) {
                     gymTeamSelection[gymNumber] = savedTeam.map(poke => poke.id);
                 } else {
                     // Filtrar solo los Pokémon que están vivos actualmente
@@ -3714,7 +3888,7 @@
             }
             const currentSelection = gymTeamSelection[gymNumber] || [];
 
-            const isGym1Or2 = gymNumber === '1' || gymNumber === '2';
+            const preserveDeadInEarlyGyms = allowsDeadPokemonForGym(gymNumber);
             document.getElementById('grid-teambuilder').innerHTML = `<div class="col-span-full text-center title-font text-2xl text-gray-700 mb-2">Miembros actuales: ${currentSelection.length}/6 (puede estar vacío)</div>` + myActive.map(data => {
                 const isSelected = currentSelection.includes(data.id);
                 const isOriginallyDead = data._originalEstado === 'Muerto';
@@ -3728,7 +3902,7 @@
                     <div class="flex flex-col gap-2 w-full mt-auto">
                         <button onclick="window.openViewModal('${data.id}', '${data.jugador}', '${data._originalEstado || data.estado || 'Vivo'}', '${gymNumber}')" class="cartoon-btn-sm bg-yellow-100 border-yellow-800 text-yellow-800">ℹ️ Ficha</button>
                         ${isSelected ? `<button onclick="window.openEditModal('${data.id}', true)" class="cartoon-btn-sm teambuilder-action-btn bg-indigo-100 border-indigo-600 text-indigo-700 mb-2">⚙️ Personalizar</button>` : ''}
-                        ${isSelected ? `<button onclick="window.killFromTeamBuilder('${data.id}', ${isGym1Or2})" class="cartoon-btn-sm teambuilder-action-btn bg-red-100 border-red-600 text-red-600 mb-2">💀 Ha muerto</button>` : ''}
+                        ${isSelected ? `<button onclick="window.killFromTeamBuilder('${data.id}', ${preserveDeadInEarlyGyms})" class="cartoon-btn-sm teambuilder-action-btn bg-red-100 border-red-600 text-red-600 mb-2">💀 Ha muerto</button>` : ''}
                         <button onclick="window.toggleTeam('${data.id}', ${!isSelected})" class="cartoon-btn-sm teambuilder-action-btn ${isSelected ? 'bg-red-100 border-red-600 text-red-600' : 'bg-green-100 border-green-600 text-green-700'}">${isSelected ? '❌ Quitar' : '➕ Añadir'}</button>
                     </div></div>`;
             }).join('');
@@ -3737,6 +3911,7 @@
         };
 
         window.toggleTeam = function(id, newState) {
+            cancelTeamAutocomplete();
             const gymNumber = document.getElementById('teambuilder-gym-selector').value;
             // Inicializar selección para este gimnasio si no existe
             if(!gymTeamSelection[gymNumber]) {
@@ -3754,7 +3929,7 @@
             window.updateTeambuilderView();
         };
 
-        function openDeathDedication(id, isGym1Or2 = false) {
+        function openDeathDedication(id, preserveDeadInEarlyGyms = false) {
             const pokeData = globalData.find(x => x.id === id);
             if(!pokeData) return;
             if(deathAnimationTimeout) clearTimeout(deathAnimationTimeout);
@@ -3772,7 +3947,7 @@
             document.getElementById('dedicatoria-is-new-death').value = 'true';
             document.getElementById('dedicatoria-pokemon-name').innerText = `"${pokeData.mote}" (${pokeData.especie})`;
             document.getElementById('dedicatoria-text').value = '';
-            document.getElementById('dedicatoria-poke-id').dataset.gym1Or2 = isGym1Or2;
+            document.getElementById('dedicatoria-poke-id').dataset.preserveDeadInEarlyGyms = preserveDeadInEarlyGyms;
             document.getElementById('modal-dedicatoria').dataset.deathPokemonId = id;
             const card = [...document.querySelectorAll('.poke-card[data-pokemon-id]')]
                 .find(candidate => candidate.dataset.pokemonId === id);
@@ -4249,7 +4424,7 @@
             const id = document.getElementById('dedicatoria-poke-id').value;
             const dedicatoria = document.getElementById('dedicatoria-text').value.trim();
             const isNewDeath = document.getElementById('dedicatoria-is-new-death')?.value === 'true';
-            const isGym1Or2 = document.getElementById('dedicatoria-poke-id').dataset.gym1Or2 === 'true';
+            const preserveDeadInEarlyGyms = document.getElementById('dedicatoria-poke-id').dataset.preserveDeadInEarlyGyms === 'true';
 
             if (db) {
                 const p = getMyPlayer();
@@ -4262,9 +4437,11 @@
                     set(ref(db, userPath(`${p}/pokemon/muertos/${id}`)), copyData).then(() => {
                         remove(ref(db, userPath(`${p}/pokemon/vivos/${id}`)));
 
-                        // Eliminar el Pokémon de los equipos de gimnasio (excepto 1 y 2)
-                        if(!isGym1Or2) {
-                            const gymTeamsToRemoveFrom = ['3', '4', '5', '6', '7', '8', 'league'];
+                        // En OG los Pokémon muertos se eliminan de todos los equipos; V2 conserva su excepción en gimnasios 1 y 2.
+                        if(currentLocke === 'PawPatrolOG' || !preserveDeadInEarlyGyms) {
+                            const gymTeamsToRemoveFrom = currentLocke === 'PawPatrolOG'
+                                ? ['1', '2', '3', '4', '5', '6', '7', '8', 'league']
+                                : ['3', '4', '5', '6', '7', '8', 'league'];
                             gymTeamsToRemoveFrom.forEach(gymNum => {
                                 const gymTeam = globalEquiposGimnasio[p]?.[gymNum] || [];
                                 const filteredTeam = gymTeam.filter(poke => poke.id !== id);
@@ -4323,7 +4500,7 @@
             }
         });
 
-        function generateCardsHTML(list, isInteractive = false, isDead = false, isViewMode = false, isBanned = false, canEditCapture = false, showBBC = false, isPublicView = false, showUnban = false, showEditDedicatoria = false, allowKill = false, emptyMessage = null, isGym1Or2 = false) {
+        function generateCardsHTML(list, isInteractive = false, isDead = false, isViewMode = false, isBanned = false, canEditCapture = false, showBBC = false, isPublicView = false, showUnban = false, showEditDedicatoria = false, allowKill = false, emptyMessage = null, preserveDeadInEarlyGyms = false) {
             if (list.length === 0) return `<div class="col-span-full cartoon-panel p-6 text-center font-bold">${emptyMessage || 'No hay registros.'}</div>`;
             return `<div class="col-span-full grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">` + list.map(data => `
                 <div class="poke-card cartoon-panel flex flex-col items-center text-center relative border-4 ${isDead ? 'grayscale-dead' : (data.shiny ? 'shiny-bg' : 'bg-white')}" data-pokemon-id="${data.id}" data-species="${slugifySpeciesName(data.especie)}" data-search="${data.ruta} ${data.especie} ${data.mote}">
@@ -4338,7 +4515,7 @@
                         ${showBBC && !isDead && !isBanned && !isPublicView ? `<button onclick="window.deevolve('${data.id}')" class="cartoon-btn-sm profile-edit-btn bg-purple-100 border-purple-700 text-purple-900">🔄 BBC</button>` : ''}
                         ${showUnban && !isPublicView ? `<button onclick="window.unbanPokemon('${data.id}')" class="cartoon-btn-sm profile-edit-btn bg-green-100 border-green-700 text-green-900">🔓 Desbloquear</button>` : ''}
                         ${isPublicView && (isBanned || data.baneadoPor || Object.keys(data.baneos || {}).length > 0 || data.revividoPor) ? `<div class="w-full rounded-xl border-2 border-amber-300 bg-amber-50 p-2 text-left text-xs font-bold text-gray-800">${isBanned || data.baneadoPor || Object.keys(data.baneos || {}).length > 0 ? `<p>🚫 Tarjeta Roja: ${data.baneadoPor || Object.keys(data.baneos || {}).join(', ')}</p>` : ''}${data.revividoPor ? '<p>💚 Revivido: Sí</p>' : ''}</div>` : ''}
-                        ${isBanned ? `<div class="bg-red-800 text-white text-sm font-bold py-2 rounded-xl w-full">⛔ BANEADO${data.baneadoPor ? ' POR ' + data.baneadoPor.toUpperCase() : ''}</div>` : (isInteractive ? `<button onclick="window.evolve('${data.id}', this)" class="cartoon-btn-sm bg-blue-100 border-blue-800 text-blue-800">🌟 Evolucionar</button><button onclick="window.kill('${data.id}')" class="cartoon-btn-sm bg-red-100 border-red-800 text-red-800">💀 Ha muerto</button>` : (allowKill && !isDead ? `<button onclick="window.killFromProfile('${data.id}', ${isGym1Or2})" class="cartoon-btn-sm bg-red-100 border-red-800 text-red-800">💀 Ha muerto</button>` : (isDead ? `<div class="bg-gray-800 text-white text-sm font-bold py-1 rounded-full w-full">DEBILITADO</div>` : '')))}
+                        ${isBanned ? `<div class="bg-red-800 text-white text-sm font-bold py-2 rounded-xl w-full">⛔ BANEADO${data.baneadoPor ? ' POR ' + data.baneadoPor.toUpperCase() : ''}</div>` : (isInteractive ? `<button onclick="window.evolve('${data.id}', this)" class="cartoon-btn-sm bg-blue-100 border-blue-800 text-blue-800">🌟 Evolucionar</button><button onclick="window.kill('${data.id}')" class="cartoon-btn-sm bg-red-100 border-red-800 text-red-800">💀 Ha muerto</button>` : (allowKill && !isDead ? `<button onclick="window.killFromProfile('${data.id}', ${preserveDeadInEarlyGyms})" class="cartoon-btn-sm bg-red-100 border-red-800 text-red-800">💀 Ha muerto</button>` : (isDead ? `<div class="bg-gray-800 text-white text-sm font-bold py-1 rounded-full w-full">DEBILITADO</div>` : '')))}
                     </div>
                 </div>`).join('') + `</div>`;
         }
