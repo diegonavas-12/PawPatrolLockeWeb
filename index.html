@@ -171,14 +171,22 @@
         }
         .map-gym-pin.is-earned { background: #16a34a; }
         .map-gym-pin.is-pending { background: #2563eb; }
+        .map-v2-marker { width: calc(22px * var(--map-marker-scale, 1)); height: calc(22px * var(--map-marker-scale, 1)); display: flex; align-items: center; justify-content: center; border: 3px solid white; border-radius: 50%; color: white; font: 900 calc(10px * var(--map-marker-scale, 1))/1 'Fredoka', sans-serif; text-shadow: 0 1px 2px #111; box-shadow: 0 2px 6px #1119; }
+        .map-v2-marker.type-ruta { border-radius: 5px; transform: rotate(45deg); }
+        .map-v2-marker.type-ruta span { transform: rotate(-45deg); }
+        .map-v2-marker.is-captured { background: #dc2626; }
+        .map-v2-marker.is-partial { background: linear-gradient(135deg, #dc2626 50%, #eab308 50%); }
+        .map-v2-marker.is-failed { background: #64748b; }
+        .map-v2-marker.is-available { background: #eab308; color: #1f2937; text-shadow: none; }
+        .map-v2-marker.is-postgame { border-style: dashed; }
         .map-popup-title { font-weight: 800; font-size: 1rem; margin-bottom: 5px; }
         .map-popup-status { font-weight: 700; margin-bottom: 4px; }
         .map-popup-list { margin: 4px 0 0; padding-left: 18px; list-style: disc; }
         body.theme-og #screen-map { z-index: 3; overflow: visible; }
         body.theme-og #kalos-map { border: 3px solid #54f39a; box-shadow: 5px 5px 0 #030811; }
-        body.theme-og.map-fullscreen { padding: 0; overflow: hidden; }
-        body.theme-og.map-fullscreen > .fixed { display: none; }
-        body.theme-og.map-fullscreen #screen-map {
+        body.map-fullscreen { padding: 0; overflow: hidden; }
+        body.map-fullscreen > .fixed { display: none; }
+        body.map-fullscreen #screen-map {
             position: fixed;
             inset: 0;
             z-index: 10;
@@ -190,7 +198,7 @@
             padding: 0;
             overflow: hidden;
         }
-        body.theme-og.map-fullscreen #screen-map > div:first-child {
+        body.map-fullscreen #screen-map > div:first-child {
             position: absolute;
             z-index: 1100;
             top: max(12px, env(safe-area-inset-top));
@@ -199,15 +207,15 @@
             margin: 0;
             pointer-events: none;
         }
-        body.theme-og.map-fullscreen #screen-map > div:first-child > * { pointer-events: auto; }
-        body.theme-og.map-fullscreen #screen-map h2 {
+        body.map-fullscreen #screen-map > div:first-child > * { pointer-events: auto; }
+        body.map-fullscreen #screen-map h2 {
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
             white-space: nowrap;
             text-align: center;
         }
-        body.theme-og.map-fullscreen #map-content {
+        body.map-fullscreen #map-content {
             position: absolute;
             inset: 0;
             width: 100%;
@@ -219,7 +227,7 @@
             border-radius: 0;
             box-shadow: none;
         }
-        body.theme-og.map-fullscreen #map-content > div.mb-4.max-w-md {
+        body.map-fullscreen #map-content > div.mb-4.max-w-md {
             position: absolute;
             z-index: 1100;
             top: max(72px, calc(env(safe-area-inset-top) + 60px));
@@ -230,9 +238,9 @@
             background: rgba(7, 19, 35, 0.94);
             border: 2px solid #54f39a;
         }
-        body.theme-og.map-fullscreen #map-player-selector { width: 100%; }
-        body.theme-og.map-fullscreen #map-content > .flex { display: none; }
-        body.theme-og.map-fullscreen #kalos-map {
+        body.map-fullscreen #map-player-selector { width: 100%; }
+        body.map-fullscreen #map-content > .flex { display: none; }
+        body.map-fullscreen #kalos-map {
             position: absolute;
             inset: 0;
             width: 100%;
@@ -242,16 +250,16 @@
             border-radius: 0;
             box-shadow: none;
         }
-        body.theme-og.map-fullscreen #map-error-message,
-        body.theme-og.map-fullscreen #map-unlocated-records {
+        body.map-fullscreen #map-error-message,
+        body.map-fullscreen #map-unlocated-records {
             position: absolute;
             z-index: 1100;
             left: 12px;
             right: 12px;
             margin: 0;
         }
-        body.theme-og.map-fullscreen #map-error-message { top: max(124px, calc(env(safe-area-inset-top) + 112px)); }
-        body.theme-og.map-fullscreen #map-unlocated-records { bottom: max(12px, env(safe-area-inset-bottom)); }
+        body.map-fullscreen #map-error-message { top: max(124px, calc(env(safe-area-inset-top) + 112px)); }
+        body.map-fullscreen #map-unlocated-records { bottom: max(12px, env(safe-area-inset-bottom)); }
         #kalos-map .leaflet-popup-pane { z-index: 900; }
         #kalos-map .leaflet-popup { max-width: calc(100% - 24px); z-index: 901; }
         #kalos-map .leaflet-popup-content-wrapper { overflow: visible; }
@@ -374,8 +382,8 @@
             color: #effff4;
         }
         @media (max-width: 640px) {
-            body.theme-og.map-fullscreen #screen-map h2 { display: none; }
-            body.theme-og.map-fullscreen #map-content > div.mb-4.max-w-md { width: min(190px, 52vw); }
+            body.map-fullscreen #screen-map h2 { display: none; }
+            body.map-fullscreen #map-content > div.mb-4.max-w-md { width: min(190px, 52vw); }
             #kalos-map .leaflet-popup-content-wrapper {
                 width: 260px;
             }
@@ -1401,7 +1409,7 @@
     <div id="screen-map" class="w-full max-w-6xl hidden flex-col mt-4">
         <div class="flex justify-between items-center mb-4 gap-2 flex-wrap">
             <button onclick="nav('menu')" class="cartoon-btn-sm">⬅ VOLVER</button>
-            <h2 class="title-font text-3xl md:text-4xl text-white text-shadow-hard uppercase">🗺️ MAPA DE KALOS</h2>
+            <h2 id="map-title" class="title-font text-3xl md:text-4xl text-white text-shadow-hard uppercase">🗺️ MAPA DE KALOS</h2>
         </div>
         <div id="map-content" class="cartoon-panel p-4 md:p-6">
             <p id="map-error-message" class="hidden mb-4 rounded-xl border-2 border-red-500 bg-red-50 p-4 text-center font-bold text-red-800"></p>
@@ -1418,7 +1426,7 @@
                 <span><i class="inline-block w-3 h-3 rounded-full bg-green-600 mr-1"></i>Medalla conseguida</span>
                 <span><i class="inline-block w-3 h-3 rounded-full bg-blue-600 mr-1"></i>Medalla pendiente</span>
             </div>
-            <div id="kalos-map" role="application" aria-label="Mapa interactivo de Kalos con capturas y gimnasios"></div>
+            <div id="kalos-map" role="application" aria-label="Mapa interactivo con capturas, rutas y gimnasios"></div>
             <div id="map-unlocated-records" class="hidden mt-4 rounded-xl border-2 border-amber-400 bg-amber-50 p-4 text-sm text-amber-950"></div>
         </div>
     </div>
@@ -1506,6 +1514,7 @@
         let kalosMapInstance = null;
         let kalosMapMarkers = null;
         let kalosMapBaseZoom = null;
+        let kalosMapLocke = null;
 
         // Variable temporal para el teambuilder de gimnasio - ahora independiente por gimnasio
         let gymTeamSelection = {}; // Objeto con selecciones por gimnasio: { '1': [], '2': [], ... }
@@ -2139,6 +2148,126 @@
             { number: '8', city: 'Ciudad Fractal', coords: mapKalosPercent(85.1, 53.8) }
         ];
 
+        const V2_MAP_SIZE = { width: 2532, height: 1664 };
+        const V2_MAP_BOUNDS = [[0, 0], [V2_MAP_SIZE.height, V2_MAP_SIZE.width]];
+        const V2_MAP_LOCATIONS = [
+            { id: 'ciudad_engobe', name: 'Ciudad Engobe', type: 'ciudad', x: 5.2, y: 91.5, postgame: false, connections: ['ruta_19'] },
+            { id: 'ruta_19', name: 'Ruta 19', type: 'ruta', x: 7.5, y: 77.5, postgame: false, connections: ['ciudad_engobe', 'pueblo_ocre'] },
+            { id: 'pueblo_ocre', name: 'Pueblo Ocre', type: 'pueblo', x: 12.6, y: 75.5, postgame: false, connections: ['ruta_19', 'ruta_20', 'rancho_ocre', 'arboleda_promesa'] },
+            { id: 'rancho_ocre', name: 'Rancho Ocre', type: 'zona', x: 15.8, y: 70.0, postgame: false, connections: ['pueblo_ocre'] },
+            { id: 'arboleda_promesa', name: 'Arboleda Promesa', type: 'zona', x: 15.8, y: 82.2, postgame: false, connections: ['pueblo_ocre'] },
+            { id: 'ruta_20', name: 'Ruta 20', type: 'ruta', x: 19.8, y: 75.5, postgame: false, connections: ['pueblo_ocre', 'ciudad_hormigon'] },
+            { id: 'ciudad_hormigon', name: 'Ciudad Hormigón', type: 'ciudad', x: 26.8, y: 75.5, postgame: false, connections: ['ruta_20', 'pokewood', 'poligono_hormigon', 'ciudad_porcelana'] },
+            { id: 'pokewood', name: 'Pokéwood', type: 'zona', x: 24.8, y: 68.4, postgame: false, connections: ['ciudad_hormigon'] },
+            { id: 'poligono_hormigon', name: 'Polígono Hormigón', type: 'zona', x: 24.8, y: 82.2, postgame: false, connections: ['ciudad_hormigon'] },
+            { id: 'torre_union', name: 'Torre Unión', type: 'zona', x: 28.6, y: 86.7, postgame: false, connections: ['ciudad_porcelana'] },
+            { id: 'isla_libertad', name: 'Isla Libertad', type: 'zona', x: 38.6, y: 94.0, postgame: false, connections: ['ciudad_porcelana'] },
+            { id: 'ciudad_porcelana', name: 'Ciudad Porcelana', type: 'ciudad', x: 51.5, y: 77.5, postgame: false, connections: ['ciudad_hormigon', 'cloacas_porcelana', 'gruta_antigua', 'ruta_4', 'puente_saeta'] },
+            { id: 'cloacas_porcelana', name: 'Cloacas Porcelana', type: 'zona', x: 60.8, y: 85.0, postgame: false, connections: ['ciudad_porcelana', 'gruta_antigua'] },
+            { id: 'gruta_antigua', name: 'Gruta Antigua', type: 'zona', x: 40.9, y: 70.0, postgame: false, connections: ['ciudad_porcelana', 'cloacas_porcelana', 'pwt'] },
+            { id: 'ruta_4', name: 'Ruta 4', type: 'ruta', x: 51.5, y: 69.5, postgame: false, connections: ['ciudad_porcelana', 'galeria_union'] },
+            { id: 'galeria_union', name: 'Galería Unión', type: 'zona', x: 51.5, y: 62.0, postgame: false, connections: ['ruta_4', 'zona_desierto', 'ciudad_mayolica'] },
+            { id: 'zona_desierto', name: 'Zona Desierto', type: 'zona', x: 48.0, y: 62.0, postgame: false, connections: ['galeria_union', 'castillo_ancestral'] },
+            { id: 'castillo_ancestral', name: 'Castillo Ancestral', type: 'zona', x: 44.8, y: 62.0, postgame: false, connections: ['zona_desierto'] },
+            { id: 'ciudad_mayolica', name: 'Ciudad Mayólica', type: 'ciudad', x: 51.5, y: 54.5, postgame: false, connections: ['galeria_union', 'ruta_5', 'ruta_16', 'pueblo_biscuit'] },
+            { id: 'zona_nexo', name: 'Zona Nexo', type: 'zona', x: 51.5, y: 40.0, postgame: false, connections: [] },
+            { id: 'ruta_16', name: 'Ruta 16', type: 'ruta', x: 57.0, y: 54.5, postgame: false, connections: ['ciudad_mayolica', 'bosque_perdido', 'puente_progreso'] },
+            { id: 'bosque_perdido', name: 'Bosque Perdido', type: 'zona', x: 56.8, y: 50.0, postgame: false, connections: ['ruta_16'] },
+            { id: 'ruta_5', name: 'Ruta 5', type: 'ruta', x: 45.0, y: 54.5, postgame: false, connections: ['ciudad_mayolica', 'puente_fayenza'] },
+            { id: 'puente_fayenza', name: 'Puente de Fayenza', type: 'puente', x: 37.5, y: 54.5, postgame: false, connections: ['ruta_5', 'ciudad_fayenza'] },
+            { id: 'ciudad_fayenza', name: 'Ciudad Fayenza', type: 'ciudad', x: 28.8, y: 54.5, postgame: false, connections: ['puente_fayenza', 'pwt', 'ruta_6', 'tunel_yakon'] },
+            { id: 'pwt', name: 'Pokémon World Tournament', type: 'zona', x: 29.8, y: 61.3, postgame: false, connections: ['ciudad_fayenza', 'gruta_antigua'] },
+            { id: 'tunel_yakon', name: 'Túnel Yakón', type: 'zona', x: 28.0, y: 45.8, postgame: true, connections: ['ciudad_fayenza', 'monte_tuerca'] },
+            { id: 'ruta_6', name: 'Ruta 6', type: 'ruta', x: 21.8, y: 47.0, postgame: false, connections: ['ciudad_fayenza', 'cueva_loza', 'cueva_electrorroca', 'ciudad_loza'] },
+            { id: 'cueva_loza', name: 'Cueva Loza', type: 'zona', x: 24.8, y: 42.3, postgame: false, connections: ['ruta_6'] },
+            { id: 'cueva_electrorroca', name: 'Cueva Electrorroca', type: 'zona', x: 16.2, y: 47.4, postgame: false, connections: ['ruta_6', 'ciudad_loza'] },
+            { id: 'ciudad_loza', name: 'Ciudad Loza', type: 'ciudad', x: 15.4, y: 39.8, postgame: false, connections: ['cueva_electrorroca', 'ruta_7', 'pueblo_chamota'] },
+            { id: 'ruta_7', name: 'Ruta 7', type: 'ruta', x: 22.0, y: 32.5, postgame: false, connections: ['ciudad_loza', 'torre_cielos', 'monte_tuerca', 'ciudad_teja'] },
+            { id: 'torre_cielos', name: 'Torre de los Cielos', type: 'zona', x: 20.8, y: 29.8, postgame: false, connections: ['ruta_7'] },
+            { id: 'pueblo_biscuit', name: 'Pueblo Biscuit', type: 'pueblo', x: 2.4, y: 17.5, postgame: false, connections: ['ciudad_mayolica'] },
+            { id: 'pueblo_chamota', name: 'Pueblo Chamota', type: 'pueblo', x: 73.0, y: 39.8, postgame: false, connections: ['ciudad_loza', 'montana_reversia', 'villa_horroris'] },
+            { id: 'villa_horroris', name: 'Villa Horroris', type: 'zona', x: 77.5, y: 35.0, postgame: false, connections: ['pueblo_chamota'] },
+            { id: 'montana_reversia', name: 'Montaña Reversia', type: 'zona', x: 80.5, y: 39.8, postgame: false, connections: ['pueblo_chamota', 'pueblo_arenisca'] },
+            { id: 'pueblo_arenisca', name: 'Pueblo Arenisca', type: 'pueblo', x: 87.6, y: 39.8, postgame: false, connections: ['montana_reversia', 'bahia_arenisca', 'ruta_13', 'ruta_14', 'gruta_marina'] },
+            { id: 'bahia_arenisca', name: 'Bahía Arenisca', type: 'zona', x: 96.5, y: 39.8, postgame: false, connections: ['pueblo_arenisca', 'ruta_21'] },
+            { id: 'ruta_14', name: 'Ruta 14', type: 'ruta', x: 81.0, y: 47.0, postgame: false, connections: ['pueblo_arenisca', 'santuario_abundancia', 'ciudad_negra'] },
+            { id: 'santuario_abundancia', name: 'Santuario Abundancia', type: 'zona', x: 77.0, y: 45.8, postgame: false, connections: ['ruta_14'] },
+            { id: 'ruta_13', name: 'Ruta 13', type: 'ruta', x: 81.0, y: 32.5, postgame: false, connections: ['pueblo_arenisca', 'pueblo_ladrillo'] },
+            { id: 'pueblo_ladrillo', name: 'Pueblo Ladrillo', type: 'pueblo', x: 74.2, y: 25.5, postgame: false, connections: ['ruta_13', 'ruta_12'] },
+            { id: 'ruta_12', name: 'Ruta 12', type: 'ruta', x: 69.0, y: 25.5, postgame: false, connections: ['pueblo_ladrillo', 'puente_villa'] },
+            { id: 'puente_villa', name: 'Puente Villa', type: 'puente', x: 63.5, y: 25.5, postgame: false, connections: ['ruta_12', 'ruta_11'] },
+            { id: 'ruta_11', name: 'Ruta 11', type: 'ruta', x: 58.0, y: 25.5, postgame: false, connections: ['puente_villa', 'ciudad_caolin'] },
+            { id: 'ciudad_caolin', name: 'Ciudad Caolín', type: 'ciudad', x: 51.5, y: 25.5, postgame: false, connections: ['ruta_11', 'ruta_9'] },
+            { id: 'ruta_9', name: 'Ruta 9', type: 'ruta', x: 47.0, y: 25.5, postgame: false, connections: ['ciudad_caolin', 'puente_axial'] },
+            { id: 'gruta_marina', name: 'Gruta Marina', type: 'zona', x: 91.8, y: 31.3, postgame: false, connections: ['pueblo_arenisca', 'ruta_21'] },
+            { id: 'ruta_21', name: 'Ruta 21', type: 'ruta', x: 92.0, y: 26.5, postgame: false, connections: ['gruta_marina', 'ciudad_marga'] },
+            { id: 'ciudad_marga', name: 'Ciudad Marga', type: 'ciudad', x: 92.0, y: 21.2, postgame: false, connections: ['ruta_21', 'ruta_22'] },
+            { id: 'ruta_22', name: 'Ruta 22', type: 'ruta', x: 86.5, y: 21.2, postgame: false, connections: ['ciudad_marga', 'boquete_gigante'] },
+            { id: 'boquete_gigante', name: 'Boquete Gigante', type: 'zona', x: 81.2, y: 21.2, postgame: false, connections: ['ruta_22', 'ruta_23'] },
+            { id: 'ruta_23', name: 'Ruta 23', type: 'ruta', x: 76.5, y: 15.0, postgame: false, connections: ['boquete_gigante', 'calle_victoria'] },
+            { id: 'calle_victoria', name: 'Calle Victoria', type: 'zona', x: 72.0, y: 8.8, postgame: false, connections: ['ruta_23', 'liga_pokemon'] },
+            { id: 'liga_pokemon', name: 'Liga Pokémon', type: 'zona', x: 66.2, y: 8.8, postgame: false, connections: ['calle_victoria'] },
+            { id: 'puente_axial', name: 'Puente Axial', type: 'puente', x: 42.5, y: 25.5, postgame: true, connections: ['ruta_9', 'ruta_8'] },
+            { id: 'ruta_8', name: 'Ruta 8', type: 'ruta', x: 36.5, y: 25.5, postgame: true, connections: ['puente_axial', 'pantano_teja', 'ciudad_teja'] },
+            { id: 'pantano_teja', name: 'Pantano Teja', type: 'zona', x: 34.3, y: 21.0, postgame: true, connections: ['ruta_8'] },
+            { id: 'ciudad_teja', name: 'Ciudad Teja', type: 'ciudad', x: 28.8, y: 25.5, postgame: true, connections: ['ruta_8', 'torre_duodraco', 'monte_tuerca'] },
+            { id: 'torre_duodraco', name: 'Torre Duodraco', type: 'zona', x: 25.6, y: 18.2, postgame: true, connections: ['ciudad_teja'] },
+            { id: 'monte_tuerca', name: 'Monte Tuerca', type: 'zona', x: 28.0, y: 32.8, postgame: true, connections: ['ciudad_teja', 'ruta_7', 'tunel_yakon'] },
+            { id: 'ciudad_negra', name: 'Ciudad Negra', type: 'ciudad', x: 74.2, y: 54.5, postgame: true, connections: ['ruta_14', 'ruta_15'] },
+            { id: 'ruta_15', name: 'Ruta 15', type: 'ruta', x: 69.5, y: 54.5, postgame: true, connections: ['ciudad_negra', 'lab_transfer', 'puente_progreso'] },
+            { id: 'lab_transfer', name: 'Laboratorio Transfer', type: 'zona', x: 69.2, y: 50.0, postgame: true, connections: ['ruta_15'] },
+            { id: 'puente_progreso', name: 'Puente Progreso', type: 'puente', x: 64.5, y: 54.5, postgame: true, connections: ['ruta_15', 'ruta_16'] },
+            { id: 'puente_saeta', name: 'Puente Saeta', type: 'puente', x: 64.5, y: 72.5, postgame: true, connections: ['ciudad_porcelana', 'bosque_azulejo'] },
+            { id: 'bosque_azulejo', name: 'Bosque Azulejo', type: 'zona', x: 75.8, y: 74.5, postgame: true, connections: ['puente_saeta', 'ciudad_esmalte'] },
+            { id: 'ciudad_esmalte', name: 'Ciudad Esmalte', type: 'ciudad', x: 79.3, y: 70.5, postgame: true, connections: ['bosque_azulejo', 'ruta_3'] },
+            { id: 'ruta_3', name: 'Ruta 3', type: 'ruta', x: 84.3, y: 70.5, postgame: true, connections: ['ciudad_esmalte', 'cueva_manantial', 'ciudad_gres'] },
+            { id: 'cueva_manantial', name: 'Cueva Manantial', type: 'zona', x: 84.1, y: 65.5, postgame: true, connections: ['ruta_3'] },
+            { id: 'ciudad_gres', name: 'Ciudad Gres', type: 'ciudad', x: 89.2, y: 70.5, postgame: true, connections: ['ruta_3', 'solar_suenos', 'ruta_2'] },
+            { id: 'solar_suenos', name: 'Solar de los Sueños', type: 'zona', x: 93.4, y: 70.0, postgame: true, connections: ['ciudad_gres'] },
+            { id: 'ruta_2', name: 'Ruta 2', type: 'ruta', x: 90.0, y: 76.5, postgame: true, connections: ['ciudad_gres', 'pueblo_terracota'] },
+            { id: 'pueblo_terracota', name: 'Pueblo Terracota', type: 'pueblo', x: 90.8, y: 82.2, postgame: true, connections: ['ruta_2', 'ruta_1'] },
+            { id: 'ruta_1', name: 'Ruta 1', type: 'ruta', x: 90.8, y: 88.2, postgame: true, connections: ['pueblo_terracota', 'pueblo_arcilla'] },
+            { id: 'pueblo_arcilla', name: 'Pueblo Arcilla', type: 'pueblo', x: 90.8, y: 94.2, postgame: true, connections: ['ruta_1', 'ruta_17'] },
+            { id: 'ruta_17', name: 'Ruta 17', type: 'ruta', x: 86.0, y: 94.2, postgame: true, connections: ['pueblo_arcilla', 'ruta_18', 'laboratorio_pp'] },
+            { id: 'ruta_18', name: 'Ruta 18', type: 'ruta', x: 80.5, y: 94.2, postgame: true, connections: ['ruta_17'] },
+            { id: 'laboratorio_pp', name: 'Laboratorio P+P', type: 'zona', x: 83.6, y: 90.2, postgame: true, connections: ['ruta_17'] }
+        ];
+        const V2_GYM_LOCATIONS = [
+            { number: '1', city: 'Ciudad Gres', id: 'ciudad_gres' },
+            { number: '2', city: 'Ciudad Esmalte', id: 'ciudad_esmalte' },
+            { number: '3', city: 'Ciudad Porcelana', id: 'ciudad_porcelana' },
+            { number: '4', city: 'Ciudad Mayólica', id: 'ciudad_mayolica' },
+            { number: '5', city: 'Ciudad Fayenza', id: 'ciudad_fayenza' },
+            { number: '6', city: 'Ciudad Loza', id: 'ciudad_loza' },
+            { number: '7', city: 'Ciudad Teja', id: 'ciudad_teja' },
+            { number: '8', city: 'Ciudad Caolín', id: 'ciudad_caolin' }
+        ];
+        const V2_MAP_LOCATION_ALIASES = {
+            ciudad_engobe: ['Inicial', 'Engobe'],
+            rancho_ocre: ['Rancho'],
+            cloacas_porcelana: ['Alcantarillas'],
+            gruta_antigua: ['Pasadizo', 'Reliquia'],
+            zona_desierto: ['Zona Desértica', 'Desértica'],
+            castillo_ancestral: ['Castillo', 'Ancestral'],
+            bosque_perdido: ['Bosque', 'Perdido', 'Perdidos'],
+            cueva_electrorroca: ['Electrorroca'],
+            torre_cielos: ['Cielos'],
+            villa_horroris: ['Villa', 'Horroris'],
+            montana_reversia: ['Reversia'],
+            pueblo_arenisca: ['Arenisca'],
+            pueblo_ladrillo: ['Ladrillo'],
+            ruta_21: ['Costera'],
+            boquete_gigante: ['Gigante'],
+            calle_victoria: ['Victoria']
+        };
+
+        function mapV2Percent(location) {
+            return [
+                V2_MAP_SIZE.height * (1 - location.y / 100),
+                V2_MAP_SIZE.width * (location.x / 100)
+            ];
+        }
+
         function getKalosMapLocation(route) {
             const normalizedRoute = normalizeRouteKeyword(route);
             const exactMatch = KALOS_CAPTURE_LOCATIONS.find(location =>
@@ -2373,16 +2502,192 @@
             }
         }
 
+        function v2MapLocationMatches(route, location) {
+            const normalizedRoute = normalizeRouteKeyword(route);
+            const prefixes = ['ciudad', 'pueblo', 'ruta', 'zona', 'puente'];
+            const aliases = [
+                location.name,
+                location.id.replace(/_/g, ' '),
+                ...(V2_MAP_LOCATION_ALIASES[location.id] || [])
+            ]
+                .map(normalizeRouteKeyword);
+            const shortenedAliases = aliases.map(alias => {
+                const prefix = prefixes.find(candidate => alias.startsWith(`${candidate} `));
+                return prefix ? alias.slice(prefix.length + 1) : alias;
+            });
+            return [...aliases, ...shortenedAliases].some(alias =>
+                normalizedRoute === alias || normalizedRoute.startsWith(`${alias} `)
+            );
+        }
+
+        function getV2MapLocation(route) {
+            return V2_MAP_LOCATIONS.find(location => v2MapLocationMatches(route, location));
+        }
+
+        function addV2MapMarkers(player) {
+            if(!kalosMapMarkers) return;
+            kalosMapMarkers.clearLayers();
+            const captures = globalData.filter(record => record.jugador === player);
+            const failures = globalFailedRoutes[player] || [];
+            const locationsById = new Map(V2_MAP_LOCATIONS.map(location => [location.id, location]));
+            const locationStatus = new Map();
+            const capturesByLocation = new Map(V2_MAP_LOCATIONS.map(location => [location.id, []]));
+            const failuresByLocation = new Map(V2_MAP_LOCATIONS.map(location => [location.id, []]));
+            const unlocatedCaptures = [];
+            const unlocatedFailures = [];
+            captures.forEach(record => {
+                const location = getV2MapLocation(record.ruta);
+                if(location) capturesByLocation.get(location.id).push(record);
+                else unlocatedCaptures.push(record);
+            });
+            failures.forEach(route => {
+                const location = getV2MapLocation(route);
+                if(location) failuresByLocation.get(location.id).push(route);
+                else unlocatedFailures.push(route);
+            });
+            const isMobile = window.matchMedia('(max-width: 640px)').matches;
+            const zoomIncrease = Math.max(0, kalosMapInstance.getZoom() - kalosMapBaseZoom);
+            const markerScale = Math.min(isMobile ? 1.65 : 1.45, (isMobile ? 1.05 : 0.9) * Math.pow(1.15, zoomIncrease));
+
+            V2_MAP_LOCATIONS.forEach(location => {
+                const records = capturesByLocation.get(location.id);
+                const failedRoutes = failuresByLocation.get(location.id);
+                const hasCapture = records.length > 0;
+                const hasFailure = failedRoutes.length > 0;
+                const state = hasCapture && hasFailure ? 'partial'
+                    : hasCapture ? 'captured'
+                    : hasFailure ? 'failed' : 'available';
+                locationStatus.set(location.id, hasCapture || hasFailure);
+                const routeNumber = location.type === 'ruta' ? location.name.match(/^Ruta (\\d+)$/) : null;
+                const label = routeNumber
+                    ? routeNumber[1]
+                    : location.name.split(/\\s+/).map(word => word[0]).join('').slice(0, 2).toUpperCase();
+                const postgameClass = location.postgame ? ' is-postgame' : '';
+                const pin = L.divIcon({
+                    className: 'map-route-marker',
+                    html: `<div class="map-v2-marker type-${location.type} is-${state}${postgameClass}" style="--map-marker-scale:${markerScale}"><span>${label}</span></div>`,
+                    iconSize: [Math.round(28 * markerScale), Math.round(28 * markerScale)],
+                    iconAnchor: [Math.round(14 * markerScale), Math.round(14 * markerScale)],
+                    popupAnchor: [0, Math.round(-14 * markerScale)]
+                });
+                let status = hasCapture && hasFailure
+                    ? `${records.length} captura(s) registrada(s) y ${failedRoutes.length} intento(s) fallido(s).`
+                    : hasCapture ? `${records.length} captura(s) registrada(s).`
+                    : hasFailure ? 'Captura fallida; esta ubicación ya está completada.'
+                    : 'Captura pendiente.';
+                if(location.postgame) status += ' Zona postgame.';
+                L.marker(mapV2Percent(location), { icon: pin })
+                    .bindPopup(createMapPopup(location.name, status, records), {
+                        autoPan: true,
+                        autoPanPaddingTopLeft: [40, 80],
+                        autoPanPaddingBottomRight: [40, 40],
+                        keepInView: true,
+                        maxWidth: 280,
+                        closeButton: true
+                    })
+                    .addTo(kalosMapMarkers);
+            });
+
+            const drawnConnections = new Set();
+            V2_MAP_LOCATIONS.forEach(location => {
+                location.connections.forEach(connectionId => {
+                    const connectedLocation = locationsById.get(connectionId);
+                    if(!connectedLocation) {
+                        console.warn(`La ubicación ${location.id} conecta con una ubicación desconocida: ${connectionId}.`);
+                        return;
+                    }
+                    const connectionKey = [location.id, connectionId].sort().join('|');
+                    if(drawnConnections.has(connectionKey)) return;
+                    drawnConnections.add(connectionKey);
+                    const completed = locationStatus.get(location.id) && locationStatus.get(connectionId);
+                    L.polyline([mapV2Percent(location), mapV2Percent(connectedLocation)], {
+                        color: completed ? '#16a34a' : '#facc15',
+                        weight: 4,
+                        opacity: 0.82,
+                        lineCap: 'round',
+                        dashArray: location.postgame || connectedLocation.postgame ? '7 7' : null,
+                        interactive: false
+                    }).addTo(kalosMapMarkers);
+                });
+            });
+
+            const badges = globalBadges[player] || {};
+            V2_GYM_LOCATIONS.forEach(gym => {
+                const location = locationsById.get(gym.id);
+                if(!location) return;
+                const earned = badges[`b${gym.number}`] === true;
+                const badge = GYM_BADGES.find(item => item.id === `b${gym.number}`);
+                const pin = L.divIcon({
+                    className: 'map-gym-marker',
+                    html: `<div class="map-gym-pin is-${earned ? 'earned' : 'pending'}" style="--map-marker-scale:${markerScale}">${earned ? '★' : gym.number}</div>`,
+                    iconSize: [Math.round(27 * markerScale), Math.round(27 * markerScale)],
+                    iconAnchor: [Math.round(13 * markerScale), Math.round(13 * markerScale)],
+                    popupAnchor: [0, Math.round(-12 * markerScale)]
+                });
+                L.marker(mapV2Percent(location), { icon: pin })
+                    .bindPopup(createMapPopup(
+                        `${gym.number}.º gimnasio · ${gym.city}`,
+                        `${earned ? '🏅 Medalla conseguida' : '🔒 Medalla pendiente'}${badge ? ` · ${badge.name}` : ''}`
+                    ), {
+                        autoPan: true,
+                        autoPanPaddingTopLeft: [40, 80],
+                        autoPanPaddingBottomRight: [40, 40],
+                        keepInView: true,
+                        maxWidth: 280,
+                        closeButton: true
+                    })
+                    .addTo(kalosMapMarkers);
+            });
+
+            const unlocated = document.getElementById('map-unlocated-records');
+            unlocated.replaceChildren();
+            if(unlocatedCaptures.length || unlocatedFailures.length) {
+                unlocated.classList.remove('hidden');
+                const title = document.createElement('strong');
+                title.textContent = 'Registros sin ubicación reconocida en este mapa';
+                unlocated.appendChild(title);
+                const list = document.createElement('ul');
+                list.className = 'list-disc pl-5 mt-1';
+                unlocatedCaptures.forEach(record => {
+                    const item = document.createElement('li');
+                    item.textContent = `${record.ruta}: ${record.mote || record.especie} (${record.especie})`;
+                    list.appendChild(item);
+                });
+                unlocatedFailures.forEach(route => {
+                    const item = document.createElement('li');
+                    item.textContent = `${route}: captura fallida`;
+                    list.appendChild(item);
+                });
+                unlocated.appendChild(list);
+            } else {
+                unlocated.classList.add('hidden');
+            }
+        }
+
+        function addActiveMapMarkers(player) {
+            if(currentLocke === 'PawPatrolOG') addKalosMapMarkers(player);
+            else addV2MapMarkers(player);
+        }
+
         window.updateKalosMap = function() {
-            if(currentLocke !== 'PawPatrolOG') return;
+            if(currentLocke !== 'PawPatrolOG' && currentLocke !== 'PawPatrolV2') return;
+            const mapTitle = document.getElementById('map-title');
+            if(mapTitle) mapTitle.textContent = currentLocke === 'PawPatrolOG' ? '🗺️ MAPA DE KALOS' : '🗺️ MAPA DE TESELIA';
             const errorMessage = document.getElementById('map-error-message');
             if(!window.L) {
-                console.error('Leaflet no está disponible; no se puede inicializar el mapa de Kalos.');
+                console.error(`Leaflet no está disponible; no se puede inicializar el mapa de ${currentLocke === 'PawPatrolOG' ? 'Kalos' : 'Teselia'}.`);
                 errorMessage.textContent = 'No se pudo cargar Leaflet. Comprueba tu conexión e inténtalo de nuevo.';
                 errorMessage.classList.remove('hidden');
                 return;
             }
             errorMessage.classList.add('hidden');
+
+            if(kalosMapInstance && kalosMapLocke !== currentLocke) {
+                kalosMapInstance.remove();
+                kalosMapInstance = null;
+                kalosMapMarkers = null;
+                kalosMapBaseZoom = null;
+            }
 
             const selector = document.getElementById('map-player-selector');
             const players = LOCKE_PLAYERS[currentLocke] || [];
@@ -2391,6 +2696,8 @@
             selector.replaceChildren(...players.map(player => new Option(player, player)));
             selector.value = selectedPlayer;
 
+            const mapBounds = currentLocke === 'PawPatrolOG' ? KALOS_MAP_BOUNDS : V2_MAP_BOUNDS;
+            const mapImage = currentLocke === 'PawPatrolOG' ? 'KalosMap.jpg' : 'MapaPkN2.jpg';
             let shouldFitMap = false;
             if(!kalosMapInstance) {
                 kalosMapInstance = L.map('kalos-map', {
@@ -2399,31 +2706,32 @@
                     maxZoom: 2,
                     zoomSnap: 0.25,
                     zoomDelta: 0.5,
-                    maxBounds: KALOS_MAP_BOUNDS,
+                    maxBounds: mapBounds,
                     maxBoundsViscosity: 1
                 });
-                L.imageOverlay('KalosMap.jpg', KALOS_MAP_BOUNDS).addTo(kalosMapInstance);
+                L.imageOverlay(mapImage, mapBounds).addTo(kalosMapInstance);
                 kalosMapMarkers = L.layerGroup().addTo(kalosMapInstance);
-                kalosMapInstance.fitBounds(KALOS_MAP_BOUNDS);
+                kalosMapInstance.fitBounds(mapBounds);
                 kalosMapBaseZoom = kalosMapInstance.getZoom();
                 kalosMapInstance.setMinZoom(kalosMapBaseZoom);
-                kalosMapInstance.on('zoomend', () => addKalosMapMarkers(selector.value));
+                kalosMapLocke = currentLocke;
+                kalosMapInstance.on('zoomend', () => addActiveMapMarkers(selector.value));
                 shouldFitMap = true;
             }
             requestAnimationFrame(() => {
                 kalosMapInstance.invalidateSize();
                 if(shouldFitMap) {
-                    kalosMapInstance.fitBounds(KALOS_MAP_BOUNDS);
+                    kalosMapInstance.fitBounds(mapBounds);
                     kalosMapBaseZoom = kalosMapInstance.getZoom();
                     kalosMapInstance.setMinZoom(kalosMapBaseZoom);
                     if(document.body.classList.contains('map-fullscreen')) {
-                        const fillZoom = kalosMapInstance.getBoundsZoom(KALOS_MAP_BOUNDS, true);
+                        const fillZoom = kalosMapInstance.getBoundsZoom(mapBounds, true);
                         kalosMapInstance.setZoom(Math.max(kalosMapBaseZoom, fillZoom));
                     }
-                    addKalosMapMarkers(selectedPlayer);
+                    addActiveMapMarkers(selectedPlayer);
                 }
             });
-            addKalosMapMarkers(selectedPlayer);
+            addActiveMapMarkers(selectedPlayer);
         };
 
         function routeHasKeyword(route, keyword) {
@@ -2625,7 +2933,8 @@
         }
 
         function transitionToScreen(name) {
-            document.body.classList.toggle('map-fullscreen', name === 'map' && currentLocke === 'PawPatrolOG');
+            document.body.classList.toggle('map-fullscreen', name === 'map' &&
+                (currentLocke === 'PawPatrolOG' || currentLocke === 'PawPatrolV2'));
             document.querySelectorAll('[id^="screen-"]').forEach(screen => {
                 screen.classList.add('hidden');
                 screen.classList.remove('flex');
@@ -2705,7 +3014,11 @@
             gymTeamSelection = {};
             gymTeamSelectionLoaded = {};
             currentLocke = locke;
-            document.getElementById('menu-map-action').classList.toggle('hidden', locke !== 'PawPatrolOG');
+            document.getElementById('menu-map-action').classList.remove('hidden');
+            document.getElementById('menu-map-button').querySelector('span').textContent =
+                locke === 'PawPatrolOG' ? '🗺️ MAPA INTERACTIVO DE KALOS' : '🗺️ MAPA INTERACTIVO DE TESELIA';
+            const mapTitle = document.getElementById('map-title');
+            if(mapTitle) mapTitle.textContent = locke === 'PawPatrolOG' ? '🗺️ MAPA DE KALOS' : '🗺️ MAPA DE TESELIA';
             document.body.classList.toggle('theme-og', locke === 'PawPatrolOG');
             document.body.classList.toggle('theme-v2', locke === 'PawPatrolV2');
             document.getElementById('locke-title').textContent = locke.toUpperCase();
